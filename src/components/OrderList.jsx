@@ -3,11 +3,14 @@ import { useOrders } from '../hooks/useOrders'
 import { OrderCard } from './OrderCard'
 import { OrderForm } from './OrderForm'
 
-export function OrderList() {
-  const { orders, loading, createOrder, updateOrder, deleteOrder, completeOrder, restoreOrder } = useOrders()
+export function OrderList({ currentUser }) {
+  const { orders, loading, createOrder, updateOrder, deleteOrder, completeOrder, restoreOrder, assignToOrder, unassignFromOrder, fetchAssignments } = useOrders()
   const [activeTab, setActiveTab] = useState('active')
   const [showModal, setShowModal] = useState(false)
   const [editingOrder, setEditingOrder] = useState(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [orderToDelete, setOrderToDelete] = useState(null)
+  const [deleteAssignments, setDeleteAssignments] = useState([])
 
   const filteredOrders = orders.filter(order => order.status === activeTab)
 
@@ -40,7 +43,30 @@ export function OrderList() {
   }
 
   const handleDeleteOrder = async (id) => {
-    await deleteOrder(id)
+    const { data: assignments } = await fetchAssignments(id)
+
+    if (assignments && assignments.length > 0) {
+      setOrderToDelete(id)
+      setDeleteAssignments(assignments)
+      setShowDeleteConfirm(true)
+    } else {
+      await deleteOrder(id)
+    }
+  }
+
+  const handleConfirmDelete = async () => {
+    if (orderToDelete) {
+      await deleteOrder(orderToDelete)
+      setShowDeleteConfirm(false)
+      setOrderToDelete(null)
+      setDeleteAssignments([])
+    }
+  }
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false)
+    setOrderToDelete(null)
+    setDeleteAssignments([])
   }
 
   const handleRestoreOrder = async (id) => {
@@ -93,10 +119,14 @@ export function OrderList() {
             <OrderCard
               key={order.id}
               order={order}
+              currentUserId={currentUser?.id}
               onEdit={handleEditOrder}
               onComplete={handleCompleteOrder}
               onDelete={handleDeleteOrder}
               onRestore={handleRestoreOrder}
+              onAssign={assignToOrder}
+              onUnassign={unassignFromOrder}
+              fetchAssignments={fetchAssignments}
             />
           ))
         )}
@@ -115,6 +145,29 @@ export function OrderList() {
               initialData={editingOrder}
               onCancel={handleCloseModal}
             />
+          </div>
+        </div>
+      )}
+
+      {showDeleteConfirm && (
+        <div className="modal-overlay" onClick={handleCancelDelete}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>Potwierdzenie usunięcia</h2>
+            <p>
+              To zlecenie ma przypisanych:{' '}
+              <strong>
+                {deleteAssignments.map(a => a.user_profile?.name).join(', ')}
+              </strong>
+              . Czy na pewno chcesz je usunąć?
+            </p>
+            <div className="modal-actions">
+              <button onClick={handleCancelDelete} className="btn-secondary">
+                Anuluj
+              </button>
+              <button onClick={handleConfirmDelete} className="btn-danger">
+                Usuń mimo to
+              </button>
+            </div>
           </div>
         </div>
       )}

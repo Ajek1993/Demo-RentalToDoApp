@@ -133,6 +133,78 @@ export function useOrders() {
     }
   }
 
+  async function assignToOrder(orderId, userId, assignedBy) {
+    try {
+      const { data, error } = await supabase
+        .from('assignments')
+        .insert([{
+          order_id: orderId,
+          user_id: userId,
+          assigned_by: assignedBy
+        }])
+        .select()
+        .single()
+
+      if (error) throw error
+      return { data, error: null }
+    } catch (error) {
+      console.error('Error assigning to order:', error)
+      return { data: null, error }
+    }
+  }
+
+  async function unassignFromOrder(orderId, userId, unassignedBy) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      const { data, error } = await supabase
+        .from('assignments')
+        .update({
+          unassigned_at: new Date().toISOString(),
+          unassigned_by: unassignedBy || user.id
+        })
+        .eq('order_id', orderId)
+        .eq('user_id', userId)
+        .is('unassigned_at', null)
+
+      if (error) throw error
+      return { data, error: null }
+    } catch (error) {
+      console.error('Error unassigning from order:', error)
+      return { data: null, error }
+    }
+  }
+
+  async function fetchAssignments(orderId) {
+    try {
+      const { data, error } = await supabase
+        .from('assignments')
+        .select(`
+          *,
+          user_profile:profiles!assignments_user_id_fkey(id, name),
+          assigned_by_profile:profiles!assignments_assigned_by_fkey(id, name),
+          unassigned_by_profile:profiles!assignments_unassigned_by_fkey(id, name)
+        `)
+        .eq('order_id', orderId)
+        .order('assigned_at', { ascending: true })
+        .limit(20)
+
+      if (error) throw error
+
+      // Sortuj: najpierw aktywni (unassigned_at = null), potem wypisani
+      const sorted = (data || []).sort((a, b) => {
+        if (a.unassigned_at === null && b.unassigned_at !== null) return -1
+        if (a.unassigned_at !== null && b.unassigned_at === null) return 1
+        return new Date(a.assigned_at) - new Date(b.assigned_at)
+      })
+
+      return { data: sorted, error: null }
+    } catch (error) {
+      console.error('Error fetching assignments:', error)
+      return { data: [], error }
+    }
+  }
+
   return {
     orders,
     loading,
@@ -141,6 +213,9 @@ export function useOrders() {
     updateOrder,
     deleteOrder,
     completeOrder,
-    restoreOrder
+    restoreOrder,
+    assignToOrder,
+    unassignFromOrder,
+    fetchAssignments
   }
 }

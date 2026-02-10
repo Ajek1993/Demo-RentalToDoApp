@@ -27,7 +27,7 @@ function App() {
         </button>
       </header>
 
-      <OrderList />
+      <OrderList currentUser={user} />
     </div>
   )
 }

@@ -185,6 +185,21 @@ button.btn-primary {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+.order-assigned-first {
+  margin-bottom: 0.5rem;
+}
+
+.first-assigned-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3);
+}
+
 .order-card.status-active {
   border-left-color: var(--status-active);
 }
@@ -245,7 +260,7 @@ button.btn-primary {
 }
 
 .order-actions {
-  display: flex;
+  display: none; /* Ukryj na mobile */
   gap: 0.25rem;
   flex-shrink: 0;
   align-items: center;
@@ -254,6 +269,11 @@ button.btn-primary {
 .order-actions button {
   min-height: 36px;
   height: 36px;
+}
+
+.order-card {
+  cursor: pointer;
+  user-select: none;
 }
 
 .btn-icon {
@@ -410,13 +430,226 @@ button.btn-primary {
   font-size: 0.9rem;
 }
 
+/* Assignment Section */
+.assignment-section {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.assignment-actions-compact {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn-compact {
+  min-height: 32px;
+  height: 32px;
+  padding: 0 0.75rem;
+  font-size: 0.85rem;
+  min-width: auto;
+  white-space: nowrap;
+}
+
+.assign-other-dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 0.25rem;
+  background: white;
+  border: 1px solid var(--gray-300);
+  border-radius: 6px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.dropdown-item {
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  background: white;
+  border: none;
+  border-radius: 0;
+  color: var(--gray-900);
+  font-size: 0.85rem;
+  min-height: 36px;
+  transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+  background-color: var(--gray-100);
+  transform: none;
+}
+
+.dropdown-item:first-child {
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+.dropdown-item:last-child {
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+/* Assignment History */
+.assignment-history h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: 0.5rem;
+}
+
+.assignment-history ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.assignment-history li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  background: var(--gray-50);
+  border-radius: 6px;
+  margin-bottom: 0.25rem;
+}
+
+.assignment-history li.current-user {
+  background: rgba(37, 99, 235, 0.1);
+}
+
+.assignment-history li.current-user .assignment-name {
+  font-weight: 700;
+}
+
+.assignment-name {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--gray-900);
+}
+
+.assignment-time {
+  font-size: 0.85rem;
+  color: var(--gray-600);
+  font-family: monospace;
+}
+
+.first-badge {
+  display: none; /* Ukryj na mobile */
+  padding: 0.25rem 0.5rem;
+  background: var(--primary-color);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.history-divider {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--gray-300);
+  background: none !important;
+}
+
+.history-divider span {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.assignment-history li.unassigned {
+  opacity: 0.6;
+  background: var(--gray-100);
+}
+
+.assignment-history li.unassigned .assignment-name {
+  text-decoration: line-through;
+  color: var(--gray-500);
+}
+
+/* Modal Actions */
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.modal-actions button {
+  flex: 1;
+}
+
+/* Modal Actions Menu (mobile) */
+.modal-actions-menu {
+  max-width: 400px;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.modal-actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.modal-action-item {
+  width: 100%;
+  text-align: left;
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 /* Responsive */
 @media (min-width: 640px) {
   .orders-container {
     padding: 1.5rem;
   }
 
+  .order-actions {
+    display: flex; /* Pokaż przyciski na desktop */
+  }
+
   .order-actions button {
     flex: 0 1 auto;
+  }
+
+  .order-card {
+    cursor: default; /* Wyłącz kursor pointer na desktop */
+    pointer-events: auto;
+  }
+
+  /* Na desktop kliknięcie w kartę nie otwiera modalu */
+  .order-card:active {
+    transform: none;
+  }
+
+  /* Pokaż badge "Pierwszy" tylko na desktop */
+  .first-badge {
+    display: inline-block;
   }
 }
