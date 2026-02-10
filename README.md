@@ -1,16 +1,49 @@
-# React + Vite
+# System Zleceń Wypożyczalni
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplikacja do zarządzania zleceniami w wypożyczalni samochodów.
 
-Currently, two official plugins are available:
+## Funkcjonalności
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Zarządzanie zleceniami** - dodawanie, edycja, usuwanie i oznaczanie jako ukończone
+- **Filtrowanie zleceń** - widok aktywnych, ukończonych i usuniętych zleceń
+- **Autoryzacja** - logowanie przez Supabase Auth
+- **Responsywny design** - dostosowany do urządzeń mobilnych i desktopowych
 
-## React Compiler
+## Struktura zlecenia
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Każde zlecenie zawiera:
+- Numer rejestracyjny pojazdu
+- Data i godzina wypożyczenia
+- Lokalizacja odbioru
+- Notatki (opcjonalnie)
+- Status (aktywne/ukończone/usunięte)
 
-## Expanding the ESLint configuration
+## Technologie
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- React 18 + Vite
+- Supabase (baza danych + autoryzacja)
+- CSS modules (custom design system)
+
+## Konfiguracja
+
+1. Zainstaluj zależności:
+```bash
+npm install
+```
+
+2. Skonfiguruj zmienne środowiskowe w `.env`:
+```
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+3. Uruchom aplikację:
+```bash
+npm run dev
+```
+
+## Rozwój
+
+- `npm run dev` - uruchom serwer deweloperski
+- `npm run build` - zbuduj aplikację produkcyjną
+- `npm run preview` - podgląd buildu produkcyjnego
