@@ -625,6 +625,36 @@ button.btn-primary {
 }
 
 /* Responsive */
+/* Offline Banner */
+.offline-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, var(--warning-color), #d97706);
+  color: white;
+  text-align: center;
+  padding: 0.75rem;
+  font-weight: 600;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Push down content when offline banner is visible */
+.offline-banner + .app-header {
+  margin-top: 48px;
+}
+
 @media (min-width: 640px) {
   .orders-container {
     padding: 1.5rem;

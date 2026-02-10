@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { AssignmentHistory } from './AssignmentHistory'
+import { useOnlineStatus } from './OfflineBanner'
 
 export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, onRestore, onAssign, onUnassign, fetchAssignments }) {
+  const isOnline = useOnlineStatus()
   const [assignments, setAssignments] = useState([])
   const [allUsers, setAllUsers] = useState([])
   const [showAssignDropdown, setShowAssignDropdown] = useState(false)
@@ -12,6 +14,28 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
   useEffect(() => {
     loadAssignments()
     loadAllUsers()
+
+    // Real-time subscription dla assignments tego zlecenia
+    const channel = supabase
+      .channel(`assignments-${order.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'assignments',
+          filter: `order_id=eq.${order.id}`
+        },
+        () => {
+          // Odśwież assignments gdy coś się zmieni
+          loadAssignments()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [order.id])
 
   async function loadAssignments() {
@@ -124,13 +148,13 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
         <div className="order-actions">
           {order.status === 'active' && (
             <>
-              <button onClick={() => onComplete(order.id)} className="btn-complete btn-success">
+              <button onClick={() => onComplete(order.id)} className="btn-complete btn-success" disabled={!isOnline}>
                 Zakończ
               </button>
-              <button onClick={() => onEdit(order)} className="btn-icon btn-secondary" title="Edytuj">
+              <button onClick={() => onEdit(order)} className="btn-icon btn-secondary" title="Edytuj" disabled={!isOnline}>
                 ✏️
               </button>
-              <button onClick={() => onDelete(order.id)} className="btn-icon btn-danger" title="Usuń">
+              <button onClick={() => onDelete(order.id)} className="btn-icon btn-danger" title="Usuń" disabled={!isOnline}>
                 ✕
               </button>
             </>
@@ -138,17 +162,17 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
 
           {order.status === 'completed' && (
             <>
-              <button onClick={() => onRestore(order.id)} className="btn-icon btn-primary" title="Przywróć">
+              <button onClick={() => onRestore(order.id)} className="btn-icon btn-primary" title="Przywróć" disabled={!isOnline}>
                 ↶
               </button>
-              <button onClick={() => onDelete(order.id)} className="btn-icon btn-danger" title="Usuń">
+              <button onClick={() => onDelete(order.id)} className="btn-icon btn-danger" title="Usuń" disabled={!isOnline}>
                 ✕
               </button>
             </>
           )}
 
           {order.status === 'deleted' && (
-            <button onClick={() => onRestore(order.id)} className="btn-icon btn-primary" title="Przywróć">
+            <button onClick={() => onRestore(order.id)} className="btn-icon btn-primary" title="Przywróć" disabled={!isOnline}>
               ↶
             </button>
           )}
@@ -168,6 +192,7 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
                 handleUnassignSelf()
               }}
               className="btn-compact btn-secondary"
+              disabled={!isOnline}
             >
               Wypisz się
             </button>
@@ -178,7 +203,7 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
                 handleAssignSelf()
               }}
               className="btn-compact btn-primary"
-              disabled={isMaxAssignmentsReached}
+              disabled={isMaxAssignmentsReached || !isOnline}
             >
               Zapisz się
             </button>
@@ -191,7 +216,7 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
                 setShowAssignDropdown(!showAssignDropdown)
               }}
               className="btn-compact btn-secondary"
-              disabled={availableUsers.length === 0 || isMaxAssignmentsReached}
+              disabled={availableUsers.length === 0 || isMaxAssignmentsReached || !isOnline}
               title={isMaxAssignmentsReached ? 'Osiągnięto maksymalną liczbę przypisanych (10)' : ''}
             >
               Przypisz
@@ -247,18 +272,21 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
                 <button
                   onClick={() => handleActionClick(() => onComplete(order.id))}
                   className="modal-action-item btn-success"
+                  disabled={!isOnline}
                 >
                   ✓ Zakończ zlecenie
                 </button>
                 <button
                   onClick={() => handleActionClick(() => onEdit(order))}
                   className="modal-action-item btn-secondary"
+                  disabled={!isOnline}
                 >
                   ✏️ Edytuj
                 </button>
                 <button
                   onClick={() => handleActionClick(() => onDelete(order.id))}
                   className="modal-action-item btn-danger"
+                  disabled={!isOnline}
                 >
                   ✕ Usuń
                 </button>
@@ -270,12 +298,14 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
                 <button
                   onClick={() => handleActionClick(() => onRestore(order.id))}
                   className="modal-action-item btn-primary"
+                  disabled={!isOnline}
                 >
                   ↶ Przywróć do aktywnych
                 </button>
                 <button
                   onClick={() => handleActionClick(() => onDelete(order.id))}
                   className="modal-action-item btn-danger"
+                  disabled={!isOnline}
                 >
                   ✕ Usuń
                 </button>
@@ -286,6 +316,7 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
               <button
                 onClick={() => handleActionClick(() => onRestore(order.id))}
                 className="modal-action-item btn-primary"
+                disabled={!isOnline}
               >
                 ↶ Przywróć do aktywnych
               </button>

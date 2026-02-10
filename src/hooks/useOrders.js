@@ -1,13 +1,187 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase'
+import toast from 'react-hot-toast'
 
 export function useOrders() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
+  const channelRef = useRef(null)
+  const currentUserIdRef = useRef(null)
+
+  // Pobierz ID aktualnego użytkownika
+  useEffect(() => {
+    async function getUserId() {
+      const { data: { user } } = await supabase.auth.getUser()
+      currentUserIdRef.current = user?.id
+    }
+    getUserId()
+  }, [])
 
   useEffect(() => {
     fetchOrders()
+    setupRealtimeSubscription()
+
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current)
+      }
+    }
   }, [])
+
+  async function setupRealtimeSubscription() {
+    // Pobierz mapę user_id -> name dla toastów
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, name')
+
+    const profileMap = {}
+    profiles?.forEach(p => {
+      profileMap[p.id] = p.name
+    })
+
+    const channel = supabase
+      .channel('orders-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        async (payload) => {
+          console.log('🔥 EVENT PRZYSZEDŁ:', payload.eventType, payload.new)
+          const { eventType, new: newRow, old: oldRow } = payload
+
+          if (eventType === 'INSERT') {
+            // Pobierz dane profilu twórcy
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('name')
+              .eq('id', newRow.created_by)
+              .single()
+
+            const orderWithProfile = {
+              ...newRow,
+              created_by_profile: profile
+            }
+
+            setOrders(prev => [orderWithProfile, ...prev])
+
+            // Nie pokazuj toast dla własnych akcji
+            if (newRow.created_by !== currentUserIdRef.current) {
+              toast.success(`Nowe zlecenie: ${newRow.plate}`, {
+                icon: '🆕'
+              })
+            }
+          } else if (eventType === 'UPDATE') {
+            // Pobierz dane profilu twórcy
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('name')
+              .eq('id', newRow.created_by)
+              .single()
+
+            const orderWithProfile = {
+              ...newRow,
+              created_by_profile: profile
+            }
+
+            setOrders(prev =>
+              prev.map(order =>
+                order.id === newRow.id ? orderWithProfile : order
+              )
+            )
+
+            // Toast przy zmianie statusu (nie dla własnych akcji)
+            if (newRow.created_by !== currentUserIdRef.current) {
+              if (newRow.status === 'completed' && oldRow.status !== 'completed') {
+                toast.success(`Zlecenie zakończone: ${newRow.plate}`, {
+                  icon: '✅'
+                })
+              } else if (newRow.status === 'deleted' && oldRow.status !== 'deleted') {
+                toast(`Zlecenie usunięte: ${newRow.plate}`, {
+                  icon: '🗑️'
+                })
+              } else if (newRow.status === 'active' && oldRow.status === 'deleted') {
+                toast.success(`Zlecenie przywrócone: ${newRow.plate}`, {
+                  icon: '↩️'
+                })
+              }
+            }
+          } else if (eventType === 'DELETE') {
+            setOrders(prev => prev.filter(order => order.id !== oldRow.id))
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'assignments' },
+        async (payload) => {
+          const { eventType, new: newRow, old: oldRow } = payload
+
+          if (eventType === 'INSERT') {
+            // Pobierz dane przypisania z profilami
+            const { data: assignment } = await supabase
+              .from('assignments')
+              .select(`
+                *,
+                user_profile:profiles!assignments_user_id_fkey(id, name),
+                assigned_by_profile:profiles!assignments_assigned_by_fkey(id, name)
+              `)
+              .eq('id', newRow.id)
+              .single()
+
+            if (assignment) {
+              // Toast o nowym przypisaniu
+              if (newRow.user_id !== currentUserIdRef.current &&
+                  newRow.assigned_by !== currentUserIdRef.current) {
+                const userName = assignment.user_profile?.name || 'Ktoś'
+                // Pobierz plate zlecenia
+                const { data: order } = await supabase
+                  .from('orders')
+                  .select('plate')
+                  .eq('id', newRow.order_id)
+                  .single()
+
+                if (order) {
+                  toast.success(`${userName} przypisał się do ${order.plate}`, {
+                    icon: '👤'
+                  })
+                }
+              }
+            }
+          } else if (eventType === 'UPDATE') {
+            // Przypisanie zostało zaktualizowane (np. wypisanie)
+            if (newRow.unassigned_at && !oldRow.unassigned_at) {
+              // Ktoś się wypisał
+              if (newRow.user_id !== currentUserIdRef.current) {
+                const { data: assignment } = await supabase
+                  .from('assignments')
+                  .select(`
+                    *,
+                    user_profile:profiles!assignments_user_id_fkey(id, name)
+                  `)
+                  .eq('id', newRow.id)
+                  .single()
+
+                if (assignment?.user_profile) {
+                  const { data: order } = await supabase
+                    .from('orders')
+                    .select('plate')
+                    .eq('id', newRow.order_id)
+                    .single()
+
+                  if (order) {
+                    toast(`${assignment.user_profile.name} wypisał się z ${order.plate}`, {
+                      icon: '👋'
+                    })
+                  }
+                }
+              }
+            }
+          }
+        }
+      )
+      .subscribe()
+
+    channelRef.current = channel
+  }
 
   async function fetchOrders() {
     try {
@@ -49,7 +223,7 @@ export function useOrders() {
 
       if (error) throw error
 
-      await fetchOrders()
+      // Nie trzeba fetchOrders - realtime załatwi aktualizację
       return { data, error: null }
     } catch (error) {
       console.error('Error creating order:', error)
@@ -68,7 +242,7 @@ export function useOrders() {
 
       if (error) throw error
 
-      await fetchOrders()
+      // Nie trzeba fetchOrders - realtime załatwi aktualizację
       return { data, error: null }
     } catch (error) {
       console.error('Error updating order:', error)
@@ -87,7 +261,7 @@ export function useOrders() {
 
       if (error) throw error
 
-      await fetchOrders()
+      // Nie trzeba fetchOrders - realtime załatwi aktualizację
       return { data, error: null }
     } catch (error) {
       console.error('Error deleting order:', error)
@@ -106,7 +280,7 @@ export function useOrders() {
 
       if (error) throw error
 
-      await fetchOrders()
+      // Nie trzeba fetchOrders - realtime załatwi aktualizację
       return { data, error: null }
     } catch (error) {
       console.error('Error completing order:', error)
@@ -125,7 +299,7 @@ export function useOrders() {
 
       if (error) throw error
 
-      await fetchOrders()
+      // Nie trzeba fetchOrders - realtime załatwi aktualizację
       return { data, error: null }
     } catch (error) {
       console.error('Error restoring order:', error)

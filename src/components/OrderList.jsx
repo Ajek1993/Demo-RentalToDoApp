@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { useOrders } from '../hooks/useOrders'
 import { OrderCard } from './OrderCard'
 import { OrderForm } from './OrderForm'
+import { useOnlineStatus } from './OfflineBanner'
 
 export function OrderList({ currentUser }) {
   const { orders, loading, createOrder, updateOrder, deleteOrder, completeOrder, restoreOrder, assignToOrder, unassignFromOrder, fetchAssignments } = useOrders()
+  const isOnline = useOnlineStatus()
   const [activeTab, setActiveTab] = useState('active')
   const [showModal, setShowModal] = useState(false)
   const [editingOrder, setEditingOrder] = useState(null)
@@ -45,13 +47,10 @@ export function OrderList({ currentUser }) {
   const handleDeleteOrder = async (id) => {
     const { data: assignments } = await fetchAssignments(id)
 
-    if (assignments && assignments.length > 0) {
-      setOrderToDelete(id)
-      setDeleteAssignments(assignments)
-      setShowDeleteConfirm(true)
-    } else {
-      await deleteOrder(id)
-    }
+    // Zawsze pokazuj modal potwierdzenia
+    setOrderToDelete(id)
+    setDeleteAssignments(assignments || [])
+    setShowDeleteConfirm(true)
   }
 
   const handleConfirmDelete = async () => {
@@ -132,7 +131,7 @@ export function OrderList({ currentUser }) {
         )}
       </div>
 
-      <button className="fab" onClick={handleAddOrder} title="Dodaj zlecenie">
+      <button className="fab" onClick={handleAddOrder} title="Dodaj zlecenie" disabled={!isOnline}>
         +
       </button>
 
@@ -154,18 +153,24 @@ export function OrderList({ currentUser }) {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h2>Potwierdzenie usunięcia</h2>
             <p>
-              To zlecenie ma przypisanych:{' '}
-              <strong>
-                {deleteAssignments.map(a => a.user_profile?.name).join(', ')}
-              </strong>
-              . Czy na pewno chcesz je usunąć?
+              {deleteAssignments.length > 0 ? (
+                <>
+                  To zlecenie jest przypisane do:{' '}
+                  <strong>
+                    {deleteAssignments[0]?.user_profile?.name || 'Nieznany'}
+                  </strong>
+                  . Czy na pewno chcesz je usunąć?
+                </>
+              ) : (
+                'Czy na pewno chcesz usunąć to zlecenie?'
+              )}
             </p>
             <div className="modal-actions">
               <button onClick={handleCancelDelete} className="btn-secondary">
                 Anuluj
               </button>
               <button onClick={handleConfirmDelete} className="btn-danger">
-                Usuń mimo to
+                {deleteAssignments.length > 0 ? 'Usuń mimo to' : 'Usuń'}
               </button>
             </div>
           </div>

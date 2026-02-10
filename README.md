@@ -8,6 +8,10 @@ Aplikacja do zarządzania zleceniami w wypożyczalni samochodów.
 - **Przypisywanie użytkowników** - kierowcy mogą się przypisywać do zleceń (max 10 osób)
 - **Historia przypisań** - pełna historia przypisań i wypisań z timestampami
 - **Filtrowanie zleceń** - widok aktywnych, ukończonych i usuniętych zleceń
+- **Real-time updates** - zmiany widoczne natychmiast u wszystkich użytkowników (bez odświeżania)
+- **Powiadomienia toast** - informacje o nowych zleceniach i przypisaniach
+- **Tryb offline** - banner i blokada akcji przy braku internetu
+- **Modal potwierdzenia** - zabezpieczenie przed przypadkowym usunięciem
 - **Autoryzacja** - logowanie przez Supabase Auth
 - **Responsywny design** - dostosowany do urządzeń mobilnych i desktopowych
 - **Mobile-first** - modal z akcjami na urządzeniach mobilnych
@@ -31,8 +35,9 @@ Każde zlecenie zawiera:
 
 ## Technologie
 
-- React 18 + Vite
-- Supabase (baza danych + autoryzacja)
+- React 19 + Vite
+- Supabase (baza danych + autoryzacja + realtime)
+- react-hot-toast (powiadomienia)
 - CSS modules (custom design system)
 
 ## Konfiguracja
