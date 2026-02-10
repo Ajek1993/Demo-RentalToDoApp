@@ -63,9 +63,9 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
    - Migracje dodają tabele i kolumny potrzebne do przypisywania użytkowników oraz push notifications
 
 4. (Opcjonalnie) Skonfiguruj push notifications:
-   - Postępuj zgodnie z instrukcjami w pliku `VAPID_SETUP.md`
-   - Wdróż Supabase Edge Function z folderu `supabase/functions/send-push/`
-   - Sprawdź `PWA_DEPLOYMENT.md` dla informacji o wdrożeniu PWA
+   - Skonfiguruj VAPID keys w Supabase Dashboard → Settings → Edge Functions → Secrets
+   - Wdróż Edge Function: `npx supabase functions deploy send-push --no-verify-jwt`
+   - Szczegóły w `specs/archive/PWA_DEPLOYMENT.md`
 
 5. Uruchom aplikację:
 ```bash

@@ -17,6 +17,12 @@ dist-ssr
 .env.local
 .env.*.local
 
+# Supabase CLI cache
+supabase/.temp/
+
+# Sensitive docs (contain private keys)
+**/VAPID_SETUP.md
+
 # Claude Code
 .claude/
 
