@@ -418,16 +418,39 @@ button.btn-primary {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
+}
+
+.header-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.header-right {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .app-header h1 {
   font-size: 1.25rem;
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .app-header button {
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
+}
+
+.app-header .btn-icon {
+  font-size: 1.25rem;
+  min-width: 44px;
+  width: 44px;
+  padding: 0;
 }
 
 /* Assignment Section */
@@ -653,6 +676,90 @@ button.btn-primary {
 /* Push down content when offline banner is visible */
 .offline-banner + .app-header {
   margin-top: 48px;
+}
+
+/* Push Notifications Settings */
+.push-settings {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.push-settings-content {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.push-settings-content h3 {
+  margin: 0 0 1rem 0;
+  color: var(--gray-900);
+  font-size: 1.25rem;
+}
+
+.push-status {
+  padding: 0.75rem;
+  background: var(--gray-50);
+  border-radius: 6px;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.push-description {
+  color: var(--gray-600);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.push-not-supported {
+  color: var(--danger-color);
+  font-size: 0.9rem;
+  padding: 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 6px;
+  line-height: 1.5;
+}
+
+.push-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.push-buttons button {
+  width: 100%;
+}
+
+.push-error {
+  color: var(--danger-color);
+  background: rgba(239, 68, 68, 0.1);
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
 }
 
 @media (min-width: 640px) {
