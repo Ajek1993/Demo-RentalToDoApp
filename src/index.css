@@ -12,9 +12,14 @@
   --gray-200: #e5e7eb;
   --gray-300: #d1d5db;
   --gray-500: #6b7280;
+  --gray-400: #9ca3af;
+  --gray-600: #4b5563;
   --gray-700: #374151;
   --gray-800: #1f2937;
   --gray-900: #111827;
+
+  --bg-card: #ffffff;
+  --bg-input: #ffffff;
 
   --status-active: #3b82f6;
   --status-completed: #10b981;
@@ -24,6 +29,26 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+[data-theme="dark"] {
+  --gray-50: #111827;
+  --gray-100: #1f2937;
+  --gray-200: #374151;
+  --gray-300: #4b5563;
+  --gray-400: #6b7280;
+  --gray-500: #9ca3af;
+  --gray-600: #d1d5db;
+  --gray-700: #e5e7eb;
+  --gray-800: #f3f4f6;
+  --gray-900: #f9fafb;
+
+  --bg-card: #1f2937;
+  --bg-input: #374151;
+
+  --primary-color: #3b82f6;
+
+  color-scheme: dark;
 }
 
 * {
@@ -37,6 +62,11 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background-color: var(--gray-50);
+  color: var(--gray-900);
+}
+
+input, textarea, select {
+  background-color: var(--bg-input);
   color: var(--gray-900);
 }
 
@@ -118,7 +148,7 @@ button.btn-primary {
 /* Tabs */
 .tabs {
   display: flex;
-  background-color: white;
+  background-color: var(--bg-card);
   border-bottom: 2px solid var(--gray-200);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -151,7 +181,7 @@ button.btn-primary {
   display: flex;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: white;
+  background: var(--bg-card);
   border-bottom: 1px solid var(--gray-200);
 }
 
@@ -165,7 +195,7 @@ button.btn-primary {
   font-weight: 500;
   border-radius: 16px;
   border: 1.5px solid var(--gray-300);
-  background: white;
+  background: var(--bg-card);
   color: var(--gray-700);
   cursor: pointer;
   transition: all 0.2s;
@@ -289,7 +319,7 @@ button.btn-primary {
 
 /* Order Card - border-left jako status indicator */
 .order-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: 8px;
   padding: 0.75rem 1rem;
   margin-bottom: 0.75rem;
@@ -505,7 +535,7 @@ button.btn-primary {
 }
 
 .modal-content {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 1.5rem;
   width: 100%;
@@ -582,7 +612,7 @@ button.btn-primary {
 
 /* Header */
 .app-header {
-  background: white;
+  background: var(--bg-card);
   padding: 1rem;
   border-bottom: 1px solid var(--gray-200);
   display: flex;
@@ -623,6 +653,81 @@ button.btn-primary {
   padding: 0;
 }
 
+/* Header Menu Dropdown */
+.header-menu-wrapper {
+  position: relative;
+}
+
+.header-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--gray-200);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  z-index: 200;
+  padding: 0.35rem;
+  animation: menuFadeIn 0.15s ease-out;
+}
+
+@keyframes menuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--gray-900);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.header-menu-item:hover:not(:disabled) {
+  background: var(--gray-100);
+  transform: none;
+}
+
+.header-menu-item:disabled {
+  opacity: 0.4;
+}
+
+.header-menu-item-danger {
+  color: var(--danger-color);
+}
+
+.header-menu-icon {
+  font-size: 1.15rem;
+  width: 1.5rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.header-menu-divider {
+  height: 1px;
+  background: var(--gray-200);
+  margin: 0.35rem 0.5rem;
+}
+
 /* Assignment Section */
 .assignment-section {
   margin-top: 0.75rem;
@@ -656,7 +761,7 @@ button.btn-primary {
   left: 0;
   right: 0;
   margin-top: 0.25rem;
-  background: white;
+  background: var(--bg-card);
   border: 1px solid var(--gray-300);
   border-radius: 6px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -669,7 +774,7 @@ button.btn-primary {
   width: 100%;
   text-align: left;
   padding: 0.5rem 0.75rem;
-  background: white;
+  background: var(--bg-card);
   border: none;
   border-radius: 0;
   color: var(--gray-900);
@@ -874,7 +979,7 @@ button.btn-primary {
 }
 
 .push-settings-content {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 1.5rem;
   width: 100%;
@@ -1146,7 +1251,7 @@ button.btn-primary {
   font-weight: 500;
   border-radius: 6px;
   border: 2px solid var(--gray-300);
-  background: white;
+  background: var(--bg-input);
   color: var(--gray-700);
   cursor: pointer;
   margin-bottom: 0.75rem;

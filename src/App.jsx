@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Toaster, toast } from 'react-hot-toast'
 import { useAuth } from './hooks/useAuth'
 import { useOnlineStatus } from './components/OfflineBanner'
@@ -8,12 +8,30 @@ import { OrderList } from './components/OrderList'
 import { OfflineBanner } from './components/OfflineBanner'
 import { AvailabilityManager } from './components/AvailabilityManager'
 
+function useDarkMode() {
+  const [dark, setDark] = useState(() => {
+    const saved = localStorage.getItem('theme')
+    if (saved) return saved === 'dark'
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+  })
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+    localStorage.setItem('theme', dark ? 'dark' : 'light')
+  }, [dark])
+
+  return [dark, () => setDark(d => !d)]
+}
+
 function App() {
   const { user, profile, loading, signOut } = useAuth()
   const isOnline = useOnlineStatus()
   const { subscribed, supported, subscribe, unsubscribe, loading: pushLoading } = usePushNotifications()
   const [showPushSettings, setShowPushSettings] = useState(false)
   const [showAvailability, setShowAvailability] = useState(false)
+  const [darkMode, toggleDarkMode] = useDarkMode()
+  const [showMenu, setShowMenu] = useState(false)
+  const menuRef = useRef(null)
 
   // Automatyczna subskrypcja przy pierwszym zalogowaniu
   useEffect(() => {
@@ -64,6 +82,18 @@ function App() {
     setShowPushSettings(!showPushSettings)
   }
 
+  // Zamknij menu po kliknięciu poza nim
+  useEffect(() => {
+    if (!showMenu) return
+    const handleClick = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setShowMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [showMenu])
+
   if (loading) {
     return (
       <div className="loading-container">
@@ -96,27 +126,52 @@ function App() {
           <h1>Witaj, {profile?.name || 'Użytkownik'}</h1>
         </div>
         <div className="header-right">
-          <button
-            onClick={() => setShowAvailability(true)}
-            className="btn-icon"
-            title="Dyspozycyjność"
-            disabled={!isOnline}
-          >
-            📅
-          </button>
-          {supported && (
+          <div className="header-menu-wrapper" ref={menuRef}>
             <button
-              onClick={togglePushSettings}
+              onClick={() => setShowMenu(v => !v)}
               className="btn-icon"
-              title="Ustawienia powiadomień"
-              disabled={!isOnline}
+              title="Menu"
             >
-              🔔
+              ⚙️
             </button>
-          )}
-          <button onClick={signOut} className="btn-danger" disabled={!isOnline}>
-            Wyloguj
-          </button>
+            {showMenu && (
+              <div className="header-menu">
+                <button
+                  className="header-menu-item"
+                  onClick={() => { toggleDarkMode(); setShowMenu(false) }}
+                >
+                  <span className="header-menu-icon">{darkMode ? '☀️' : '🌙'}</span>
+                  {darkMode ? 'Tryb jasny' : 'Tryb ciemny'}
+                </button>
+                <button
+                  className="header-menu-item"
+                  onClick={() => { setShowAvailability(true); setShowMenu(false) }}
+                  disabled={!isOnline}
+                >
+                  <span className="header-menu-icon">📅</span>
+                  Dyspozycyjność
+                </button>
+                {supported && (
+                  <button
+                    className="header-menu-item"
+                    onClick={() => { togglePushSettings(); setShowMenu(false) }}
+                    disabled={!isOnline}
+                  >
+                    <span className="header-menu-icon">🔔</span>
+                    Powiadomienia
+                  </button>
+                )}
+                <div className="header-menu-divider"></div>
+                <button
+                  className="header-menu-item header-menu-item-danger"
+                  onClick={() => { signOut(); setShowMenu(false) }}
+                  disabled={!isOnline}
+                >
+                  Wyloguj
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 

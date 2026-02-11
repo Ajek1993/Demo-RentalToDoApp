@@ -85,7 +85,7 @@ export function LoginForm() {
         </div>
 
         {error && (
-          <div style={{ color: 'red', marginBottom: '15px' }}>
+          <div style={{ color: 'var(--danger-color)', marginBottom: '15px' }}>
             {error}
           </div>
         )}
@@ -96,7 +96,7 @@ export function LoginForm() {
           style={{
             width: '100%',
             padding: '10px',
-            backgroundColor: '#2563eb',
+            backgroundColor: 'var(--primary-color)',
             color: 'white',
             border: 'none',
             borderRadius: '4px',
@@ -116,7 +116,7 @@ export function LoginForm() {
           style={{
             background: 'none',
             border: 'none',
-            color: '#2563eb',
+            color: 'var(--primary-color)',
             cursor: 'pointer',
             textDecoration: 'underline'
           }}

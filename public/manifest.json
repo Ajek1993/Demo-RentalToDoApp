@@ -1,6 +1,6 @@
 {
-  "name": "System Zleceń - Wypożyczalnia",
-  "short_name": "Zlecenia",
+  "name": "Abacus - System Zleceń",
+  "short_name": "Abacus",
   "description": "Zarządzanie zleceniami wypożyczalni",
   "start_url": "/",
   "display": "standalone",
