@@ -25,8 +25,8 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'Nowe powiadomienie';
   const options = {
     body: data.body || '',
-    icon: '/icon-192.png',
-    badge: '/icon-192.png',
+    icon: '/icons/android/android-launchericon-192-192.png',
+    badge: '/icons/android/android-launchericon-96-96.png',
     tag: data.tag || 'notification',
     data: { url: data.url || '/' },
     vibrate: [200, 100, 200],

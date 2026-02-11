@@ -1,79 +1,133 @@
 # System Zleceń Wypożyczalni
 
-Aplikacja do zarządzania zleceniami w wypożyczalni samochodów.
+Wewnętrzna aplikacja PWA do zarządzania zleceniami dostaw w wypożyczalni samochodów. Przeznaczona dla ~15 pracowników - umożliwia tworzenie zleceń, przypisywanie się do nich, śledzenie historii zmian i zarządzanie dyspozycyjnością.
 
 ## Funkcjonalności
 
 - **Zarządzanie zleceniami** - dodawanie, edycja, usuwanie i oznaczanie jako ukończone
+- **Grupowanie po datach** - zlecenia pogrupowane chronologicznie z nagłówkami dat
+- **Filtr "Tylko moje"** - szybkie filtrowanie zleceń przypisanych do zalogowanego użytkownika
 - **Przypisywanie użytkowników** - kierowcy mogą się przypisywać do zleceń (max 10 osób)
 - **Historia przypisań** - pełna historia przypisań i wypisań z timestampami
-- **Filtrowanie zleceń** - widok aktywnych, ukończonych i usuniętych zleceń
+- **Historia edycji** - śledzenie kto i kiedy edytował zlecenie z listą zmienionych pól
+- **Dyspozycyjność** - pracownicy mogą ustawiać swoją dostępność na poszczególne dni tygodnia
 - **Real-time updates** - zmiany widoczne natychmiast u wszystkich użytkowników (bez odświeżania)
-- **Powiadomienia toast** - informacje o nowych zleceniach i przypisaniach
 - **Push notifications** - powiadomienia o nowych zleceniach nawet gdy aplikacja jest zamknięta
-- **Progressive Web App (PWA)** - możliwość instalacji aplikacji na urządzeniu
-- **Service Worker** - obsługa offline i cachowanie zasobów
-- **Tryb offline** - banner i blokada akcji przy braku internetu
-- **Modal potwierdzenia** - zabezpieczenie przed przypadkowym usunięciem
-- **Autoryzacja** - logowanie przez Supabase Auth
-- **Responsywny design** - dostosowany do urządzeń mobilnych i desktopowych
-- **Mobile-first** - modal z akcjami na urządzeniach mobilnych
+- **Progressive Web App (PWA)** - instalacja na urządzeniu, Service Worker, obsługa offline
+- **Tryb offline** - banner informacyjny i blokada akcji przy braku internetu
+- **Autoryzacja** - logowanie przez Supabase Auth (email/hasło)
+- **Responsywny design** - mobile-first, dostosowany do telefonów i desktopów
 
 ## Struktura zlecenia
 
 Każde zlecenie zawiera:
 - Numer rejestracyjny pojazdu
-- Data i godzina wypożyczenia
+- Data i godzina
 - Lokalizacja odbioru
 - Notatki (opcjonalnie)
-- Status (aktywne/ukończone/usunięte)
+- Status (aktywne / ukończone / usunięte)
 - Lista przypisanych użytkowników z timestampami
-
-## Przypisywanie do zleceń
-
-- **Limit**: maksymalnie 10 osób może być przypisanych do zlecenia
-- **Pierwszeństwo**: pierwszy przypisany użytkownik jest wyróżniony
-- **Historia**: pełna historia przypisań i wypisań jest zachowywana
-- **Soft delete**: wypisanie nie usuwa rekordu, tylko ustawia timestamp wypisania
 
 ## Technologie
 
-- React 19 + Vite
-- Supabase (baza danych + autoryzacja + realtime + edge functions)
-- react-hot-toast (powiadomienia)
-- Web Push API (powiadomienia push)
-- Service Worker API (PWA, offline support)
-- CSS modules (custom design system)
+- **Frontend:** React 19 + Vite 7
+- **Backend:** Supabase (PostgreSQL, Auth, Realtime, Edge Functions)
+- **Powiadomienia:** Web Push API + Service Worker
+- **UI:** react-hot-toast, custom CSS (mobile-first)
+
+## Struktura projektu
+
+```
+src/
+├── components/
+│   ├── LoginForm.jsx           # Formularz logowania/rejestracji
+│   ├── OrderCard.jsx           # Karta zlecenia z akcjami
+│   ├── OrderList.jsx           # Lista zleceń z grupowaniem i filtrami
+│   ├── OrderForm.jsx           # Formularz tworzenia/edycji zlecenia
+│   ├── AssignmentHistory.jsx   # Historia przypisań z timestampami
+│   ├── AvailabilityManager.jsx # Zarządzanie dyspozycyjnością
+│   └── OfflineBanner.jsx       # Banner trybu offline
+├── hooks/
+│   ├── useAuth.js              # Autoryzacja Supabase
+│   ├── useOrders.js            # CRUD zleceń + subskrypcje realtime
+│   ├── useAvailability.js      # Zarządzanie dostępnością
+│   └── usePushNotifications.js # Push notifications
+├── lib/
+│   └── supabase.js             # Klient Supabase (singleton)
+├── App.jsx                     # Główny komponent aplikacji
+└── main.jsx                    # Entry point
+supabase/
+├── functions/
+│   └── send-push/index.ts      # Edge Function - wysyłka push notifications
+└── migrations/                 # Migracje SQL (uruchom po kolei w Supabase SQL Editor)
+```
 
 ## Konfiguracja
 
-1. Zainstaluj zależności:
+### 1. Zainstaluj zależności
+
 ```bash
 npm install
 ```
 
-2. Skonfiguruj zmienne środowiskowe w `.env`:
+### 2. Skonfiguruj zmienne środowiskowe
+
+Skopiuj plik `.env.example` jako `.env` i uzupełnij wartości:
+
+```bash
+cp .env.example .env
 ```
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+Wymagane zmienne:
+| Zmienna | Opis |
+|---------|------|
+| `VITE_SUPABASE_URL` | URL projektu Supabase |
+| `VITE_SUPABASE_ANON_KEY` | Klucz publiczny (anon key) Supabase |
+| `VITE_VAPID_PUBLIC_KEY` | Klucz publiczny VAPID do push notifications |
+
+Klucze VAPID wygenerujesz komendą:
+```bash
+npx web-push generate-vapid-keys
 ```
 
-3. Wykonaj migracje SQL w Supabase:
-   - Uruchom migracje z folderu `supabase/migrations/` w Supabase SQL Editor
-   - Migracje dodają tabele i kolumny potrzebne do przypisywania użytkowników oraz push notifications
+### 3. Wykonaj migracje SQL
 
-4. (Opcjonalnie) Skonfiguruj push notifications:
-   - Skonfiguruj VAPID keys w Supabase Dashboard → Settings → Edge Functions → Secrets
-   - Wdróż Edge Function: `npx supabase functions deploy send-push --no-verify-jwt`
-   - Szczegóły w `specs/archive/PWA_DEPLOYMENT.md`
+Uruchom migracje z folderu `supabase/migrations/` **po kolei** w Supabase SQL Editor:
 
-5. Uruchom aplikację:
+1. `supabase-schema.sql` - tabele: profiles, orders, assignments, push_subscriptions
+2. `002_add_unassigned_at.sql` - kolumny unassigned_at/unassigned_by w assignments
+3. `003_push_notifications.sql` - triggery push notifications
+4. `004_fix_push_triggers.sql` - poprawki triggerów
+5. `005_update_push_triggers.sql` - aktualizacja triggerów
+6. `006_order_edits.sql` - historia edycji zleceń
+7. `007_availability.sql` - tabela dyspozycyjności pracowników
+
+### 4. Skonfiguruj push notifications
+
+W Supabase Dashboard → Settings → Edge Functions → Secrets dodaj:
+
+| Sekret | Opis |
+|--------|------|
+| `VAPID_PUBLIC_KEY` | Klucz publiczny VAPID (ten sam co w `.env`) |
+| `VAPID_PRIVATE_KEY` | Klucz prywatny VAPID |
+| `VAPID_EMAIL` | Email kontaktowy (format: `mailto:admin@example.com`) |
+
+Wdróż Edge Function:
+```bash
+npx supabase functions deploy send-push --no-verify-jwt
+```
+
+### 5. Uruchom aplikację
+
 ```bash
 npm run dev
 ```
 
-## Rozwój
+## Skrypty
 
-- `npm run dev` - uruchom serwer deweloperski
-- `npm run build` - zbuduj aplikację produkcyjną
-- `npm run preview` - podgląd buildu produkcyjnego
+| Komenda | Opis |
+|---------|------|
+| `npm run dev` | Serwer deweloperski (Vite) |
+| `npm run build` | Build produkcyjny do `dist/` |
+| `npm run preview` | Podgląd buildu produkcyjnego |
+| `npm run lint` | Linting kodu (ESLint) |

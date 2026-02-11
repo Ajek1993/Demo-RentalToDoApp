@@ -99,7 +99,7 @@ function App() {
           <button
             onClick={() => setShowAvailability(true)}
             className="btn-icon"
-            title="Dyspozycyjnosc"
+            title="Dyspozycyjność"
             disabled={!isOnline}
           >
             📅

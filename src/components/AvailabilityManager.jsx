@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAvailability } from '../hooks/useAvailability'
 
-const DAY_NAMES = ['Pon', 'Wt', 'Sr', 'Czw', 'Pt', 'Sob', 'Ndz']
+const DAY_NAMES = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Ndz']
 
 function getWeekDates(offset = 0) {
   const now = new Date()
@@ -127,7 +127,7 @@ export function AvailabilityManager({ onClose }) {
     const dateStr = toDateStr(date)
     const slots = weekData[dateStr] || []
     if (slots.length === 0) return null
-    if (slots.some(s => s.is_full_day)) return 'Caly dzien'
+    if (slots.some(s => s.is_full_day)) return 'Cały dzień'
     return slots.map(s =>
       `${s.start_time?.substring(0, 5)}-${s.end_time?.substring(0, 5)}`
     ).join(', ')
@@ -142,7 +142,7 @@ export function AvailabilityManager({ onClose }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content avail-modal" onClick={(e) => e.stopPropagation()}>
-        <h2>Moja dyspozycyjnosc</h2>
+        <h2>Moja dyspozycyjność</h2>
 
         <div className="avail-week-nav">
           <button
@@ -194,7 +194,7 @@ export function AvailabilityManager({ onClose }) {
               className={`avail-fullday-toggle ${isFullDay ? 'active' : ''}`}
               onClick={handleToggleFullDay}
             >
-              Caly dzien
+              Cały dzień
             </button>
 
             {!isFullDay && (
@@ -237,7 +237,7 @@ export function AvailabilityManager({ onClose }) {
                 onClick={handleClearDay}
                 disabled={saving}
               >
-                Wyczysc
+                Wyczyść
               </button>
               <button
                 className="btn-compact btn-secondary"
@@ -251,7 +251,7 @@ export function AvailabilityManager({ onClose }) {
                 onClick={handleSaveDay}
                 disabled={saving}
               >
-                {saving ? 'Zapisuje...' : 'Zapisz'}
+                {saving ? 'Zapisuję...' : 'Zapisz'}
               </button>
             </div>
           </div>
@@ -259,6 +259,7 @@ export function AvailabilityManager({ onClose }) {
 
         <div className="avail-close">
           <button className="btn-secondary" onClick={onClose}>Zamknij</button>
+
         </div>
       </div>
     </div>

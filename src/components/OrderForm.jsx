@@ -94,10 +94,10 @@ export function OrderForm({ onSubmit, initialData, onCancel }) {
         {errors.date && <span className="error">{errors.date}</span>}
         {formData.date && dateAvailability.length > 0 && (
           <div className="avail-preview">
-            <span className="avail-preview-label">Dostepni:</span>
+            <span className="avail-preview-label">Dostępni:</span>
             {dateAvailability.map((person, i) => {
               const slotsText = person.slots.some(s => s.is_full_day)
-                ? 'caly dzien'
+                ? 'cały dzień'
                 : person.slots.map(s =>
                     `${s.start_time?.substring(0, 5)}-${s.end_time?.substring(0, 5)}`
                   ).join(', ')
@@ -112,7 +112,7 @@ export function OrderForm({ onSubmit, initialData, onCancel }) {
         )}
         {formData.date && dateAvailability.length === 0 && (
           <div className="avail-preview avail-preview-empty">
-            Brak zgloszonej dyspozycyjnosci na ten dzien
+            Brak zgłoszonej dyspozycyjności na ten dzień
           </div>
         )}
       </div>
