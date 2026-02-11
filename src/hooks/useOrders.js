@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 export function useOrders() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
+  const [myAssignedOrderIds, setMyAssignedOrderIds] = useState(new Set())
   const channelRef = useRef(null)
   const currentUserIdRef = useRef(null)
 
@@ -13,9 +14,29 @@ export function useOrders() {
     async function getUserId() {
       const { data: { user } } = await supabase.auth.getUser()
       currentUserIdRef.current = user?.id
+      if (user?.id) {
+        fetchMyAssignments(user.id)
+      }
     }
     getUserId()
   }, [])
+
+  async function fetchMyAssignments(userId) {
+    const uid = userId || currentUserIdRef.current
+    if (!uid) return
+    try {
+      const { data, error } = await supabase
+        .from('assignments')
+        .select('order_id')
+        .eq('user_id', uid)
+        .is('unassigned_at', null)
+
+      if (error) throw error
+      setMyAssignedOrderIds(new Set((data || []).map(a => a.order_id)))
+    } catch (error) {
+      console.error('Error fetching my assignments:', error)
+    }
+  }
 
   useEffect(() => {
     fetchOrders()
@@ -146,6 +167,9 @@ export function useOrders() {
                 }
               }
             }
+
+            // Odśwież moje przypisania
+            fetchMyAssignments()
           } else if (eventType === 'UPDATE') {
             // Przypisanie zostało zaktualizowane (np. wypisanie)
             if (newRow.unassigned_at && !oldRow.unassigned_at) {
@@ -175,6 +199,9 @@ export function useOrders() {
                 }
               }
             }
+
+            // Odśwież moje przypisania
+            fetchMyAssignments()
           }
         }
       )
@@ -382,6 +409,7 @@ export function useOrders() {
   return {
     orders,
     loading,
+    myAssignedOrderIds,
     fetchOrders,
     createOrder,
     updateOrder,

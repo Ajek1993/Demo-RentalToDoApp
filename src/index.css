@@ -146,6 +146,123 @@ button.btn-primary {
   border-bottom-color: var(--primary-color);
 }
 
+/* Filter Bar */
+.filter-bar {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: white;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  height: 32px;
+  padding: 0 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-radius: 16px;
+  border: 1.5px solid var(--gray-300);
+  background: white;
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: auto;
+}
+
+.filter-chip:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  transform: none;
+}
+
+.filter-chip.active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+/* Date Group Sections */
+.date-group {
+  margin-bottom: 0.5rem;
+}
+
+.date-group-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 40px;
+  padding: 0.5rem 0.75rem;
+  background: var(--gray-100);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--gray-800);
+  transition: background-color 0.2s;
+}
+
+.date-group-header:hover {
+  background: var(--gray-200);
+  transform: none;
+}
+
+.date-group-overdue > .date-group-header {
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--danger-color);
+}
+
+.date-group-overdue > .date-group-header:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.chevron {
+  display: inline-block;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: transform 0.2s;
+  transform: rotate(0deg);
+  width: 1rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.chevron.open {
+  transform: rotate(90deg);
+}
+
+.date-group-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  flex: 1;
+  text-align: left;
+}
+
+.date-group-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 0.4rem;
+  border-radius: 11px;
+  background: var(--gray-300);
+  color: var(--gray-800);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.date-group-overdue > .date-group-header .date-group-count {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--danger-color);
+}
+
+.date-group-body {
+  padding-top: 0.5rem;
+}
+
 /* Order List Container */
 .order-list-container {
   flex: 1;
@@ -229,9 +346,9 @@ button.btn-primary {
 }
 
 .order-plate {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--gray-900);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--gray-700);
 }
 
 .order-separator {
@@ -239,11 +356,16 @@ button.btn-primary {
   font-weight: 300;
 }
 
-.order-date,
+.order-date {
+  color: var(--gray-900);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
 .order-time {
-  color: var(--gray-700);
-  font-size: 0.95rem;
-  font-weight: 500;
+  color: var(--gray-900);
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
 .order-location {

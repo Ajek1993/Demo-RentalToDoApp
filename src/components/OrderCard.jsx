@@ -137,10 +137,10 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
 
         <div className="order-main-row">
         <div className="order-info">
-          <span className="order-plate">{order.plate}</span>
-          <span className="order-separator">•</span>
           <span className="order-date">{formatDate(order.date)}</span>
           <span className="order-time">{formatTime(order.time)}</span>
+          <span className="order-separator">•</span>
+          <span className="order-plate">{order.plate}</span>
           <span className="order-separator">•</span>
           <span className="order-location">{order.location}</span>
         </div>

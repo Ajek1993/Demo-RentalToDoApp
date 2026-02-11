@@ -1,11 +1,59 @@
-import { useState } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useOrders } from '../hooks/useOrders'
 import { OrderCard } from './OrderCard'
 import { OrderForm } from './OrderForm'
 import { useOnlineStatus } from './OfflineBanner'
 
+function toLocalDateStr(date) {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+function groupOrdersByDate(orders) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const todayStr = toLocalDateStr(today)
+
+  const tomorrow = new Date(today)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  const tomorrowStr = toLocalDateStr(tomorrow)
+
+  const groups = {
+    overdue: { label: 'Przeterminowane', orders: [] },
+    today: { label: 'Dzisiaj', orders: [] },
+    tomorrow: { label: 'Jutro', orders: [] },
+    later: { label: 'Później', orders: [] },
+  }
+
+  for (const order of orders) {
+    const d = order.date
+    if (!d || d < todayStr) {
+      groups.overdue.orders.push(order)
+    } else if (d === todayStr) {
+      groups.today.orders.push(order)
+    } else if (d === tomorrowStr) {
+      groups.tomorrow.orders.push(order)
+    } else {
+      groups.later.orders.push(order)
+    }
+  }
+
+  // Sortuj wewnątrz grup: date ASC, time ASC
+  const sortFn = (a, b) => {
+    if (a.date !== b.date) return (a.date || '').localeCompare(b.date || '')
+    return (a.time || '').localeCompare(b.time || '')
+  }
+  for (const g of Object.values(groups)) {
+    g.orders.sort(sortFn)
+  }
+
+  return groups
+}
+
 export function OrderList({ currentUser }) {
-  const { orders, loading, createOrder, updateOrder, deleteOrder, completeOrder, restoreOrder, assignToOrder, unassignFromOrder, fetchAssignments } = useOrders()
+  const { orders, loading, myAssignedOrderIds, createOrder, updateOrder, deleteOrder, completeOrder, restoreOrder, assignToOrder, unassignFromOrder, fetchAssignments } = useOrders()
   const isOnline = useOnlineStatus()
   const [activeTab, setActiveTab] = useState('active')
   const [showModal, setShowModal] = useState(false)
@@ -13,8 +61,33 @@ export function OrderList({ currentUser }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [orderToDelete, setOrderToDelete] = useState(null)
   const [deleteAssignments, setDeleteAssignments] = useState([])
+  const [showOnlyMine, setShowOnlyMine] = useState(false)
+  const [collapsedGroups, setCollapsedGroups] = useState(new Set())
 
-  const filteredOrders = orders.filter(order => order.status === activeTab)
+  const toggleGroup = useCallback((groupKey) => {
+    setCollapsedGroups(prev => {
+      const next = new Set(prev)
+      if (next.has(groupKey)) {
+        next.delete(groupKey)
+      } else {
+        next.add(groupKey)
+      }
+      return next
+    })
+  }, [])
+
+  const filteredOrders = useMemo(() => {
+    let result = orders.filter(order => order.status === activeTab)
+    if (showOnlyMine) {
+      result = result.filter(order => myAssignedOrderIds.has(order.id))
+    }
+    return result
+  }, [orders, activeTab, showOnlyMine, myAssignedOrderIds])
+
+  const dateGroups = useMemo(() => {
+    if (activeTab !== 'active') return null
+    return groupOrdersByDate(filteredOrders)
+  }, [filteredOrders, activeTab])
 
   const handleAddOrder = () => {
     setEditingOrder(null)
@@ -104,15 +177,56 @@ export function OrderList({ currentUser }) {
         </button>
       </div>
 
+      <div className="filter-bar">
+        <button
+          className={`filter-chip ${showOnlyMine ? 'active' : ''}`}
+          onClick={() => setShowOnlyMine(prev => !prev)}
+        >
+          Tylko moje
+        </button>
+      </div>
+
       <div className="orders-container">
         {filteredOrders.length === 0 ? (
           <div className="empty-state">
             <p>
-              {activeTab === 'active' && 'Brak aktywnych zleceń'}
+              {activeTab === 'active' && (showOnlyMine ? 'Brak przypisanych do Ciebie zleceń' : 'Brak aktywnych zleceń')}
               {activeTab === 'completed' && 'Brak zakończonych zleceń'}
               {activeTab === 'deleted' && 'Brak usuniętych zleceń'}
             </p>
           </div>
+        ) : dateGroups ? (
+          Object.entries(dateGroups).map(([key, group]) => {
+            if (group.orders.length === 0) return null
+            const isCollapsed = collapsedGroups.has(key)
+            return (
+              <div className={`date-group ${key === 'overdue' ? 'date-group-overdue' : ''}`} key={key}>
+                <button className="date-group-header" onClick={() => toggleGroup(key)}>
+                  <span className={`chevron ${isCollapsed ? '' : 'open'}`}>›</span>
+                  <span className="date-group-label">{group.label}</span>
+                  <span className="date-group-count">{group.orders.length}</span>
+                </button>
+                {!isCollapsed && (
+                  <div className="date-group-body">
+                    {group.orders.map(order => (
+                      <OrderCard
+                        key={order.id}
+                        order={order}
+                        currentUserId={currentUser?.id}
+                        onEdit={handleEditOrder}
+                        onComplete={handleCompleteOrder}
+                        onDelete={handleDeleteOrder}
+                        onRestore={handleRestoreOrder}
+                        onAssign={assignToOrder}
+                        onUnassign={unassignFromOrder}
+                        fetchAssignments={fetchAssignments}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })
         ) : (
           filteredOrders.map(order => (
             <OrderCard
