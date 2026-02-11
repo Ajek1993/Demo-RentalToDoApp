@@ -62,6 +62,7 @@ export function OrderList({ currentUser }) {
   const [orderToDelete, setOrderToDelete] = useState(null)
   const [deleteAssignments, setDeleteAssignments] = useState([])
   const [showOnlyMine, setShowOnlyMine] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const [collapsedGroups, setCollapsedGroups] = useState(new Set())
 
   const toggleGroup = useCallback((groupKey) => {
@@ -81,8 +82,22 @@ export function OrderList({ currentUser }) {
     if (showOnlyMine) {
       result = result.filter(order => myAssignedOrderIds.has(order.id))
     }
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase()
+      result = result.filter(order => {
+        const displayDate = order.date
+          ? order.date.split('-').reverse().join('.')
+          : ''
+        return (
+          (order.plate || '').toLowerCase().includes(q) ||
+          (order.location || '').toLowerCase().includes(q) ||
+          (order.notes || '').toLowerCase().includes(q) ||
+          displayDate.includes(q)
+        )
+      })
+    }
     return result
-  }, [orders, activeTab, showOnlyMine, myAssignedOrderIds])
+  }, [orders, activeTab, showOnlyMine, myAssignedOrderIds, searchQuery])
 
   const dateGroups = useMemo(() => {
     if (activeTab !== 'active') return null
@@ -184,6 +199,23 @@ export function OrderList({ currentUser }) {
         >
           Tylko moje
         </button>
+        <div className="search-wrapper">
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Szukaj..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              className="search-clear"
+              onClick={() => setSearchQuery('')}
+            >
+              ✕
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="orders-container">
