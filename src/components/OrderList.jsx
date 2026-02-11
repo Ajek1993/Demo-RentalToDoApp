@@ -63,6 +63,8 @@ export function OrderList({ currentUser }) {
   const [deleteAssignments, setDeleteAssignments] = useState([])
   const [showOnlyMine, setShowOnlyMine] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
   const [collapsedGroups, setCollapsedGroups] = useState(new Set())
 
   const toggleGroup = useCallback((groupKey) => {
@@ -96,8 +98,14 @@ export function OrderList({ currentUser }) {
         )
       })
     }
+    if (dateFrom) {
+      result = result.filter(order => order.date >= dateFrom)
+    }
+    if (dateTo) {
+      result = result.filter(order => order.date <= dateTo)
+    }
     return result
-  }, [orders, activeTab, showOnlyMine, myAssignedOrderIds, searchQuery])
+  }, [orders, activeTab, showOnlyMine, myAssignedOrderIds, searchQuery, dateFrom, dateTo])
 
   const dateGroups = useMemo(() => {
     if (activeTab !== 'active') return null
@@ -216,6 +224,32 @@ export function OrderList({ currentUser }) {
             </button>
           )}
         </div>
+      </div>
+
+      {/* Filtr zakresu dat */}
+      <div className="date-range-bar">
+        <label className="date-range-label">Od</label>
+        <input
+          type="date"
+          className="date-range-input"
+          value={dateFrom}
+          onChange={(e) => setDateFrom(e.target.value)}
+        />
+        <label className="date-range-label">Do</label>
+        <input
+          type="date"
+          className="date-range-input"
+          value={dateTo}
+          onChange={(e) => setDateTo(e.target.value)}
+        />
+        {(dateFrom || dateTo) && (
+          <button
+            className="filter-chip"
+            onClick={() => { setDateFrom(''); setDateTo('') }}
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       <div className="orders-container">

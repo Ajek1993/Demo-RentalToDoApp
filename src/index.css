@@ -243,6 +243,41 @@ button.btn-primary {
   transform: translateY(-50%);
 }
 
+/* Date Range Filter */
+.date-range-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 1rem;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.date-range-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gray-500);
+}
+
+.date-range-input {
+  min-height: 32px;
+  height: 32px;
+  padding: 0 0.5rem;
+  border: 1.5px solid var(--gray-300);
+  border-radius: 16px;
+  font-size: 0.82rem;
+  font-family: inherit;
+  background: var(--bg-input);
+  color: var(--gray-900);
+  transition: border-color 0.2s;
+}
+
+.date-range-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
 .filter-chip {
   display: inline-flex;
   align-items: center;
