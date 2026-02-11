@@ -258,7 +258,7 @@ export function useOrders() {
     }
   }
 
-  async function updateOrder(id, updates) {
+  async function updateOrder(id, updates, oldOrder) {
     try {
       const { data, error } = await supabase
         .from('orders')
@@ -268,6 +268,27 @@ export function useOrders() {
         .single()
 
       if (error) throw error
+
+      // Zapisz diff do order_edits
+      if (oldOrder) {
+        const trackFields = ['plate', 'date', 'time', 'location', 'notes']
+        const changes = {}
+        for (const field of trackFields) {
+          const oldVal = oldOrder[field] ?? ''
+          const newVal = updates[field] ?? ''
+          if (String(oldVal) !== String(newVal)) {
+            changes[field] = [String(oldVal), String(newVal)]
+          }
+        }
+        if (Object.keys(changes).length > 0) {
+          const { data: { user } } = await supabase.auth.getUser()
+          await supabase.from('order_edits').insert({
+            order_id: id,
+            edited_by: user.id,
+            changes
+          })
+        }
+      }
 
       // Nie trzeba fetchOrders - realtime załatwi aktualizację
       return { data, error: null }
@@ -406,6 +427,26 @@ export function useOrders() {
     }
   }
 
+  async function fetchOrderEdits(orderId) {
+    try {
+      const { data, error } = await supabase
+        .from('order_edits')
+        .select(`
+          *,
+          edited_by_profile:profiles!order_edits_edited_by_fkey(id, name)
+        `)
+        .eq('order_id', orderId)
+        .order('edited_at', { ascending: false })
+        .limit(50)
+
+      if (error) throw error
+      return { data: data || [], error: null }
+    } catch (error) {
+      console.error('Error fetching order edits:', error)
+      return { data: [], error }
+    }
+  }
+
   return {
     orders,
     loading,
@@ -418,6 +459,7 @@ export function useOrders() {
     restoreOrder,
     assignToOrder,
     unassignFromOrder,
-    fetchAssignments
+    fetchAssignments,
+    fetchOrderEdits
   }
 }

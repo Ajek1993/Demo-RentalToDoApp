@@ -53,7 +53,7 @@ function groupOrdersByDate(orders) {
 }
 
 export function OrderList({ currentUser }) {
-  const { orders, loading, myAssignedOrderIds, createOrder, updateOrder, deleteOrder, completeOrder, restoreOrder, assignToOrder, unassignFromOrder, fetchAssignments } = useOrders()
+  const { orders, loading, myAssignedOrderIds, createOrder, updateOrder, deleteOrder, completeOrder, restoreOrder, assignToOrder, unassignFromOrder, fetchAssignments, fetchOrderEdits } = useOrders()
   const isOnline = useOnlineStatus()
   const [activeTab, setActiveTab] = useState('active')
   const [showModal, setShowModal] = useState(false)
@@ -106,7 +106,7 @@ export function OrderList({ currentUser }) {
 
   const handleSubmitOrder = async (formData) => {
     if (editingOrder) {
-      await updateOrder(editingOrder.id, formData)
+      await updateOrder(editingOrder.id, formData, editingOrder)
     } else {
       await createOrder(formData)
     }
@@ -220,6 +220,7 @@ export function OrderList({ currentUser }) {
                         onAssign={assignToOrder}
                         onUnassign={unassignFromOrder}
                         fetchAssignments={fetchAssignments}
+                        fetchOrderEdits={fetchOrderEdits}
                       />
                     ))}
                   </div>
@@ -240,6 +241,7 @@ export function OrderList({ currentUser }) {
               onAssign={assignToOrder}
               onUnassign={unassignFromOrder}
               fetchAssignments={fetchAssignments}
+              fetchOrderEdits={fetchOrderEdits}
             />
           ))
         )}

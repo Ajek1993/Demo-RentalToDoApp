@@ -302,7 +302,10 @@ button.btn-primary {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.order-assigned-first {
+.order-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 0.5rem;
 }
 
@@ -379,6 +382,51 @@ button.btn-primary {
   font-style: italic;
   margin-top: 0.5rem;
   padding-left: 0.25rem;
+}
+
+/* Na mobile ukryj notatki tekstowe, pokaż ikonkę "i" */
+.order-notes-desktop {
+  display: none;
+}
+
+.btn-notes-info {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  width: 28px;
+  min-height: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--gray-200);
+  color: var(--gray-700);
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-style: italic;
+  font-family: Georgia, serif;
+  border: none;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.btn-notes-info:hover {
+  background: var(--gray-300);
+}
+
+.notes-popup {
+  margin-top: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--gray-100);
+  border-radius: 6px;
+  border: 1px solid var(--gray-200);
+}
+
+.notes-popup-content {
+  color: var(--gray-700);
+  font-size: 0.9rem;
+  font-style: italic;
+  line-height: 1.5;
 }
 
 .order-actions {
@@ -910,5 +958,327 @@ button.btn-primary {
   /* Pokaż badge "Pierwszy" tylko na desktop */
   .first-badge {
     display: inline-block;
+  }
+
+  /* Na desktop pokaż notatki tekstowo, ukryj ikonkę "i" i popup */
+  .order-notes-desktop {
+    display: block;
+  }
+
+  .btn-notes-info,
+  .notes-popup {
+    display: none;
+  }
+}
+
+/* Edit History */
+.edit-history-section {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--gray-300);
+}
+
+.edit-history-section h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: 0.5rem;
+}
+
+.edit-history-item {
+  background: var(--gray-50);
+  border-radius: 6px;
+  padding: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.edit-history-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.edit-changes {
+  padding-left: 0.25rem;
+}
+
+.edit-change {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  flex-wrap: wrap;
+  line-height: 1.6;
+}
+
+.edit-field-label {
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.edit-old-value {
+  color: var(--danger-color);
+  text-decoration: line-through;
+}
+
+.edit-arrow {
+  color: var(--gray-500);
+}
+
+.edit-new-value {
+  color: var(--success-color);
+  font-weight: 500;
+}
+
+/* ===================== Availability ===================== */
+
+/* Modal */
+.avail-modal {
+  max-width: 540px;
+}
+
+.avail-modal h2 {
+  margin-bottom: 1rem;
+}
+
+/* Week navigation */
+.avail-week-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.avail-week-label {
+  font-weight: 600;
+  font-size: 1rem;
+  min-width: 130px;
+  text-align: center;
+}
+
+/* 7-day grid */
+.avail-week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.avail-day-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.5rem 0.25rem;
+  min-height: 70px;
+  min-width: 0;
+  background: var(--gray-50);
+  border: 2px solid var(--gray-200);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.avail-day-card:hover {
+  border-color: var(--primary-color);
+  background: rgba(37, 99, 235, 0.04);
+  transform: none;
+}
+
+.avail-day-card.has-slots {
+  border-color: var(--success-color);
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.avail-day-card.is-today {
+  box-shadow: 0 0 0 2px var(--primary-color);
+}
+
+.avail-day-name {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--gray-500);
+}
+
+.avail-day-date {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.avail-day-summary {
+  font-size: 0.65rem;
+  color: var(--success-color);
+  font-weight: 600;
+  text-align: center;
+  word-break: break-all;
+}
+
+.avail-day-empty {
+  font-size: 0.85rem;
+  color: var(--gray-300);
+}
+
+/* Day editor */
+.avail-day-editor {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.avail-day-editor h3 {
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  color: var(--gray-800);
+}
+
+.avail-fullday-toggle {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 6px;
+  border: 2px solid var(--gray-300);
+  background: white;
+  color: var(--gray-700);
+  cursor: pointer;
+  margin-bottom: 0.75rem;
+  transition: all 0.2s;
+}
+
+.avail-fullday-toggle.active {
+  border-color: var(--success-color);
+  background: var(--success-color);
+  color: white;
+}
+
+/* Slots list */
+.avail-slots-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.avail-slot-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.avail-slot-row input[type="time"] {
+  flex: 1;
+  min-height: 40px;
+  padding: 0.5rem;
+  border: 1px solid var(--gray-300);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.avail-slot-separator {
+  font-weight: 600;
+  color: var(--gray-500);
+}
+
+.avail-remove-slot {
+  width: 32px !important;
+  min-width: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 !important;
+  font-size: 1.1rem;
+}
+
+/* Day editor actions */
+.avail-day-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.avail-close {
+  display: flex;
+  justify-content: center;
+}
+
+.avail-close button {
+  width: 100%;
+}
+
+/* ===================== Availability Preview in OrderForm ===================== */
+
+.avail-preview {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 6px;
+}
+
+.avail-preview-empty {
+  color: var(--gray-500);
+  font-size: 0.85rem;
+  font-style: italic;
+  background: var(--gray-50);
+  border-color: var(--gray-200);
+}
+
+.avail-preview-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--success-color);
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.avail-preview-person {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.15rem 0;
+  font-size: 0.85rem;
+}
+
+.avail-preview-name {
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.avail-preview-slots {
+  color: var(--gray-600);
+}
+
+/* ===================== Availability responsive ===================== */
+@media (max-width: 400px) {
+  .avail-week-grid {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.2rem;
+  }
+
+  .avail-day-card {
+    padding: 0.35rem 0.15rem;
+    min-height: 60px;
+  }
+
+  .avail-day-name {
+    font-size: 0.6rem;
+  }
+
+  .avail-day-date {
+    font-size: 0.65rem;
+  }
+
+  .avail-day-summary {
+    font-size: 0.55rem;
   }
 }

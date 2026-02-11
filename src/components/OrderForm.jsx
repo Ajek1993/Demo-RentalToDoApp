@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useAvailability } from '../hooks/useAvailability'
 
 export function OrderForm({ onSubmit, initialData, onCancel }) {
   const [formData, setFormData] = useState({
@@ -10,6 +11,16 @@ export function OrderForm({ onSubmit, initialData, onCancel }) {
   })
   const [errors, setErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
+  const [dateAvailability, setDateAvailability] = useState([])
+  const { fetchDateAvailability } = useAvailability()
+
+  useEffect(() => {
+    if (formData.date) {
+      fetchDateAvailability(formData.date).then(setDateAvailability)
+    } else {
+      setDateAvailability([])
+    }
+  }, [formData.date])
 
   function handleChange(e) {
     const { name, value } = e.target
@@ -81,6 +92,29 @@ export function OrderForm({ onSubmit, initialData, onCancel }) {
           disabled={submitting}
         />
         {errors.date && <span className="error">{errors.date}</span>}
+        {formData.date && dateAvailability.length > 0 && (
+          <div className="avail-preview">
+            <span className="avail-preview-label">Dostepni:</span>
+            {dateAvailability.map((person, i) => {
+              const slotsText = person.slots.some(s => s.is_full_day)
+                ? 'caly dzien'
+                : person.slots.map(s =>
+                    `${s.start_time?.substring(0, 5)}-${s.end_time?.substring(0, 5)}`
+                  ).join(', ')
+              return (
+                <div key={i} className="avail-preview-person">
+                  <span className="avail-preview-name">{person.name}</span>
+                  <span className="avail-preview-slots">{slotsText}</span>
+                </div>
+              )
+            })}
+          </div>
+        )}
+        {formData.date && dateAvailability.length === 0 && (
+          <div className="avail-preview avail-preview-empty">
+            Brak zgloszonej dyspozycyjnosci na ten dzien
+          </div>
+        )}
       </div>
 
       <div className="form-group">

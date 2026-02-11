@@ -6,12 +6,14 @@ import { usePushNotifications } from './hooks/usePushNotifications'
 import { LoginForm } from './components/LoginForm'
 import { OrderList } from './components/OrderList'
 import { OfflineBanner } from './components/OfflineBanner'
+import { AvailabilityManager } from './components/AvailabilityManager'
 
 function App() {
   const { user, profile, loading, signOut } = useAuth()
   const isOnline = useOnlineStatus()
   const { subscribed, supported, subscribe, unsubscribe, loading: pushLoading } = usePushNotifications()
   const [showPushSettings, setShowPushSettings] = useState(false)
+  const [showAvailability, setShowAvailability] = useState(false)
 
   // Automatyczna subskrypcja przy pierwszym zalogowaniu
   useEffect(() => {
@@ -94,6 +96,14 @@ function App() {
           <h1>Witaj, {profile?.name || 'Użytkownik'}</h1>
         </div>
         <div className="header-right">
+          <button
+            onClick={() => setShowAvailability(true)}
+            className="btn-icon"
+            title="Dyspozycyjnosc"
+            disabled={!isOnline}
+          >
+            📅
+          </button>
           {supported && (
             <button
               onClick={togglePushSettings}
@@ -158,6 +168,10 @@ function App() {
             )}
           </div>
         </div>
+      )}
+
+      {showAvailability && (
+        <AvailabilityManager onClose={() => setShowAvailability(false)} />
       )}
 
       <OrderList currentUser={user} />

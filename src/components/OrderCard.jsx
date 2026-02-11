@@ -3,16 +3,19 @@ import { supabase } from '../lib/supabase'
 import { AssignmentHistory } from './AssignmentHistory'
 import { useOnlineStatus } from './OfflineBanner'
 
-export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, onRestore, onAssign, onUnassign, fetchAssignments }) {
+export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, onRestore, onAssign, onUnassign, fetchAssignments, fetchOrderEdits }) {
   const isOnline = useOnlineStatus()
   const [assignments, setAssignments] = useState([])
+  const [edits, setEdits] = useState([])
   const [allUsers, setAllUsers] = useState([])
   const [showAssignDropdown, setShowAssignDropdown] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
   const [showActionsModal, setShowActionsModal] = useState(false)
+  const [showNotesPopup, setShowNotesPopup] = useState(false)
 
   useEffect(() => {
     loadAssignments()
+    loadEdits()
     loadAllUsers()
 
     // Real-time subscription dla assignments tego zlecenia
@@ -27,8 +30,19 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
           filter: `order_id=eq.${order.id}`
         },
         () => {
-          // Odśwież assignments gdy coś się zmieni
           loadAssignments()
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'order_edits',
+          filter: `order_id=eq.${order.id}`
+        },
+        () => {
+          loadEdits()
         }
       )
       .subscribe()
@@ -41,6 +55,11 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
   async function loadAssignments() {
     const { data } = await fetchAssignments(order.id)
     setAssignments(data)
+  }
+
+  async function loadEdits() {
+    const { data } = await fetchOrderEdits(order.id)
+    setEdits(data)
   }
 
   async function loadAllUsers() {
@@ -127,11 +146,25 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
   return (
     <>
       <div className={`order-card status-${order.status}`} onClick={handleCardClick}>
-        {activeAssignments.length > 0 && activeAssignments[0] && (
-          <div className="order-assigned-first">
-            <span className="first-assigned-badge">
-              {activeAssignments[0].user_profile?.name || 'Nieznany'}
-            </span>
+        {(activeAssignments.length > 0 || order.notes) && (
+          <div className="order-top-row">
+            {activeAssignments.length > 0 && activeAssignments[0] && (
+              <span className="first-assigned-badge">
+                {activeAssignments[0].user_profile?.name || 'Nieznany'}
+              </span>
+            )}
+            {order.notes && (
+              <button
+                className="btn-notes-info"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowNotesPopup(!showNotesPopup)
+                }}
+                title="Notatki"
+              >
+                i
+              </button>
+            )}
           </div>
         )}
 
@@ -180,7 +213,16 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
       </div>
 
       {order.notes && (
-        <div className="order-notes">{order.notes}</div>
+        <>
+          <div className="order-notes order-notes-desktop">{order.notes}</div>
+          {showNotesPopup && (
+            <div className="notes-popup" onClick={(e) => e.stopPropagation()}>
+              <div className="notes-popup-content">
+                {order.notes}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       <div className="assignment-section" onClick={(e) => e.stopPropagation()}>
@@ -240,7 +282,7 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
             )}
           </div>
 
-          {activeAssignments.length > 0 && (
+          {(activeAssignments.length > 0 || edits.length > 0) && (
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -257,6 +299,7 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
           <AssignmentHistory
             assignments={assignments}
             currentUserId={currentUserId}
+            edits={edits}
           />
         )}
       </div>
