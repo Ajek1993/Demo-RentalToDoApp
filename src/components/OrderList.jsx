@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { useOrders } from '../hooks/useOrders'
 import { OrderCard } from './OrderCard'
 import { OrderForm } from './OrderForm'
@@ -66,6 +66,15 @@ export function OrderList({ currentUser }) {
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [collapsedGroups, setCollapsedGroups] = useState(new Set())
+  const [showSearch, setShowSearch] = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
+  const searchInputRef = useRef(null)
+
+  useEffect(() => {
+    if (showSearch && searchInputRef.current) {
+      searchInputRef.current.focus()
+    }
+  }, [showSearch])
 
   const toggleGroup = useCallback((groupKey) => {
     setCollapsedGroups(prev => {
@@ -104,6 +113,10 @@ export function OrderList({ currentUser }) {
     if (dateTo) {
       result = result.filter(order => order.date <= dateTo)
     }
+    result.sort((a, b) => {
+      if (a.date !== b.date) return (a.date || '').localeCompare(b.date || '')
+      return (a.time || '').localeCompare(b.time || '')
+    })
     return result
   }, [orders, activeTab, showOnlyMine, myAssignedOrderIds, searchQuery, dateFrom, dateTo])
 
@@ -200,57 +213,78 @@ export function OrderList({ currentUser }) {
         </button>
       </div>
 
-      <div className="filter-bar">
+      <div className="toolbar">
         <button
-          className={`filter-chip ${showOnlyMine ? 'active' : ''}`}
-          onClick={() => setShowOnlyMine(prev => !prev)}
+          className={`toolbar-icon-btn ${showFilters ? 'active' : ''} ${(showOnlyMine || dateFrom || dateTo) ? 'has-active-filter' : ''}`}
+          onClick={() => setShowFilters(prev => !prev)}
+          title="Filtry"
         >
-          Tylko moje
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
         </button>
-        <div className="search-wrapper">
-          <input
-            type="text"
-            className="search-input"
-            placeholder="Szukaj..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
+        {showSearch ? (
+          <div className="search-wrapper search-expanded">
+            <input
+              ref={searchInputRef}
+              type="text"
+              className="search-input"
+              placeholder="Szukaj..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onBlur={() => {
+                if (!searchQuery) setShowSearch(false)
+              }}
+            />
             <button
               className="search-clear"
-              onClick={() => setSearchQuery('')}
+              onClick={() => { setSearchQuery(''); setShowSearch(false) }}
+            >
+              ✕
+            </button>
+          </div>
+        ) : (
+          <button
+            className={`toolbar-icon-btn ${searchQuery ? 'has-active-filter' : ''}`}
+            onClick={() => setShowSearch(true)}
+            title="Szukaj"
+            style={{ marginLeft: 'auto' }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+        )}
+      </div>
+
+      {showFilters && (
+        <div className="filter-panel">
+          <button
+            className={`filter-chip ${showOnlyMine ? 'active' : ''}`}
+            onClick={() => setShowOnlyMine(prev => !prev)}
+          >
+            Moje
+          </button>
+          <label className="date-range-label">Od</label>
+          <input
+            type="date"
+            className="date-range-input"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+          />
+          <label className="date-range-label">Do</label>
+          <input
+            type="date"
+            className="date-range-input"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+          />
+          {(dateFrom || dateTo) && (
+            <button
+              className="filter-chip"
+              onClick={() => { setDateFrom(''); setDateTo('') }}
             >
               ✕
             </button>
           )}
         </div>
-      </div>
-
-      {/* Filtr zakresu dat */}
-      <div className="date-range-bar">
-        <label className="date-range-label">Od</label>
-        <input
-          type="date"
-          className="date-range-input"
-          value={dateFrom}
-          onChange={(e) => setDateFrom(e.target.value)}
-        />
-        <label className="date-range-label">Do</label>
-        <input
-          type="date"
-          className="date-range-input"
-          value={dateTo}
-          onChange={(e) => setDateTo(e.target.value)}
-        />
-        {(dateFrom || dateTo) && (
-          <button
-            className="filter-chip"
-            onClick={() => { setDateFrom(''); setDateTo('') }}
-          >
-            ✕
-          </button>
-        )}
-      </div>
+      )}
 
       <div className="orders-container">
         {filteredOrders.length === 0 ? (

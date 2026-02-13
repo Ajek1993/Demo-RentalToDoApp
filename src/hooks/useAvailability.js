@@ -59,8 +59,9 @@ export function useAvailability() {
         user_id: user.id,
         date,
         is_full_day: s.is_full_day || false,
-        start_time: s.is_full_day ? null : s.start_time,
-        end_time: s.is_full_day ? null : s.end_time
+        is_unavailable: s.is_unavailable || false,
+        start_time: (s.is_full_day || s.is_unavailable) ? null : s.start_time,
+        end_time: (s.is_full_day || s.is_unavailable) ? null : s.end_time
       }))
 
       const { error } = await supabase

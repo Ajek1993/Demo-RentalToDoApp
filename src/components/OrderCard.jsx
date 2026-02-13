@@ -146,27 +146,44 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
   return (
     <>
       <div className={`order-card status-${order.status}`} onClick={handleCardClick}>
-        {(activeAssignments.length > 0 || order.notes) && (
-          <div className="order-top-row">
-            {activeAssignments.length > 0 && activeAssignments[0] && (
+        <div className="order-top-row">
+            {activeAssignments.length > 0 && activeAssignments[0] ? (
               <span className="first-assigned-badge">
                 {activeAssignments[0].user_profile?.name || 'Nieznany'}
               </span>
-            )}
-            {order.notes && (
-              <button
-                className="btn-notes-info"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setShowNotesPopup(!showNotesPopup)
-                }}
-                title="Notatki"
-              >
-                i
-              </button>
-            )}
+            ) : order.status === 'active' ? (
+              <span className="unassigned-badge">Nieprzydzielone</span>
+            ) : null}
+            <div className="top-row-icons">
+              {(assignments.length > 0 || edits.length > 0) && (
+                <button
+                  className="btn-history-icon"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setShowHistory(!showHistory)
+                  }}
+                  title="Historia"
+                >
+                  📜
+                  {activeAssignments.length > 0 && (
+                    <span className="history-badge">{activeAssignments.length}</span>
+                  )}
+                </button>
+              )}
+              {order.notes && (
+                <button
+                  className="btn-notes-info"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setShowNotesPopup(!showNotesPopup)
+                  }}
+                  title="Notatki"
+                >
+                  i
+                </button>
+              )}
+            </div>
           </div>
-        )}
 
         <div className="order-main-row">
         <div className="order-info">
@@ -282,17 +299,6 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
             )}
           </div>
 
-          {(activeAssignments.length > 0 || edits.length > 0) && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                setShowHistory(!showHistory)
-              }}
-              className="btn-compact btn-secondary"
-            >
-              Historia ({activeAssignments.length})
-            </button>
-          )}
         </div>
 
         {showHistory && (

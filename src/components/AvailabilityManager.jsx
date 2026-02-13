@@ -57,12 +57,15 @@ export function AvailabilityManager({ onClose }) {
     const existing = weekData[dateStr] || []
 
     if (existing.length === 0) {
-      setDaySlots([{ is_full_day: false, start_time: '08:00', end_time: '16:00' }])
+      setDaySlots([{ is_full_day: false, is_unavailable: false, start_time: '08:00', end_time: '16:00' }])
+    } else if (existing.some(s => s.is_unavailable)) {
+      setDaySlots([{ is_full_day: false, is_unavailable: true, start_time: '', end_time: '' }])
     } else if (existing.some(s => s.is_full_day)) {
-      setDaySlots([{ is_full_day: true, start_time: '', end_time: '' }])
+      setDaySlots([{ is_full_day: true, is_unavailable: false, start_time: '', end_time: '' }])
     } else {
       setDaySlots(existing.map(s => ({
         is_full_day: false,
+        is_unavailable: false,
         start_time: s.start_time?.substring(0, 5) || '08:00',
         end_time: s.end_time?.substring(0, 5) || '16:00'
       })))
@@ -73,9 +76,18 @@ export function AvailabilityManager({ onClose }) {
   const handleToggleFullDay = () => {
     const isCurrentlyFull = daySlots.length === 1 && daySlots[0].is_full_day
     if (isCurrentlyFull) {
-      setDaySlots([{ is_full_day: false, start_time: '08:00', end_time: '16:00' }])
+      setDaySlots([{ is_full_day: false, is_unavailable: false, start_time: '08:00', end_time: '16:00' }])
     } else {
-      setDaySlots([{ is_full_day: true, start_time: '', end_time: '' }])
+      setDaySlots([{ is_full_day: true, is_unavailable: false, start_time: '', end_time: '' }])
+    }
+  }
+
+  const handleToggleUnavailable = () => {
+    const isCurrentlyUnavailable = daySlots.length === 1 && daySlots[0].is_unavailable
+    if (isCurrentlyUnavailable) {
+      setDaySlots([{ is_full_day: false, is_unavailable: false, start_time: '08:00', end_time: '16:00' }])
+    } else {
+      setDaySlots([{ is_full_day: false, is_unavailable: true, start_time: '', end_time: '' }])
     }
   }
 
@@ -100,7 +112,7 @@ export function AvailabilityManager({ onClose }) {
 
     // Filtruj puste sloty
     const validSlots = daySlots.filter(s =>
-      s.is_full_day || (s.start_time && s.end_time)
+      s.is_full_day || s.is_unavailable || (s.start_time && s.end_time)
     )
 
     const { error } = await saveDaySlots(dateStr, validSlots)
@@ -122,11 +134,13 @@ export function AvailabilityManager({ onClose }) {
   }
 
   const isFullDay = daySlots.length === 1 && daySlots[0].is_full_day
+  const isUnavailable = daySlots.length === 1 && daySlots[0].is_unavailable
 
   const getDaySummary = (date) => {
     const dateStr = toDateStr(date)
     const slots = weekData[dateStr] || []
     if (slots.length === 0) return null
+    if (slots.some(s => s.is_unavailable)) return 'Brak'
     if (slots.some(s => s.is_full_day)) return 'Cały dzień'
     return slots.map(s =>
       `${s.start_time?.substring(0, 5)}-${s.end_time?.substring(0, 5)}`
@@ -170,13 +184,13 @@ export function AvailabilityManager({ onClose }) {
               return (
                 <button
                   key={i}
-                  className={`avail-day-card ${summary ? 'has-slots' : ''} ${isToday ? 'is-today' : ''}`}
+                  className={`avail-day-card ${summary === 'Brak' ? 'is-unavailable' : summary ? 'has-slots' : ''} ${isToday ? 'is-today' : ''}`}
                   onClick={() => openDayEditor(date)}
                 >
                   <span className="avail-day-name">{DAY_NAMES[i]}</span>
                   <span className="avail-day-date">{formatShortDate(date)}</span>
                   {summary ? (
-                    <span className="avail-day-summary">{summary}</span>
+                    <span className={`avail-day-summary ${summary === 'Brak' ? 'unavailable' : ''}`}>{summary}</span>
                   ) : (
                     <span className="avail-day-empty">-</span>
                   )}
@@ -190,14 +204,22 @@ export function AvailabilityManager({ onClose }) {
           <div className="avail-day-editor">
             <h3>{DAY_NAMES[editingDay.getDay() === 0 ? 6 : editingDay.getDay() - 1]} {formatShortDate(editingDay)}</h3>
 
-            <button
-              className={`avail-fullday-toggle ${isFullDay ? 'active' : ''}`}
-              onClick={handleToggleFullDay}
-            >
-              Cały dzień
-            </button>
+            <div className="avail-toggles">
+              <button
+                className={`avail-fullday-toggle ${isFullDay ? 'active' : ''}`}
+                onClick={handleToggleFullDay}
+              >
+                Cały dzień
+              </button>
+              <button
+                className={`avail-fullday-toggle ${isUnavailable ? 'active unavailable' : ''}`}
+                onClick={handleToggleUnavailable}
+              >
+                Brak
+              </button>
+            </div>
 
-            {!isFullDay && (
+            {!isFullDay && !isUnavailable && (
               <div className="avail-slots-list">
                 {daySlots.map((slot, index) => (
                   <div key={index} className="avail-slot-row">

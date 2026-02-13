@@ -96,7 +96,10 @@ export function OrderForm({ onSubmit, initialData, onCancel }) {
           <div className="avail-preview">
             <span className="avail-preview-label">Dostępni:</span>
             {dateAvailability.map((person, i) => {
-              const slotsText = person.slots.some(s => s.is_full_day)
+              const isUnavail = person.slots.some(s => s.is_unavailable)
+              const slotsText = isUnavail
+                ? 'brak'
+                : person.slots.some(s => s.is_full_day)
                 ? 'cały dzień'
                 : person.slots.map(s =>
                     `${s.start_time?.substring(0, 5)}-${s.end_time?.substring(0, 5)}`
@@ -104,7 +107,7 @@ export function OrderForm({ onSubmit, initialData, onCancel }) {
               return (
                 <div key={i} className="avail-preview-person">
                   <span className="avail-preview-name">{person.name}</span>
-                  <span className="avail-preview-slots">{slotsText}</span>
+                  <span className={`avail-preview-slots ${isUnavail ? 'unavailable' : ''}`}>{slotsText}</span>
                 </div>
               )
             })}
