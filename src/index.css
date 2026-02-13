@@ -765,6 +765,22 @@ button.btn-primary {
   gap: 1rem;
 }
 
+.quick-paste-group {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .quick-paste-group {
+    display: flex;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--gray-200);
+  }
+
+  .quick-paste-group input {
+    border-style: dashed;
+  }
+}
+
 .form-group {
   display: flex;
   flex-direction: column;

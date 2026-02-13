@@ -65,8 +65,34 @@ export function OrderForm({ onSubmit, initialData, onCancel }) {
     }
   }
 
+  function handleQuickPaste(e) {
+    const value = e.target.value.trim()
+    const match = value.match(/^(\d{2})-(\d{2})-(\d{4})\s+(\d{2}:\d{2})$/)
+    if (match) {
+      const [, day, month, year, time] = match
+      const date = `${year}-${month}-${day}`
+      setFormData(prev => ({ ...prev, date, time }))
+      setErrors(prev => ({ ...prev, date: null, time: null }))
+      e.target.value = ''
+    }
+  }
+
   return (
     <form onSubmit={handleSubmit} className="order-form">
+      <div className="form-group quick-paste-group">
+        <label htmlFor="quickPaste">Szybkie wklejanie daty</label>
+        <input
+          type="text"
+          id="quickPaste"
+          onChange={handleQuickPaste}
+          onPaste={(e) => {
+            setTimeout(() => handleQuickPaste(e), 0)
+          }}
+          placeholder="Wklej np. 14-02-2026 18:00"
+          disabled={submitting}
+        />
+      </div>
+
       <div className="form-group">
         <label htmlFor="plate">Numer rejestracyjny *</label>
         <input
