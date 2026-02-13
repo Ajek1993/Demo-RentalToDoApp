@@ -7,6 +7,7 @@ import { LoginForm } from './components/LoginForm'
 import { OrderList } from './components/OrderList'
 import { OfflineBanner } from './components/OfflineBanner'
 import { AvailabilityManager } from './components/AvailabilityManager'
+import { FeedbackModal } from './components/FeedbackModal'
 
 function useDarkMode() {
   const [dark, setDark] = useState(() => {
@@ -29,6 +30,7 @@ function App() {
   const { subscribed, supported, subscribe, unsubscribe, loading: pushLoading } = usePushNotifications()
   const [showPushSettings, setShowPushSettings] = useState(false)
   const [showAvailability, setShowAvailability] = useState(false)
+  const [showFeedback, setShowFeedback] = useState(false)
   const [darkMode, toggleDarkMode] = useDarkMode()
   const [showMenu, setShowMenu] = useState(false)
   const [newPassword, setNewPassword] = useState('')
@@ -231,6 +233,14 @@ function App() {
                     Powiadomienia
                   </button>
                 )}
+                <button
+                  className="header-menu-item"
+                  onClick={() => { setShowFeedback(true); setShowMenu(false) }}
+                  disabled={!isOnline}
+                >
+                  <span className="header-menu-icon">💬</span>
+                  Feedback
+                </button>
                 <div className="header-menu-divider"></div>
                 <button
                   className="header-menu-item header-menu-item-danger"
@@ -297,6 +307,10 @@ function App() {
 
       {showAvailability && (
         <AvailabilityManager onClose={() => setShowAvailability(false)} />
+      )}
+
+      {showFeedback && (
+        <FeedbackModal userId={user.id} onClose={() => setShowFeedback(false)} />
       )}
 
       <OrderList currentUser={user} />
