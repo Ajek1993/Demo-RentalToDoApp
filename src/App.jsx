@@ -24,13 +24,17 @@ function useDarkMode() {
 }
 
 function App() {
-  const { user, profile, loading, signOut } = useAuth()
+  const { user, profile, loading, signOut, passwordRecovery, updatePassword } = useAuth()
   const isOnline = useOnlineStatus()
   const { subscribed, supported, subscribe, unsubscribe, loading: pushLoading } = usePushNotifications()
   const [showPushSettings, setShowPushSettings] = useState(false)
   const [showAvailability, setShowAvailability] = useState(false)
   const [darkMode, toggleDarkMode] = useDarkMode()
   const [showMenu, setShowMenu] = useState(false)
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+  const [passwordLoading, setPasswordLoading] = useState(false)
   const menuRef = useRef(null)
 
   // Automatyczna subskrypcja przy pierwszym zalogowaniu
@@ -105,6 +109,72 @@ function App() {
 
   if (!user) {
     return <LoginForm />
+  }
+
+  if (passwordRecovery) {
+    const handleSetNewPassword = async (e) => {
+      e.preventDefault()
+      setPasswordError('')
+
+      if (newPassword.length < 6) {
+        setPasswordError('Hasło musi mieć co najmniej 6 znaków')
+        return
+      }
+      if (newPassword !== confirmPassword) {
+        setPasswordError('Hasła nie są identyczne')
+        return
+      }
+
+      setPasswordLoading(true)
+      try {
+        const { error } = await updatePassword(newPassword)
+        if (error) throw error
+        toast.success('Hasło zostało zmienione!')
+        setNewPassword('')
+        setConfirmPassword('')
+      } catch (err) {
+        setPasswordError(err.message || 'Wystąpił błąd')
+      } finally {
+        setPasswordLoading(false)
+      }
+    }
+
+    return (
+      <div className="auth-container">
+        <div className="auth-card">
+          <div className="auth-message-icon">🔑</div>
+          <h1>Ustaw nowe hasło</h1>
+          <form onSubmit={handleSetNewPassword}>
+            <div className="auth-field">
+              <label>Nowe hasło:</label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                minLength={6}
+                required
+              />
+            </div>
+            <div className="auth-field">
+              <label>Powtórz hasło:</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                minLength={6}
+                required
+              />
+            </div>
+            {passwordError && (
+              <div className="auth-error">{passwordError}</div>
+            )}
+            <button type="submit" disabled={passwordLoading} className="auth-btn">
+              {passwordLoading ? 'Zapisywanie...' : 'Zapisz nowe hasło'}
+            </button>
+          </form>
+        </div>
+      </div>
+    )
   }
 
   return (

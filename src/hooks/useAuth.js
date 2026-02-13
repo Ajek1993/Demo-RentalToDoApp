@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
+const PRODUCTION_URL = 'https://to-do-app-abacus.vercel.app/'
+
 export function useAuth() {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [passwordRecovery, setPasswordRecovery] = useState(false)
 
   useEffect(() => {
     // Pobierz aktualną sesję
@@ -18,7 +21,10 @@ export function useAuth() {
     })
 
     // Nasłuchuj zmian w auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setPasswordRecovery(true)
+      }
       setUser(session?.user ?? null)
       if (session?.user) {
         fetchProfile(session.user.id)
@@ -56,7 +62,8 @@ export function useAuth() {
         options: {
           data: {
             name: name
-          }
+          },
+          emailRedirectTo: PRODUCTION_URL
         }
       })
 
@@ -90,12 +97,42 @@ export function useAuth() {
     }
   }
 
+  async function resetPassword(email) {
+    try {
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: PRODUCTION_URL
+      })
+
+      if (error) throw error
+      return { data, error: null }
+    } catch (error) {
+      return { data: null, error }
+    }
+  }
+
+  async function updatePassword(newPassword) {
+    try {
+      const { data, error } = await supabase.auth.updateUser({
+        password: newPassword
+      })
+
+      if (error) throw error
+      setPasswordRecovery(false)
+      return { data, error: null }
+    } catch (error) {
+      return { data: null, error }
+    }
+  }
+
   return {
     user,
     profile,
     loading,
+    passwordRecovery,
     signUp,
     signIn,
-    signOut
+    signOut,
+    resetPassword,
+    updatePassword
   }
 }

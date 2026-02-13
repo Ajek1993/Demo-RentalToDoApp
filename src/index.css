@@ -1269,6 +1269,147 @@ button.btn-primary {
   margin-bottom: 1rem;
 }
 
+/* ===================== Auth Forms ===================== */
+.auth-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1rem;
+  background: var(--gray-50);
+}
+
+.auth-card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.auth-card h1 {
+  font-size: 1.5rem;
+  color: var(--gray-900);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.auth-field {
+  margin-bottom: 1rem;
+}
+
+.auth-field label {
+  display: block;
+  font-weight: 500;
+  color: var(--gray-700);
+  font-size: 0.9rem;
+  margin-bottom: 0.35rem;
+}
+
+.auth-field input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.75rem;
+  border: 1px solid var(--gray-300);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.auth-field input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.auth-error {
+  color: var(--danger-color);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(239, 68, 68, 0.08);
+  border-radius: 6px;
+}
+
+.auth-btn {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-forgot {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.auth-switch {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.auth-link {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-decoration: underline;
+  padding: 0.25rem;
+  min-height: auto;
+  min-width: auto;
+}
+
+.auth-link:hover {
+  opacity: 0.8;
+  transform: none;
+}
+
+.auth-message-icon {
+  font-size: 3rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.auth-message {
+  color: var(--gray-700);
+  font-size: 1rem;
+  line-height: 1.6;
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+
+.auth-message strong {
+  color: var(--gray-900);
+}
+
+.auth-message-hint {
+  color: var(--gray-500);
+  font-size: 0.85rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.auth-description {
+  color: var(--gray-600);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
 @media (min-width: 640px) {
   .orders-container {
     padding: 1.5rem;
