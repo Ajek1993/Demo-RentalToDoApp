@@ -124,11 +124,14 @@ export function useAuth() {
     }
   }
 
+  const isAdmin = profile?.role === 'admin'
+
   return {
     user,
     profile,
     loading,
     passwordRecovery,
+    isAdmin,
     signUp,
     signIn,
     signOut,
