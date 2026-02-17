@@ -52,7 +52,7 @@ function groupOrdersByDate(orders) {
   return groups
 }
 
-export function OrderList({ currentUser }) {
+export function OrderList({ currentUser, isAdmin }) {
   const { orders, loading, myAssignedOrderIds, createOrder, updateOrder, deleteOrder, completeOrder, restoreOrder, assignToOrder, unassignFromOrder, fetchAssignments, fetchOrderEdits } = useOrders()
   const isOnline = useOnlineStatus()
   const [activeTab, setActiveTab] = useState('active')
@@ -359,6 +359,7 @@ export function OrderList({ currentUser }) {
               onSubmit={handleSubmitOrder}
               initialData={editingOrder}
               onCancel={handleCloseModal}
+              isAdmin={isAdmin}
             />
           </div>
         </div>

@@ -191,11 +191,26 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
           <span className="order-time">{formatTime(order.time)}</span>
           <span className="order-separator">•</span>
           <span className="order-plate">{order.plate}</span>
+          {order.insurance_company && (
+            <span className="insurance-badge">{order.insurance_company}</span>
+          )}
           <span className="order-separator">•</span>
           <span className="order-location">{order.location}</span>
         </div>
 
         <div className="order-actions">
+          {order.insurance_company && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                window.open(`/insurance/${order.insurance_company}.pdf`, '_blank')
+              }}
+              className="btn-icon btn-print-oc"
+              title={`Drukuj OC - ${order.insurance_company}`}
+            >
+              🖨️
+            </button>
+          )}
           {order.status === 'active' && (
             <>
               <button onClick={() => onComplete(order.id)} className="btn-complete btn-success" disabled={!isOnline}>
@@ -316,6 +331,14 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
         <div className="modal-content modal-actions-menu" onClick={(e) => e.stopPropagation()}>
           <h3 className="modal-title">{order.plate}</h3>
           <div className="modal-actions-list">
+            {order.insurance_company && (
+              <button
+                onClick={() => handleActionClick(() => window.open(`/insurance/${order.insurance_company}.pdf`, '_blank'))}
+                className="modal-action-item btn-print-oc-modal"
+              >
+                🖨️ Drukuj OC ({order.insurance_company})
+              </button>
+            )}
             {order.status === 'active' && (
               <>
                 <button
