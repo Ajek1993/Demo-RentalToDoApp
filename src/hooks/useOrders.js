@@ -230,7 +230,7 @@ export function useOrders() {
     }
   }
 
-  async function createOrder({ plate, date, time, location, notes }) {
+  async function createOrder({ plate, date, time, location, notes, insurance_company }) {
     try {
       const { data: { user } } = await supabase.auth.getUser()
 
@@ -242,6 +242,7 @@ export function useOrders() {
           time,
           location,
           notes,
+          insurance_company: insurance_company || null,
           status: 'active',
           created_by: user.id
         }])
@@ -271,7 +272,7 @@ export function useOrders() {
 
       // Zapisz diff do order_edits
       if (oldOrder) {
-        const trackFields = ['plate', 'date', 'time', 'location', 'notes']
+        const trackFields = ['plate', 'date', 'time', 'location', 'notes', 'insurance_company']
         const changes = {}
         for (const field of trackFields) {
           const oldVal = oldOrder[field] ?? ''

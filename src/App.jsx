@@ -25,7 +25,7 @@ function useDarkMode() {
 }
 
 function App() {
-  const { user, profile, loading, signOut, passwordRecovery, updatePassword } = useAuth()
+  const { user, profile, loading, signOut, passwordRecovery, updatePassword, isAdmin } = useAuth()
   const isOnline = useOnlineStatus()
   const { subscribed, supported, subscribe, unsubscribe, loading: pushLoading } = usePushNotifications()
   const [showPushSettings, setShowPushSettings] = useState(false)
@@ -313,7 +313,7 @@ function App() {
         <FeedbackModal userId={user.id} onClose={() => setShowFeedback(false)} />
       )}
 
-      <OrderList currentUser={user} />
+      <OrderList currentUser={user} isAdmin={isAdmin} />
     </div>
   )
 }

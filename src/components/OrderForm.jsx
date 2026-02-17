@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react'
 import { useAvailability } from '../hooks/useAvailability'
 
-export function OrderForm({ onSubmit, initialData, onCancel }) {
+const INSURANCE_COMPANIES = ['PZU', 'WARTA', 'VIG', 'ALLIANZ', 'TUW', 'INNE']
+
+export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
   const [formData, setFormData] = useState({
     plate: initialData?.plate || '',
     date: initialData?.date || '',
     time: initialData?.time || '',
     location: initialData?.location || '',
-    notes: initialData?.notes || ''
+    notes: initialData?.notes || '',
+    insurance_company: initialData?.insurance_company || null
   })
+  const [ocSprwacy, setOcSprawcy] = useState(!!initialData?.insurance_company)
   const [errors, setErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
   const [dateAvailability, setDateAvailability] = useState([])
@@ -172,6 +176,40 @@ export function OrderForm({ onSubmit, initialData, onCancel }) {
         />
         {errors.location && <span className="error">{errors.location}</span>}
       </div>
+
+      {isAdmin && (
+        <div className="form-group">
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              checked={ocSprwacy}
+              onChange={(e) => {
+                setOcSprawcy(e.target.checked)
+                if (!e.target.checked) {
+                  setFormData(prev => ({ ...prev, insurance_company: null }))
+                } else if (!formData.insurance_company) {
+                  setFormData(prev => ({ ...prev, insurance_company: 'PZU' }))
+                }
+              }}
+              disabled={submitting}
+            />
+            OC sprawcy
+          </label>
+          {ocSprwacy && (
+            <select
+              name="insurance_company"
+              value={formData.insurance_company || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, insurance_company: e.target.value }))}
+              disabled={submitting}
+              className="insurance-select"
+            >
+              {INSURANCE_COMPANIES.map(company => (
+                <option key={company} value={company}>{company}</option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
 
       <div className="form-group">
         <label htmlFor="notes">Notatki</label>

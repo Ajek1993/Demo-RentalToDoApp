@@ -15,6 +15,7 @@ Wewnętrzna aplikacja PWA do zarządzania zleceniami dostaw w wypożyczalni samo
 - **Push notifications** - powiadomienia o nowych zleceniach nawet gdy aplikacja jest zamknięta
 - **Progressive Web App (PWA)** - instalacja na urządzeniu, Service Worker, obsługa offline
 - **Tryb offline** - banner informacyjny i blokada akcji przy braku internetu
+- **OC sprawcy** - admin może przypisać ubezpieczyciela (PZU, WARTA, VIG, ALLIANZ, TUW, INNE) z opcją drukowania dokumentów PDF
 - **Autoryzacja** - logowanie przez Supabase Auth (email/hasło)
 - **Responsywny design** - mobile-first, dostosowany do telefonów i desktopów
 
@@ -26,6 +27,7 @@ Każde zlecenie zawiera:
 - Lokalizacja odbioru
 - Notatki (opcjonalnie)
 - Status (aktywne / ukończone / usunięte)
+- Ubezpieczyciel OC sprawcy (opcjonalnie, tylko admin)
 - Lista przypisanych użytkowników z timestampami
 
 ## Technologie
@@ -101,6 +103,7 @@ Uruchom migracje z folderu `supabase/migrations/` **po kolei** w Supabase SQL Ed
 5. `005_update_push_triggers.sql` - aktualizacja triggerów
 6. `006_order_edits.sql` - historia edycji zleceń
 7. `007_availability.sql` - tabela dyspozycyjności pracowników
+8. `012_insurance_company.sql` - kolumna ubezpieczyciela OC sprawcy w zleceniach
 
 ### 4. Skonfiguruj push notifications
 
