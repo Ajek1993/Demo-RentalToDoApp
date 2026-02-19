@@ -214,140 +214,140 @@ export function OrderList({ currentUser, isAdmin }) {
       </div>
 
       <div className="toolbar">
-        <button
-          className={`toolbar-icon-btn ${showFilters ? 'active' : ''} ${(showOnlyMine || dateFrom || dateTo) ? 'has-active-filter' : ''}`}
-          onClick={() => setShowFilters(prev => !prev)}
-          title="Filtry"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-        </button>
-        {showSearch ? (
-          <div className="search-wrapper search-expanded">
-            <input
-              ref={searchInputRef}
-              type="text"
-              className="search-input"
-              placeholder="Szukaj..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onBlur={() => {
-                if (!searchQuery) setShowSearch(false)
-              }}
-            />
             <button
-              className="search-clear"
-              onClick={() => { setSearchQuery(''); setShowSearch(false) }}
+              className={`toolbar-icon-btn ${showFilters ? 'active' : ''} ${(showOnlyMine || dateFrom || dateTo) ? 'has-active-filter' : ''}`}
+              onClick={() => setShowFilters(prev => !prev)}
+              title="Filtry"
             >
-              ✕
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
             </button>
-          </div>
-        ) : (
-          <button
-            className={`toolbar-icon-btn ${searchQuery ? 'has-active-filter' : ''}`}
-            onClick={() => setShowSearch(true)}
-            title="Szukaj"
-            style={{ marginLeft: 'auto' }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          </button>
-        )}
-      </div>
-
-      {showFilters && (
-        <div className="filter-panel">
-          <button
-            className={`filter-chip ${showOnlyMine ? 'active' : ''}`}
-            onClick={() => setShowOnlyMine(prev => !prev)}
-          >
-            Moje
-          </button>
-          <label className="date-range-label">Od</label>
-          <input
-            type="date"
-            className="date-range-input"
-            value={dateFrom}
-            onChange={(e) => setDateFrom(e.target.value)}
-          />
-          <label className="date-range-label">Do</label>
-          <input
-            type="date"
-            className="date-range-input"
-            value={dateTo}
-            onChange={(e) => setDateTo(e.target.value)}
-          />
-          {(dateFrom || dateTo) && (
-            <button
-              className="filter-chip"
-              onClick={() => { setDateFrom(''); setDateTo('') }}
-            >
-              ✕
-            </button>
-          )}
-        </div>
-      )}
-
-      <div className="orders-container">
-        {filteredOrders.length === 0 ? (
-          <div className="empty-state">
-            <p>
-              {activeTab === 'active' && (showOnlyMine ? 'Brak przypisanych do Ciebie zleceń' : 'Brak aktywnych zleceń')}
-              {activeTab === 'completed' && 'Brak zakończonych zleceń'}
-              {activeTab === 'deleted' && 'Brak usuniętych zleceń'}
-            </p>
-          </div>
-        ) : dateGroups ? (
-          Object.entries(dateGroups).map(([key, group]) => {
-            if (group.orders.length === 0) return null
-            const isCollapsed = collapsedGroups.has(key)
-            return (
-              <div className={`date-group ${key === 'overdue' ? 'date-group-overdue' : ''}`} key={key}>
-                <button className="date-group-header" onClick={() => toggleGroup(key)}>
-                  <span className={`chevron ${isCollapsed ? '' : 'open'}`}>›</span>
-                  <span className="date-group-label">{group.label}</span>
-                  <span className="date-group-count">{group.orders.length}</span>
+            {showSearch ? (
+              <div className="search-wrapper search-expanded">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  className="search-input"
+                  placeholder="Szukaj..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onBlur={() => {
+                    if (!searchQuery) setShowSearch(false)
+                  }}
+                />
+                <button
+                  className="search-clear"
+                  onClick={() => { setSearchQuery(''); setShowSearch(false) }}
+                >
+                  ✕
                 </button>
-                {!isCollapsed && (
-                  <div className="date-group-body">
-                    {group.orders.map(order => (
-                      <OrderCard
-                        key={order.id}
-                        order={order}
-                        currentUserId={currentUser?.id}
-                        onEdit={handleEditOrder}
-                        onComplete={handleCompleteOrder}
-                        onDelete={handleDeleteOrder}
-                        onRestore={handleRestoreOrder}
-                        onAssign={assignToOrder}
-                        onUnassign={unassignFromOrder}
-                        fetchAssignments={fetchAssignments}
-                        fetchOrderEdits={fetchOrderEdits}
-                      />
-                    ))}
-                  </div>
-                )}
               </div>
-            )
-          })
-        ) : (
-          filteredOrders.map(order => (
-            <OrderCard
-              key={order.id}
-              order={order}
-              currentUserId={currentUser?.id}
-              onEdit={handleEditOrder}
-              onComplete={handleCompleteOrder}
-              onDelete={handleDeleteOrder}
-              onRestore={handleRestoreOrder}
-              onAssign={assignToOrder}
-              onUnassign={unassignFromOrder}
-              fetchAssignments={fetchAssignments}
-              fetchOrderEdits={fetchOrderEdits}
-            />
-          ))
-        )}
-      </div>
+            ) : (
+              <button
+                className={`toolbar-icon-btn ${searchQuery ? 'has-active-filter' : ''}`}
+                onClick={() => setShowSearch(true)}
+                title="Szukaj"
+                style={{ marginLeft: 'auto' }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </button>
+            )}
+          </div>
 
-      <button className="fab" onClick={handleAddOrder} title="Dodaj zlecenie" disabled={!isOnline}>
+          {showFilters && (
+            <div className="filter-panel">
+              <button
+                className={`filter-chip ${showOnlyMine ? 'active' : ''}`}
+                onClick={() => setShowOnlyMine(prev => !prev)}
+              >
+                Moje
+              </button>
+              <label className="date-range-label">Od</label>
+              <input
+                type="date"
+                className="date-range-input"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+              />
+              <label className="date-range-label">Do</label>
+              <input
+                type="date"
+                className="date-range-input"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+              />
+              {(dateFrom || dateTo) && (
+                <button
+                  className="filter-chip"
+                  onClick={() => { setDateFrom(''); setDateTo('') }}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          )}
+
+          <div className="orders-container">
+            {filteredOrders.length === 0 ? (
+              <div className="empty-state">
+                <p>
+                  {activeTab === 'active' && (showOnlyMine ? 'Brak przypisanych do Ciebie zleceń' : 'Brak aktywnych zleceń')}
+                  {activeTab === 'completed' && 'Brak zakończonych zleceń'}
+                  {activeTab === 'deleted' && 'Brak usuniętych zleceń'}
+                </p>
+              </div>
+            ) : dateGroups ? (
+              Object.entries(dateGroups).map(([key, group]) => {
+                if (group.orders.length === 0) return null
+                const isCollapsed = collapsedGroups.has(key)
+                return (
+                  <div className={`date-group ${key === 'overdue' ? 'date-group-overdue' : ''}`} key={key}>
+                    <button className="date-group-header" onClick={() => toggleGroup(key)}>
+                      <span className={`chevron ${isCollapsed ? '' : 'open'}`}>›</span>
+                      <span className="date-group-label">{group.label}</span>
+                      <span className="date-group-count">{group.orders.length}</span>
+                    </button>
+                    {!isCollapsed && (
+                      <div className="date-group-body">
+                        {group.orders.map(order => (
+                          <OrderCard
+                            key={order.id}
+                            order={order}
+                            currentUserId={currentUser?.id}
+                            onEdit={handleEditOrder}
+                            onComplete={handleCompleteOrder}
+                            onDelete={handleDeleteOrder}
+                            onRestore={handleRestoreOrder}
+                            onAssign={assignToOrder}
+                            onUnassign={unassignFromOrder}
+                            fetchAssignments={fetchAssignments}
+                            fetchOrderEdits={fetchOrderEdits}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              })
+            ) : (
+              filteredOrders.map(order => (
+                <OrderCard
+                  key={order.id}
+                  order={order}
+                  currentUserId={currentUser?.id}
+                  onEdit={handleEditOrder}
+                  onComplete={handleCompleteOrder}
+                  onDelete={handleDeleteOrder}
+                  onRestore={handleRestoreOrder}
+                  onAssign={assignToOrder}
+                  onUnassign={unassignFromOrder}
+                  fetchAssignments={fetchAssignments}
+                  fetchOrderEdits={fetchOrderEdits}
+                />
+              ))
+            )}
+          </div>
+
+          <button className="fab" onClick={handleAddOrder} title="Dodaj zlecenie" disabled={!isOnline}>
         +
       </button>
 

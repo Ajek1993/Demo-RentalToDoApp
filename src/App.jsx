@@ -7,7 +7,9 @@ import { LoginForm } from './components/LoginForm'
 import { OrderList } from './components/OrderList'
 import { OfflineBanner } from './components/OfflineBanner'
 import { AvailabilityManager } from './components/AvailabilityManager'
+import { AdminAvailabilityView } from './components/AdminAvailabilityView'
 import { FeedbackModal } from './components/FeedbackModal'
+import KursyList from './components/KursyList'
 
 function useDarkMode() {
   const [dark, setDark] = useState(() => {
@@ -31,6 +33,7 @@ function App() {
   const [showPushSettings, setShowPushSettings] = useState(false)
   const [showAvailability, setShowAvailability] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
+  const [showKursy, setShowKursy] = useState(false)
   const [darkMode, toggleDarkMode] = useDarkMode()
   const [showMenu, setShowMenu] = useState(false)
   const [newPassword, setNewPassword] = useState('')
@@ -221,7 +224,15 @@ function App() {
                   disabled={!isOnline}
                 >
                   <span className="header-menu-icon">📅</span>
-                  Dyspozycyjność
+                  {isAdmin ? 'Dyspozycyjność' : 'Moja dyspozycyjność'}
+                </button>
+                <button
+                  className="header-menu-item"
+                  onClick={() => { setShowKursy(true); setShowMenu(false) }}
+                  disabled={!isOnline}
+                >
+                  <span className="header-menu-icon">🚗</span>
+                  Kursy <span className="beta-badge">Beta</span>
                 </button>
                 {supported && (
                   <button
@@ -306,11 +317,23 @@ function App() {
       )}
 
       {showAvailability && (
-        <AvailabilityManager onClose={() => setShowAvailability(false)} />
+        isAdmin ? (
+          <AdminAvailabilityView onClose={() => setShowAvailability(false)} />
+        ) : (
+          <AvailabilityManager onClose={() => setShowAvailability(false)} />
+        )
       )}
 
       {showFeedback && (
         <FeedbackModal userId={user.id} onClose={() => setShowFeedback(false)} />
+      )}
+
+      {showKursy && (
+        <div className="modal-overlay" onClick={() => setShowKursy(false)}>
+          <div className="modal-content kursy-modal" onClick={(e) => e.stopPropagation()}>
+            <KursyList currentUser={user} profile={profile} onClose={() => setShowKursy(false)} />
+          </div>
+        </div>
       )}
 
       <OrderList currentUser={user} isAdmin={isAdmin} />

@@ -328,6 +328,39 @@ export function useOrders() {
 
       if (error) throw error
 
+      // Automatyczne tworzenie kursu dla pierwszego przypisanego
+      try {
+        // Pobierz pierwszego przypisanego (najwcześniejszy assigned_at, aktywny)
+        const { data: assignments } = await supabase
+          .from('assignments')
+          .select('user_id')
+          .eq('order_id', id)
+          .is('unassigned_at', null)
+          .order('assigned_at', { ascending: true })
+          .limit(1)
+
+        const wykonawcaId = assignments?.[0]?.user_id || null
+
+        if (wykonawcaId) {
+          // Utwórz kurs
+          await supabase.from('kursy').insert({
+            user_id: wykonawcaId,
+            wykonawca_id: wykonawcaId,
+            order_id: id,
+            data: data.date,
+            nr_rej: data.plate || '',
+            marka: '',
+            adres: data.location || '',
+            kwota: 0
+          })
+        }
+      } catch (kursError) {
+        // Ignoruj błąd duplikatu (kurs już istnieje dla tego zlecenia)
+        if (!kursError.message?.includes('duplicate') && !kursError.message?.includes('unique')) {
+          console.error('Error creating kurs:', kursError)
+        }
+      }
+
       // Nie trzeba fetchOrders - realtime załatwi aktualizację
       return { data, error: null }
     } catch (error) {

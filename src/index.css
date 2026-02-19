@@ -984,7 +984,7 @@ button.btn-primary {
   position: absolute;
   top: 100%;
   left: 0;
-  right: 0;
+  min-width: 160px;
   margin-top: 0.25rem;
   background: var(--bg-card);
   border: 1px solid var(--gray-300);
@@ -992,7 +992,7 @@ button.btn-primary {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   max-height: 200px;
   overflow-y: auto;
-  z-index: 10;
+  z-index: 100;
 }
 
 .dropdown-item {
@@ -1005,6 +1005,7 @@ button.btn-primary {
   color: var(--gray-900);
   font-size: 0.85rem;
   min-height: 36px;
+  white-space: nowrap;
   transition: background-color 0.2s;
 }
 
@@ -1850,4 +1851,386 @@ button.btn-primary {
 
 .btn-print-oc-modal:hover {
   background: rgba(139, 92, 246, 0.2);
+}
+
+/* ===================== Kursy ===================== */
+
+.kursy-panel {
+  max-width: 700px;
+  background: var(--bg-card);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--gray-200);
+  padding: 32px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: relative;
+}
+
+.kursy-header {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kursy-list {
+  margin-top: 10px;
+  list-style: none;
+  padding: 0;
+  gap: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.kurs-item {
+  padding: 16px 10px 14px 10px;
+  border-radius: 8px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+}
+
+.kurs-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.kurs-edit-btn,
+.kurs-delete-btn {
+  font-size: 0.97em;
+  padding: 6px 14px;
+}
+
+.kurs-delete-btn {
+  background: var(--danger-color);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  transition: background 0.18s;
+}
+.kurs-delete-btn:hover {
+  background: #a12222;
+}
+
+.panel-close {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: none;
+  border: none;
+  font-size: 1.1em;
+  color: var(--gray-400);
+  cursor: pointer;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 7px;
+  transition: background 0.17s;
+  min-width: auto;
+  min-height: auto;
+}
+.panel-close:hover {
+  background: var(--gray-100);
+  color: var(--primary-color);
+}
+
+.period-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: var(--gray-50);
+  border-radius: 8px;
+  border: 1px solid var(--gray-200);
+}
+
+.period-selector label {
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.period-select {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: 1px solid var(--gray-300);
+  background: var(--bg-input);
+  color: var(--gray-900);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: border-color 0.18s;
+}
+
+.period-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.kursy-stats {
+  padding: 12px 14px;
+  background: rgba(37, 99, 235, 0.06);
+  border-radius: 6px;
+  border-left: 3px solid var(--primary-color);
+  font-size: 0.95rem;
+  color: var(--gray-700);
+}
+
+.kursy-stats strong {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+@media (max-width: 500px) {
+  .period-selector {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .period-select {
+    width: 100%;
+  }
+}
+
+.button.secondary {
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--primary-color);
+  border: 1px solid var(--gray-200);
+  font-weight: 500;
+  border-radius: 6px;
+  transition: background 0.17s, color 0.18s;
+}
+.button.secondary:hover {
+  background: rgba(37, 99, 235, 0.15);
+}
+
+.extra-filters {
+  margin: 16px 0 18px 0;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 18px;
+  background: var(--gray-50);
+  border-radius: 8px;
+  padding: 14px 10px 10px 10px;
+  border: 1px solid var(--gray-200);
+  transition: max-height 0.29s cubic-bezier(0.7, 0.3, 0.22, 1), opacity 0.15s;
+  overflow: hidden;
+}
+
+.extra-filters label {
+  font-size: 1em;
+  color: var(--gray-700);
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.extra-filter-input {
+  padding: 11px;
+  border-radius: 5px;
+  border: 1px solid var(--gray-300);
+  background: var(--bg-input);
+  font-size: 1em;
+  margin-top: 2px;
+}
+
+.extra-filter-input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+@media (max-width: 500px) {
+  .extra-filters {
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 3vw;
+  }
+}
+
+/* Kurs Form */
+.kurs-form {
+  padding: 22px 18px 18px 18px;
+  background: var(--bg-card);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--gray-200);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+}
+
+.kurs-form label {
+  font-size: 1rem;
+  color: var(--gray-700);
+  letter-spacing: 0.01em;
+}
+
+.kurs-form input {
+  width: 100%;
+  padding: 11px;
+  font-size: 1rem;
+  border-radius: 5px;
+  background: var(--bg-input);
+  border: 1px solid var(--gray-300);
+  margin-top: 5px;
+  transition: border-color 0.18s;
+  outline: none;
+}
+
+.kurs-form input:focus {
+  border-color: var(--primary-color);
+}
+
+.kurs-form .button {
+  margin-top: 10px;
+}
+
+.kurs-form .error {
+  color: var(--danger-color);
+  font-size: 0.9rem;
+  padding: 0.5rem;
+  background: rgba(239, 68, 68, 0.08);
+  border-radius: 4px;
+}
+
+/* Beta badge */
+.beta-badge {
+  font-size: 0.7em;
+  background: var(--warning-color);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+/* Kursy modal */
+.kursy-modal {
+  max-width: 700px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.kursy-modal .kursy-panel {
+  padding: 0;
+  box-shadow: none;
+  border: none;
+}
+
+/* Admin Availability View */
+.admin-avail-modal {
+  max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.admin-avail-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-avail-mode {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.admin-avail-dates {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.admin-avail-dates label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.admin-avail-results {
+  margin-top: 1rem;
+}
+
+.admin-avail-results h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-bottom: 0.75rem;
+}
+
+.admin-avail-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.admin-avail-list.compact {
+  gap: 0.25rem;
+}
+
+.admin-avail-person {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0.75rem;
+  background: rgba(16, 185, 129, 0.08);
+  border-radius: 6px;
+  border-left: 3px solid var(--success-color);
+}
+
+.admin-avail-person.unavailable {
+  background: rgba(239, 68, 68, 0.08);
+  border-left-color: var(--danger-color);
+}
+
+.admin-avail-name {
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.admin-avail-slots {
+  font-size: 0.9rem;
+  color: var(--success-color);
+  font-weight: 500;
+}
+
+.admin-avail-slots.unavailable {
+  color: var(--danger-color);
+}
+
+.admin-avail-day-section {
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.admin-avail-day-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.admin-avail-day-section h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: 0.5rem;
+}
+
+.admin-avail-empty {
+  font-size: 0.85rem;
+  color: var(--gray-500);
+  font-style: italic;
 }
