@@ -6,7 +6,7 @@ import webpush from 'npm:web-push@3.6.7'
 
 // CORS headers
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://to-do-app-abacus.vercel.app',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
@@ -14,6 +14,13 @@ serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
+  }
+
+  // Weryfikacja shared secret — funkcja wywoływana wyłącznie z triggerów PostgreSQL
+  const secret = req.headers.get('X-Internal-Secret')
+  const expectedSecret = Deno.env.get('PUSH_SECRET')
+  if (!expectedSecret || secret !== expectedSecret) {
+    return new Response('Unauthorized', { status: 401, headers: corsHeaders })
   }
 
   try {

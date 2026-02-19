@@ -103,7 +103,13 @@ Uruchom migracje z folderu `supabase/migrations/` **po kolei** w Supabase SQL Ed
 5. `005_update_push_triggers.sql` - aktualizacja triggerów
 6. `006_order_edits.sql` - historia edycji zleceń
 7. `007_availability.sql` - tabela dyspozycyjności pracowników
-8. `012_insurance_company.sql` - kolumna ubezpieczyciela OC sprawcy w zleceniach
+8. `008_availability_unavailable.sql` - flaga niedostępności w dyspozycyjności
+9. `009_feedback.sql` - tabela feedbacku użytkowników
+10. `010_cascade_delete_users.sql` - kaskadowe usuwanie użytkowników
+11. `011_user_roles.sql` - role użytkowników (admin/user)
+12. `012_insurance_company.sql` - kolumna ubezpieczyciela OC sprawcy w zleceniach
+13. `013_secure_push_triggers.sql` - zabezpieczenie triggerów push (shared secret z Vault)
+14. `014_field_length_constraints.sql` - constrainty długości pól (location, notes)
 
 ### 4. Skonfiguruj push notifications
 
@@ -114,6 +120,12 @@ W Supabase Dashboard → Settings → Edge Functions → Secrets dodaj:
 | `VAPID_PUBLIC_KEY` | Klucz publiczny VAPID (ten sam co w `.env`) |
 | `VAPID_PRIVATE_KEY` | Klucz prywatny VAPID |
 | `VAPID_EMAIL` | Email kontaktowy (format: `mailto:admin@example.com`) |
+| `PUSH_SECRET` | Losowy ciąg znaków weryfikujący wywołania z triggerów PostgreSQL |
+
+Przed uruchomieniem migracji 013 dodaj sekret do Vault w SQL Editor:
+```sql
+SELECT vault.create_secret('wartość-identyczna-z-PUSH_SECRET', 'push_secret');
+```
 
 Wdróż Edge Function:
 ```bash

@@ -66,7 +66,6 @@ export function useOrders() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'orders' },
         async (payload) => {
-          console.log('🔥 EVENT PRZYSZEDŁ:', payload.eventType, payload.new)
           const { eventType, new: newRow, old: oldRow } = payload
 
           if (eventType === 'INSERT') {

@@ -39,6 +39,8 @@ export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
 
     if (!formData.plate.trim()) {
       newErrors.plate = 'Numer rejestracyjny jest wymagany'
+    } else if (formData.plate.trim().length > 10) {
+      newErrors.plate = 'Numer rejestracyjny jest za długi (max 10 znaków)'
     }
     if (!formData.date) {
       newErrors.date = 'Data jest wymagana'
@@ -48,6 +50,11 @@ export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
     }
     if (!formData.location.trim()) {
       newErrors.location = 'Lokalizacja jest wymagana'
+    } else if (formData.location.trim().length > 200) {
+      newErrors.location = 'Lokalizacja jest za długa (max 200 znaków)'
+    }
+    if (formData.notes.length > 2000) {
+      newErrors.notes = 'Uwagi są za długie (max 2000 znaków)'
     }
 
     setErrors(newErrors)
