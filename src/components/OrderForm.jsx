@@ -3,17 +3,54 @@ import { useAvailability } from '../hooks/useAvailability'
 
 const INSURANCE_COMPANIES = ['PZU', 'WARTA', 'VIG', 'ALLIANZ', 'TUW', 'INNE']
 
+/**
+ * Parsuje string lokalizacji i wyodrębnia komponenty
+ * @param {string} locationString - np. "transfer komis Opolska OC"
+ * @returns {{ operationType: string, hasOC: boolean, cleanLocation: string }}
+ */
+function parseLocationString(locationString) {
+  if (!locationString) {
+    return { operationType: '', hasOC: false, cleanLocation: '' }
+  }
+
+  const str = locationString.trim()
+  const strLower = str.toLowerCase()
+
+  // Wykryj typ operacji
+  let operationType = ''
+  if (strLower.startsWith('wydanie ')) operationType = 'wydanie'
+  else if (strLower.startsWith('odbiór ') || strLower.startsWith('odbior ')) operationType = 'odbiór'
+  else if (strLower.startsWith('transfer ')) operationType = 'transfer'
+
+  // Wykryj flagę OC (na końcu stringa)
+  const hasOC = /\bOC\b/i.test(str)
+
+  // Usuń typ operacji z początku i OC z końca
+  let cleanLocation = str
+  if (operationType) {
+    cleanLocation = cleanLocation.replace(new RegExp(`^${operationType}\\s+`, 'i'), '')
+  }
+  cleanLocation = cleanLocation.replace(/\s+OC\b/gi, '').trim()
+
+  return { operationType, hasOC, cleanLocation }
+}
+
 export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
+  // Parsuj initialData.location przy edycji
+  const parsedLocation = parseLocationString(initialData?.location)
+
   const [formData, setFormData] = useState({
     plate: initialData?.plate || '',
     date: initialData?.date || '',
     time: initialData?.time || '',
-    location: initialData?.location || '',
+    location: initialData ? parsedLocation.cleanLocation : '',
     notes: initialData?.notes || '',
     insurance_company: initialData?.insurance_company || null
   })
-  const [ocSprwacy, setOcSprawcy] = useState(!!initialData?.insurance_company)
-  const [operationType, setOperationType] = useState('')
+  const [ocSprwacy, setOcSprawcy] = useState(
+    !!initialData?.insurance_company || parsedLocation.hasOC
+  )
+  const [operationType, setOperationType] = useState(parsedLocation.operationType)
   const [errors, setErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
   const [dateAvailability, setDateAvailability] = useState([])
@@ -188,7 +225,15 @@ export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
               key={type}
               type="button"
               className={`operation-type-btn ${operationType === type ? 'selected' : ''}`}
-              onClick={() => setOperationType(prev => prev === type ? '' : type)}
+              onClick={() => {
+                const newType = operationType === type ? '' : type
+                setOperationType(newType)
+                // Przy wyborze transfer - wyłącz OC sprawcy
+                if (newType === 'transfer') {
+                  setOcSprawcy(false)
+                  setFormData(prev => ({ ...prev, insurance_company: null }))
+                }
+              }}
               disabled={submitting}
             >
               {type}
@@ -224,9 +269,14 @@ export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
                 setFormData(prev => ({ ...prev, insurance_company: 'PZU' }))
               }
             }}
-            disabled={submitting}
+            disabled={submitting || operationType === 'transfer'}
           />
           OC sprawcy
+          {operationType === 'transfer' && (
+            <span style={{ fontSize: '0.8rem', color: 'var(--gray-500)', marginLeft: '8px' }}>
+              (niedostępne dla transferu)
+            </span>
+          )}
         </label>
         {ocSprwacy && (
           <select

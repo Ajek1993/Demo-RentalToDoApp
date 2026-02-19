@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import toast from 'react-hot-toast'
+import { calculatePrice } from '../lib/priceCalculator'
 
 export function useOrders() {
   const [orders, setOrders] = useState([])
@@ -350,6 +351,9 @@ export function useOrders() {
         const wykonawcaId = assignments?.[0]?.user_id || null
 
         if (wykonawcaId) {
+          // Oblicz kwotę automatycznie
+          const priceResult = calculatePrice(data.location, data.insurance_company)
+
           // Utwórz kurs
           await supabase.from('kursy').insert({
             user_id: wykonawcaId,
@@ -359,7 +363,7 @@ export function useOrders() {
             nr_rej: data.plate || '',
             marka: '',
             adres: data.location || '',
-            kwota: 0
+            kwota: priceResult.price
           })
         }
       } catch (kursError) {

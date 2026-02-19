@@ -3,6 +3,7 @@ import ExcelJS from "exceljs";
 import { supabase } from "../lib/supabase";
 import Modal from "./Modal";
 import { getPeriods, filterByPeriod } from "../lib/periods";
+import { calculatePrice } from "../lib/priceCalculator";
 
 export default function KursyList({ currentUser, profile, onClose }) {
   const [kursy, setKursy] = useState([]);
@@ -295,6 +296,17 @@ export default function KursyList({ currentUser, profile, onClose }) {
                 onChange={(e) => setEditKwota(e.target.value)}
               />
             </label>
+            <button
+              type="button"
+              className="button secondary"
+              onClick={() => {
+                const result = calculatePrice(editing.adres);
+                setEditKwota(String(result.price));
+              }}
+              style={{ marginBottom: "8px" }}
+            >
+              Oblicz automatycznie
+            </button>
             <button className="button" onClick={handleSaveEdit} disabled={saving}>
               {saving ? "Zapisywanie..." : "Zapisz"}
             </button>
