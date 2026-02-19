@@ -61,6 +61,9 @@ export function OrderList({ currentUser, isAdmin }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [orderToDelete, setOrderToDelete] = useState(null)
   const [deleteAssignments, setDeleteAssignments] = useState([])
+  const [showCompleteConfirm, setShowCompleteConfirm] = useState(false)
+  const [orderToComplete, setOrderToComplete] = useState(null)
+  const [completeAssignments, setCompleteAssignments] = useState([])
   const [showOnlyMine, setShowOnlyMine] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [dateFrom, setDateFrom] = useState('')
@@ -150,7 +153,25 @@ export function OrderList({ currentUser, isAdmin }) {
   }
 
   const handleCompleteOrder = async (id) => {
-    await completeOrder(id)
+    const { data: assignments } = await fetchAssignments(id)
+    setOrderToComplete(id)
+    setCompleteAssignments(assignments || [])
+    setShowCompleteConfirm(true)
+  }
+
+  const handleConfirmComplete = async () => {
+    if (orderToComplete) {
+      await completeOrder(orderToComplete)
+      setShowCompleteConfirm(false)
+      setOrderToComplete(null)
+      setCompleteAssignments([])
+    }
+  }
+
+  const handleCancelComplete = () => {
+    setShowCompleteConfirm(false)
+    setOrderToComplete(null)
+    setCompleteAssignments([])
   }
 
   const handleDeleteOrder = async (id) => {
@@ -388,6 +409,35 @@ export function OrderList({ currentUser, isAdmin }) {
               </button>
               <button onClick={handleConfirmDelete} className="btn-danger">
                 {deleteAssignments.length > 0 ? 'Usuń mimo to' : 'Usuń'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCompleteConfirm && (
+        <div className="modal-overlay" onClick={handleCancelComplete}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>Potwierdzenie zakończenia</h2>
+            <p>
+              {completeAssignments.filter(a => !a.unassigned_at).length > 0 ? (
+                <>
+                  Zlecenie zostanie przypisane do:{' '}
+                  <strong>
+                    {completeAssignments.filter(a => !a.unassigned_at)[0]?.user_profile?.name || 'Nieznany'}
+                  </strong>
+                  . Czy na pewno chcesz zakończyć?
+                </>
+              ) : (
+                'Brak przypisanych osób - kurs nie zostanie utworzony. Kontynuować?'
+              )}
+            </p>
+            <div className="modal-actions">
+              <button onClick={handleCancelComplete} className="btn-secondary">
+                Anuluj
+              </button>
+              <button onClick={handleConfirmComplete} className="btn-success">
+                Zakończ
               </button>
             </div>
           </div>

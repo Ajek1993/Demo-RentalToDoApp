@@ -13,6 +13,7 @@ export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
     insurance_company: initialData?.insurance_company || null
   })
   const [ocSprwacy, setOcSprawcy] = useState(!!initialData?.insurance_company)
+  const [operationType, setOperationType] = useState('')
   const [errors, setErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
   const [dateAvailability, setDateAvailability] = useState([])
@@ -68,7 +69,16 @@ export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
 
     setSubmitting(true)
     try {
-      await onSubmit(formData)
+      const composedLocation = [
+        operationType,
+        formData.location.trim(),
+        ocSprwacy ? 'OC' : ''
+      ].filter(Boolean).join(' ')
+
+      await onSubmit({
+        ...formData,
+        location: composedLocation
+      })
     } catch (error) {
       console.error('Error submitting form:', error)
     } finally {
@@ -171,6 +181,23 @@ export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
       </div>
 
       <div className="form-group">
+        <label>Typ operacji</label>
+        <div className="operation-type-group">
+          {['wydanie', 'odbiór', 'transfer'].map(type => (
+            <button
+              key={type}
+              type="button"
+              className={`operation-type-btn ${operationType === type ? 'selected' : ''}`}
+              onClick={() => setOperationType(prev => prev === type ? '' : type)}
+              disabled={submitting}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="form-group">
         <label htmlFor="location">Lokalizacja *</label>
         <input
           type="text"
@@ -184,39 +211,37 @@ export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
         {errors.location && <span className="error">{errors.location}</span>}
       </div>
 
-      {isAdmin && (
-        <div className="form-group">
-          <label className="checkbox-label">
-            <input
-              type="checkbox"
-              checked={ocSprwacy}
-              onChange={(e) => {
-                setOcSprawcy(e.target.checked)
-                if (!e.target.checked) {
-                  setFormData(prev => ({ ...prev, insurance_company: null }))
-                } else if (!formData.insurance_company) {
-                  setFormData(prev => ({ ...prev, insurance_company: 'PZU' }))
-                }
-              }}
-              disabled={submitting}
-            />
-            OC sprawcy
-          </label>
-          {ocSprwacy && (
-            <select
-              name="insurance_company"
-              value={formData.insurance_company || ''}
-              onChange={(e) => setFormData(prev => ({ ...prev, insurance_company: e.target.value }))}
-              disabled={submitting}
-              className="insurance-select"
-            >
-              {INSURANCE_COMPANIES.map(company => (
-                <option key={company} value={company}>{company}</option>
-              ))}
-            </select>
-          )}
-        </div>
-      )}
+      <div className="form-group">
+        <label className="checkbox-label">
+          <input
+            type="checkbox"
+            checked={ocSprwacy}
+            onChange={(e) => {
+              setOcSprawcy(e.target.checked)
+              if (!e.target.checked) {
+                setFormData(prev => ({ ...prev, insurance_company: null }))
+              } else if (!formData.insurance_company) {
+                setFormData(prev => ({ ...prev, insurance_company: 'PZU' }))
+              }
+            }}
+            disabled={submitting}
+          />
+          OC sprawcy
+        </label>
+        {ocSprwacy && (
+          <select
+            name="insurance_company"
+            value={formData.insurance_company || ''}
+            onChange={(e) => setFormData(prev => ({ ...prev, insurance_company: e.target.value }))}
+            disabled={submitting}
+            className="insurance-select"
+          >
+            {INSURANCE_COMPANIES.map(company => (
+              <option key={company} value={company}>{company}</option>
+            ))}
+          </select>
+        )}
+      </div>
 
       <div className="form-group">
         <label htmlFor="notes">Notatki</label>

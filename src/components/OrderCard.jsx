@@ -12,6 +12,7 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
   const [showHistory, setShowHistory] = useState(false)
   const [showActionsModal, setShowActionsModal] = useState(false)
   const [showNotesPopup, setShowNotesPopup] = useState(false)
+  const [showUnassignConfirm, setShowUnassignConfirm] = useState(false)
 
   useEffect(() => {
     loadAssignments()
@@ -91,9 +92,18 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
     await loadAssignments()
   }
 
-  const handleUnassignSelf = async () => {
+  const handleUnassignSelf = () => {
+    setShowUnassignConfirm(true)
+  }
+
+  const handleConfirmUnassign = async () => {
     await onUnassign(order.id, currentUserId, currentUserId)
     await loadAssignments()
+    setShowUnassignConfirm(false)
+  }
+
+  const handleCancelUnassign = () => {
+    setShowUnassignConfirm(false)
   }
 
   const handleAssignOther = async (userId) => {
@@ -399,6 +409,23 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
               className="modal-action-item btn-secondary"
             >
               Anuluj
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {showUnassignConfirm && (
+      <div className="modal-overlay" onClick={handleCancelUnassign}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <h2>Potwierdzenie wypisania</h2>
+          <p>Czy na pewno chcesz wypisać się z tego zlecenia?</p>
+          <div className="modal-actions">
+            <button onClick={handleCancelUnassign} className="btn-secondary">
+              Anuluj
+            </button>
+            <button onClick={handleConfirmUnassign} className="btn-danger">
+              Wypisz się
             </button>
           </div>
         </div>

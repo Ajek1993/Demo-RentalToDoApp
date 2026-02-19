@@ -300,6 +300,14 @@ export function useOrders() {
 
   async function deleteOrder(id) {
     try {
+      // Usuń kurs powiązany z tym zleceniem (jeśli istnieje)
+      const { error: deleteKursError } = await supabase
+        .rpc('delete_kurs_by_order_id', { p_order_id: id })
+
+      if (deleteKursError) {
+        console.error('Error deleting kurs:', deleteKursError)
+      }
+
       const { data, error } = await supabase
         .from('orders')
         .update({ status: 'deleted' })
@@ -371,6 +379,14 @@ export function useOrders() {
 
   async function restoreOrder(id) {
     try {
+      // Usuń kurs powiązany z tym zleceniem (używa funkcji SECURITY DEFINER)
+      const { error: deleteError } = await supabase
+        .rpc('delete_kurs_by_order_id', { p_order_id: id })
+
+      if (deleteError) {
+        console.error('Error deleting kurs:', deleteError)
+      }
+
       const { data, error } = await supabase
         .from('orders')
         .update({ status: 'active' })

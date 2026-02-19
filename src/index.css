@@ -2234,3 +2234,44 @@ button.btn-primary {
   color: var(--gray-500);
   font-style: italic;
 }
+
+/* Operation Type Radio Buttons */
+.operation-type-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.operation-type-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--gray-300);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 36px;
+  min-width: auto;
+  font-size: 0.9rem;
+}
+
+.operation-type-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  transform: none;
+}
+
+.operation-type-btn.selected {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+/* Mobile fix for print OC button */
+@media (max-width: 640px) {
+  .btn-print-oc {
+    font-size: 0.8rem;
+    padding: 0.15rem 0.3rem;
+    min-width: 32px;
+    min-height: 32px;
+  }
+}
