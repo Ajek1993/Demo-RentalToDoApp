@@ -42,26 +42,36 @@ Każde zlecenie zawiera:
 ```
 src/
 ├── components/
-│   ├── LoginForm.jsx           # Formularz logowania/rejestracji
-│   ├── OrderCard.jsx           # Karta zlecenia z akcjami
-│   ├── OrderList.jsx           # Lista zleceń z grupowaniem i filtrami
-│   ├── OrderForm.jsx           # Formularz tworzenia/edycji zlecenia
-│   ├── AssignmentHistory.jsx   # Historia przypisań z timestampami
-│   ├── AvailabilityManager.jsx # Zarządzanie dyspozycyjnością
-│   └── OfflineBanner.jsx       # Banner trybu offline
+│   ├── AdminAvailabilityView.jsx # Widok dyspozycyjności dla admina
+│   ├── AssignmentHistory.jsx     # Historia przypisań z timestampami
+│   ├── AvailabilityManager.jsx   # Zarządzanie dyspozycyjnością
+│   ├── FeedbackModal.jsx         # Modal feedbacku użytkowników
+│   ├── KursyList.jsx             # Lista kursów
+│   ├── LoginForm.jsx             # Formularz logowania/rejestracji
+│   ├── Modal.jsx                 # Uniwersalny komponent modala
+│   ├── OfflineBanner.jsx         # Banner trybu offline
+│   ├── OrderCard.jsx             # Karta zlecenia z akcjami
+│   ├── OrderForm.jsx             # Formularz tworzenia/edycji zlecenia
+│   └── OrderList.jsx             # Lista zleceń z grupowaniem i filtrami
 ├── hooks/
-│   ├── useAuth.js              # Autoryzacja Supabase
-│   ├── useOrders.js            # CRUD zleceń + subskrypcje realtime
-│   ├── useAvailability.js      # Zarządzanie dostępnością
-│   └── usePushNotifications.js # Push notifications
+│   ├── useAuth.js                # Autoryzacja Supabase
+│   ├── useAvailability.js        # Zarządzanie dostępnością
+│   ├── useOrders.js              # CRUD zleceń + subskrypcje realtime
+│   └── usePushNotifications.js   # Push notifications
 ├── lib/
-│   └── supabase.js             # Klient Supabase (singleton)
-├── App.jsx                     # Główny komponent aplikacji
-└── main.jsx                    # Entry point
+│   ├── cityService.js            # Serwis miast/lokalizacji
+│   ├── periods.js                # Definicje okresów czasowych
+│   ├── priceCalculator.js        # Kalkulator cen
+│   ├── pricingRules.js           # Reguły cenowe
+│   ├── supabase.js               # Klient Supabase (singleton)
+│   └── vehicleService.js         # Serwis pojazdów
+├── App.jsx                       # Główny komponent aplikacji
+└── main.jsx                      # Entry point
 supabase/
 ├── functions/
-│   └── send-push/index.ts      # Edge Function - wysyłka push notifications
-└── migrations/                 # Migracje SQL (uruchom po kolei w Supabase SQL Editor)
+│   └── send-push/index.ts        # Edge Function - wysyłka push notifications
+├── migrations/                   # Archiwalne migracje SQL (historia zmian schematu)
+└── schema-full.sql               # Skonsolidowany schemat - pozwala odtworzyć projekt od zera
 ```
 
 ## Konfiguracja
@@ -92,24 +102,32 @@ Klucze VAPID wygenerujesz komendą:
 npx web-push generate-vapid-keys
 ```
 
-### 3. Wykonaj migracje SQL
+### 3. Wykonaj schemat SQL
 
-Uruchom migracje z folderu `supabase/migrations/` **po kolei** w Supabase SQL Editor:
+**Nowa instalacja:** Uruchom `supabase/schema-full.sql` w Supabase SQL Editor - zawiera kompletny schemat bazy danych.
 
-1. `supabase-schema.sql` - tabele: profiles, orders, assignments, push_subscriptions
-2. `002_add_unassigned_at.sql` - kolumny unassigned_at/unassigned_by w assignments
-3. `003_push_notifications.sql` - triggery push notifications
-4. `004_fix_push_triggers.sql` - poprawki triggerów
-5. `005_update_push_triggers.sql` - aktualizacja triggerów
-6. `006_order_edits.sql` - historia edycji zleceń
-7. `007_availability.sql` - tabela dyspozycyjności pracowników
-8. `008_availability_unavailable.sql` - flaga niedostępności w dyspozycyjności
-9. `009_feedback.sql` - tabela feedbacku użytkowników
-10. `010_cascade_delete_users.sql` - kaskadowe usuwanie użytkowników
-11. `011_user_roles.sql` - role użytkowników (admin/user)
-12. `012_insurance_company.sql` - kolumna ubezpieczyciela OC sprawcy w zleceniach
-13. `013_secure_push_triggers.sql` - zabezpieczenie triggerów push (shared secret z Vault)
-14. `014_field_length_constraints.sql` - constrainty długości pól (location, notes)
+<details>
+<summary><strong>Archiwalne migracje</strong> (historia zmian schematu)</summary>
+
+Migracje w folderze `supabase/migrations/` dokumentują historię ewolucji schematu:
+
+- `supabase-schema.sql` - tabele: profiles, orders, assignments, push_subscriptions
+- `002_add_unassigned_at.sql` - kolumny unassigned_at/unassigned_by w assignments
+- `003_push_notifications.sql` - triggery push notifications
+- `004_fix_push_triggers.sql` - poprawki triggerów
+- `005_update_push_triggers.sql` - aktualizacja triggerów
+- `006_order_edits.sql` - historia edycji zleceń
+- `007_availability.sql` - tabela dyspozycyjności pracowników
+- `008_availability_unavailable.sql` - flaga niedostępności w dyspozycyjności
+- `009_feedback.sql` - tabela feedbacku użytkowników
+- `010_cascade_delete_users.sql` - kaskadowe usuwanie użytkowników
+- `011_user_roles.sql` - role użytkowników (admin/user)
+- `012_insurance_company.sql` - kolumna ubezpieczyciela OC sprawcy w zleceniach
+- `013_secure_push_triggers.sql` - zabezpieczenie triggerów push (shared secret z Vault)
+- `014_field_length_constraints.sql` - constrainty długości pól (location, notes)
+- `015_delete_kurs_by_order.sql` - usuwanie kursów przy usunięciu zlecenia
+
+</details>
 
 ### 4. Skonfiguruj push notifications
 
