@@ -267,73 +267,75 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
         </>
       )}
 
-      <div className="assignment-section" onClick={(e) => e.stopPropagation()}>
-        <div className="assignment-actions-compact">
-          {isCurrentUserAssigned ? (
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                handleUnassignSelf()
-              }}
-              className="btn-compact btn-secondary"
-              disabled={!isOnline}
-            >
-              Wypisz się
-            </button>
-          ) : (
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                handleAssignSelf()
-              }}
-              className="btn-compact btn-primary"
-              disabled={isMaxAssignmentsReached || !isOnline}
-            >
-              Zapisz się
-            </button>
-          )}
-
-          <div className="assign-other-dropdown">
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                setShowAssignDropdown(!showAssignDropdown)
-              }}
-              className="btn-compact btn-secondary"
-              disabled={availableUsers.length === 0 || isMaxAssignmentsReached || !isOnline}
-              title={isMaxAssignmentsReached ? 'Osiągnięto maksymalną liczbę przypisanych (10)' : ''}
-            >
-              Przypisz
-            </button>
-
-            {showAssignDropdown && availableUsers.length > 0 && (
-              <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
-                {availableUsers.map(user => (
-                  <button
-                    key={user.id}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleAssignOther(user.id)
-                    }}
-                    className="dropdown-item"
-                  >
-                    {user.name}
-                  </button>
-                ))}
-              </div>
+      {order.status === 'active' && (
+        <div className="assignment-section" onClick={(e) => e.stopPropagation()}>
+          <div className="assignment-actions-compact">
+            {isCurrentUserAssigned ? (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleUnassignSelf()
+                }}
+                className="btn-compact btn-secondary"
+                disabled={!isOnline}
+              >
+                Wypisz się
+              </button>
+            ) : (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleAssignSelf()
+                }}
+                className="btn-compact btn-primary"
+                disabled={isMaxAssignmentsReached || !isOnline}
+              >
+                Zapisz się
+              </button>
             )}
+
+            <div className="assign-other-dropdown">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowAssignDropdown(!showAssignDropdown)
+                }}
+                className="btn-compact btn-secondary"
+                disabled={availableUsers.length === 0 || isMaxAssignmentsReached || !isOnline}
+                title={isMaxAssignmentsReached ? 'Osiągnięto maksymalną liczbę przypisanych (10)' : ''}
+              >
+                Przypisz
+              </button>
+
+              {showAssignDropdown && availableUsers.length > 0 && (
+                <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
+                  {availableUsers.map(user => (
+                    <button
+                      key={user.id}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleAssignOther(user.id)
+                      }}
+                      className="dropdown-item"
+                    >
+                      {user.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
           </div>
 
+          {showHistory && (
+            <AssignmentHistory
+              assignments={assignments}
+              currentUserId={currentUserId}
+              edits={edits}
+            />
+          )}
         </div>
-
-        {showHistory && (
-          <AssignmentHistory
-            assignments={assignments}
-            currentUserId={currentUserId}
-            edits={edits}
-          />
-        )}
-      </div>
+      )}
     </div>
 
     {showActionsModal && (

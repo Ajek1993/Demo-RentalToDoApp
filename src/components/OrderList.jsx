@@ -52,7 +52,22 @@ function groupOrdersByDate(orders) {
   return groups
 }
 
-export function OrderList({ currentUser, isAdmin }) {
+export function OrderList({
+  currentUser,
+  isAdmin,
+  searchQuery,
+  setSearchQuery,
+  showOnlyMine,
+  setShowOnlyMine,
+  dateFrom,
+  setDateFrom,
+  dateTo,
+  setDateTo,
+  showFilters,
+  setShowFilters,
+  showSearch,
+  setShowSearch
+}) {
   const { orders, loading, myAssignedOrderIds, createOrder, updateOrder, deleteOrder, completeOrder, restoreOrder, assignToOrder, unassignFromOrder, fetchAssignments, fetchOrderEdits } = useOrders()
   const isOnline = useOnlineStatus()
   const [activeTab, setActiveTab] = useState('active')
@@ -64,13 +79,7 @@ export function OrderList({ currentUser, isAdmin }) {
   const [showCompleteConfirm, setShowCompleteConfirm] = useState(false)
   const [orderToComplete, setOrderToComplete] = useState(null)
   const [completeAssignments, setCompleteAssignments] = useState([])
-  const [showOnlyMine, setShowOnlyMine] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [dateFrom, setDateFrom] = useState('')
-  const [dateTo, setDateTo] = useState('')
   const [collapsedGroups, setCollapsedGroups] = useState(new Set())
-  const [showSearch, setShowSearch] = useState(false)
-  const [showFilters, setShowFilters] = useState(false)
   const searchInputRef = useRef(null)
 
   useEffect(() => {
@@ -234,7 +243,8 @@ export function OrderList({ currentUser, isAdmin }) {
         </button>
       </div>
 
-      <div className="toolbar">
+      {/* Mobile only: toolbar with search & filters */}
+      <div className="toolbar toolbar-mobile">
             <button
               className={`toolbar-icon-btn ${showFilters ? 'active' : ''} ${(showOnlyMine || dateFrom || dateTo) ? 'has-active-filter' : ''}`}
               onClick={() => setShowFilters(prev => !prev)}
@@ -274,8 +284,9 @@ export function OrderList({ currentUser, isAdmin }) {
             )}
           </div>
 
+          {/* Mobile only: filter panel */}
           {showFilters && (
-            <div className="filter-panel">
+            <div className="filter-panel filter-panel-mobile">
               <button
                 className={`filter-chip ${showOnlyMine ? 'active' : ''}`}
                 onClick={() => setShowOnlyMine(prev => !prev)}
