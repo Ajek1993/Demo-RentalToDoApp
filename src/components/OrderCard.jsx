@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { AssignmentHistory } from './AssignmentHistory'
 import { useOnlineStatus } from './OfflineBanner'
 
-export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, onRestore, onAssign, onUnassign, fetchAssignments, fetchOrderEdits }) {
+export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, onDelete, onRestore, onPermanentlyDelete, onAssign, onUnassign, fetchAssignments, fetchOrderEdits }) {
   const isOnline = useOnlineStatus()
   const [assignments, setAssignments] = useState([])
   const [edits, setEdits] = useState([])
@@ -13,6 +13,7 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
   const [showActionsModal, setShowActionsModal] = useState(false)
   const [showNotesPopup, setShowNotesPopup] = useState(false)
   const [showUnassignConfirm, setShowUnassignConfirm] = useState(false)
+  const [showPermanentDeleteConfirm, setShowPermanentDeleteConfirm] = useState(false)
 
   useEffect(() => {
     loadAssignments()
@@ -150,6 +151,7 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
   }
 
   const formatTime = (time) => {
+    if (!time) return null
     return time.substring(0, 5)
   }
 
@@ -198,8 +200,12 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
         <div className="order-main-row">
         <div className="order-info">
           <span className="order-date">{formatDate(order.date)}</span>
-          <span className="order-time">{formatTime(order.time)}</span>
-          <span className="order-separator">•</span>
+          {order.time && (
+            <>
+              <span className="order-time">{formatTime(order.time)}</span>
+              <span className="order-separator">•</span>
+            </>
+          )}
           <span className="order-plate">{order.plate}</span>
           {order.insurance_company && (
             <span className="insurance-badge">{order.insurance_company}</span>
@@ -247,9 +253,16 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
           )}
 
           {order.status === 'deleted' && (
-            <button onClick={() => onRestore(order.id)} className="btn-icon btn-primary" title="Przywróć" disabled={!isOnline}>
-              ↶
-            </button>
+            <>
+              <button onClick={() => onRestore(order.id)} className="btn-icon btn-primary" title="Przywróć" disabled={!isOnline}>
+                ↶
+              </button>
+              {isAdmin && (
+                <button onClick={() => setShowPermanentDeleteConfirm(true)} className="btn-icon btn-danger" title="Usuń na stałe" disabled={!isOnline}>
+                  🗑️
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -326,14 +339,16 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
             </div>
 
           </div>
+        </div>
+      )}
 
-          {showHistory && (
-            <AssignmentHistory
-              assignments={assignments}
-              currentUserId={currentUserId}
-              edits={edits}
-            />
-          )}
+      {showHistory && (assignments.length > 0 || edits.length > 0) && (
+        <div className="assignment-section" onClick={(e) => e.stopPropagation()}>
+          <AssignmentHistory
+            assignments={assignments}
+            currentUserId={currentUserId}
+            edits={edits}
+          />
         </div>
       )}
     </div>
@@ -397,13 +412,27 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
             )}
 
             {order.status === 'deleted' && (
-              <button
-                onClick={() => handleActionClick(() => onRestore(order.id))}
-                className="modal-action-item btn-primary"
-                disabled={!isOnline}
-              >
-                ↶ Przywróć do aktywnych
-              </button>
+              <>
+                <button
+                  onClick={() => handleActionClick(() => onRestore(order.id))}
+                  className="modal-action-item btn-primary"
+                  disabled={!isOnline}
+                >
+                  ↶ Przywróć do aktywnych
+                </button>
+                {isAdmin && (
+                  <button
+                    onClick={() => {
+                      setShowActionsModal(false)
+                      setShowPermanentDeleteConfirm(true)
+                    }}
+                    className="modal-action-item btn-danger"
+                    disabled={!isOnline}
+                  >
+                    🗑️ Usuń na stałe
+                  </button>
+                )}
+              </>
             )}
 
             <button
@@ -428,6 +457,30 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
             </button>
             <button onClick={handleConfirmUnassign} className="btn-danger">
               Wypisz się
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {showPermanentDeleteConfirm && (
+      <div className="modal-overlay" onClick={() => setShowPermanentDeleteConfirm(false)}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <h2>Trwałe usunięcie</h2>
+          <p>Czy na pewno chcesz <strong>na stałe</strong> usunąć zlecenie <strong>{order.plate}</strong>?</p>
+          <p style={{ color: '#dc2626', fontSize: '0.9em' }}>Ta operacja jest nieodwracalna - zlecenie i cała jego historia zostaną usunięte z bazy danych.</p>
+          <div className="modal-actions">
+            <button onClick={() => setShowPermanentDeleteConfirm(false)} className="btn-secondary">
+              Anuluj
+            </button>
+            <button
+              onClick={() => {
+                onPermanentlyDelete(order.id)
+                setShowPermanentDeleteConfirm(false)
+              }}
+              className="btn-danger"
+            >
+              Usuń na stałe
             </button>
           </div>
         </div>

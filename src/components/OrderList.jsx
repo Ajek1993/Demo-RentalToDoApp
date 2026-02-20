@@ -68,7 +68,7 @@ export function OrderList({
   showSearch,
   setShowSearch
 }) {
-  const { orders, loading, myAssignedOrderIds, createOrder, updateOrder, deleteOrder, completeOrder, restoreOrder, assignToOrder, unassignFromOrder, fetchAssignments, fetchOrderEdits } = useOrders()
+  const { orders, loading, myAssignedOrderIds, createOrder, updateOrder, deleteOrder, completeOrder, restoreOrder, permanentlyDeleteOrder, assignToOrder, unassignFromOrder, fetchAssignments, fetchOrderEdits } = useOrders()
   const isOnline = useOnlineStatus()
   const [activeTab, setActiveTab] = useState('active')
   const [showModal, setShowModal] = useState(false)
@@ -211,6 +211,10 @@ export function OrderList({
     await restoreOrder(id)
   }
 
+  const handlePermanentlyDeleteOrder = async (id) => {
+    await permanentlyDeleteOrder(id)
+  }
+
   if (loading) {
     return (
       <div className="loading-container">
@@ -345,10 +349,12 @@ export function OrderList({
                             key={order.id}
                             order={order}
                             currentUserId={currentUser?.id}
+                            isAdmin={isAdmin}
                             onEdit={handleEditOrder}
                             onComplete={handleCompleteOrder}
                             onDelete={handleDeleteOrder}
                             onRestore={handleRestoreOrder}
+                            onPermanentlyDelete={handlePermanentlyDeleteOrder}
                             onAssign={assignToOrder}
                             onUnassign={unassignFromOrder}
                             fetchAssignments={fetchAssignments}
@@ -366,10 +372,12 @@ export function OrderList({
                   key={order.id}
                   order={order}
                   currentUserId={currentUser?.id}
+                  isAdmin={isAdmin}
                   onEdit={handleEditOrder}
                   onComplete={handleCompleteOrder}
                   onDelete={handleDeleteOrder}
                   onRestore={handleRestoreOrder}
+                  onPermanentlyDelete={handlePermanentlyDeleteOrder}
                   onAssign={assignToOrder}
                   onUnassign={unassignFromOrder}
                   fetchAssignments={fetchAssignments}

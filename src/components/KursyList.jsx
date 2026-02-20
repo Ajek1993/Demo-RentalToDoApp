@@ -3,7 +3,7 @@ import ExcelJS from "exceljs";
 import { supabase } from "../lib/supabase";
 import Modal from "./Modal";
 import { getPeriods, filterByPeriod } from "../lib/periods";
-import { calculatePrice } from "../lib/priceCalculator";
+import { calculatePriceAsync } from "../lib/priceCalculator";
 import { findVehicleByPlate } from "../lib/vehicleService";
 
 export default function KursyList({ currentUser, profile, onClose, isAdmin }) {
@@ -17,6 +17,8 @@ export default function KursyList({ currentUser, profile, onClose, isAdmin }) {
   const [editKwota, setEditKwota] = useState("");
   const [saving, setSaving] = useState(false);
   const [editErrors, setEditErrors] = useState({});
+  const [detectedCity, setDetectedCity] = useState(null);
+  const [detectedDistance, setDetectedDistance] = useState(null);
   const [periods] = useState(getPeriods(12));
   const [selectedPeriod, setSelectedPeriod] = useState(0);
   const [allProfiles, setAllProfiles] = useState([]);
@@ -147,6 +149,8 @@ export default function KursyList({ currentUser, profile, onClose, isAdmin }) {
     setEditAdres(kurs.adres || "");
     setEditKwota(kurs.kwota || "0");
     setEditErrors({});
+    setDetectedCity(null);
+    setDetectedDistance(null);
   }
 
   function validateEdit() {
@@ -173,6 +177,24 @@ export default function KursyList({ currentUser, profile, onClose, isAdmin }) {
       }
     }
   }, []);
+
+  // Automatyczne obliczanie ceny przy zmianie adresu
+  useEffect(() => {
+    if (!editing) return;
+
+    async function autoCalculatePrice() {
+      if (editAdres.trim().length >= 3) {
+        const result = await calculatePriceAsync(editAdres);
+        setEditKwota(String(result.price));
+        setDetectedCity(result.detectedCity);
+        setDetectedDistance(result.distanceKm);
+      } else {
+        setDetectedCity(null);
+        setDetectedDistance(null);
+      }
+    }
+    autoCalculatePrice();
+  }, [editAdres, editing]);
 
   async function handleSaveEdit() {
     if (!editing) return;
@@ -467,6 +489,11 @@ export default function KursyList({ currentUser, profile, onClose, isAdmin }) {
                 maxLength={200}
               />
               {editErrors.adres && <span className="error">{editErrors.adres}</span>}
+              {detectedCity && detectedDistance && (
+                <span className="detected-marka">
+                  {detectedCity}: {detectedDistance} km
+                </span>
+              )}
             </label>
             <label>
               Kwota (zl):
@@ -481,13 +508,15 @@ export default function KursyList({ currentUser, profile, onClose, isAdmin }) {
             <button
               type="button"
               className="button secondary"
-              onClick={() => {
-                const result = calculatePrice(editAdres);
+              onClick={async () => {
+                const result = await calculatePriceAsync(editAdres);
                 setEditKwota(String(result.price));
+                setDetectedCity(result.detectedCity);
+                setDetectedDistance(result.distanceKm);
               }}
               style={{ marginBottom: "8px" }}
             >
-              Oblicz automatycznie
+              Przelicz ponownie
             </button>
             <button className="button" onClick={handleSaveEdit} disabled={saving}>
               {saving ? "Zapisywanie..." : "Zapisz"}

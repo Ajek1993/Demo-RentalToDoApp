@@ -239,7 +239,7 @@ export function useOrders() {
         .insert([{
           plate,
           date,
-          time,
+          time: time || null,
           location,
           notes,
           insurance_company: insurance_company || null,
@@ -262,9 +262,15 @@ export function useOrders() {
 
   async function updateOrder(id, updates, oldOrder) {
     try {
+      // Zamień pusty string time na null (PostgreSQL nie akceptuje pustego stringa dla typu time)
+      const sanitizedUpdates = {
+        ...updates,
+        time: updates.time || null
+      }
+
       const { data, error } = await supabase
         .from('orders')
-        .update(updates)
+        .update(sanitizedUpdates)
         .eq('id', id)
         .select()
         .single()
@@ -441,6 +447,53 @@ export function useOrders() {
     }
   }
 
+  async function permanentlyDeleteOrder(id) {
+    try {
+      // Usuń kurs powiązany z tym zleceniem (jeśli istnieje)
+      const { error: deleteKursError } = await supabase
+        .rpc('delete_kurs_by_order_id', { p_order_id: id })
+
+      if (deleteKursError) {
+        console.error('Error deleting kurs:', deleteKursError)
+      }
+
+      // Usuń przypisania
+      const { error: assignmentsError } = await supabase
+        .from('assignments')
+        .delete()
+        .eq('order_id', id)
+
+      if (assignmentsError) {
+        console.error('Error deleting assignments:', assignmentsError)
+      }
+
+      // Usuń historię edycji
+      const { error: editsError } = await supabase
+        .from('order_edits')
+        .delete()
+        .eq('order_id', id)
+
+      if (editsError) {
+        console.error('Error deleting order_edits:', editsError)
+      }
+
+      // Usuń zlecenie na stałe
+      const { error } = await supabase
+        .from('orders')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+
+      toast.success('Zlecenie usunięte na stałe', { icon: '🗑️' })
+      return { data: null, error: null }
+    } catch (error) {
+      console.error('Error permanently deleting order:', error)
+      toast.error(`Błąd usuwania: ${error.message}`)
+      return { data: null, error }
+    }
+  }
+
   async function assignToOrder(orderId, userId, assignedBy) {
     try {
       const { data, error } = await supabase
@@ -543,6 +596,7 @@ export function useOrders() {
     deleteOrder,
     completeOrder,
     restoreOrder,
+    permanentlyDeleteOrder,
     assignToOrder,
     unassignFromOrder,
     fetchAssignments,

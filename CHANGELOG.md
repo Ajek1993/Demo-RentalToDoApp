@@ -5,6 +5,17 @@ Wszystkie istotne zmiany w projekcie System Zleceń Wypożyczalni.
 Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.0.0/),
 wersjonowanie według [Semantic Versioning](https://semver.org/lang/pl/).
 
+## [0.9.1] - 2025-02-20
+
+### Dodane
+- Trwałe usuwanie zleceń dla admina (nieodwracalne)
+- Automatyczne przeliczanie kwoty przy edycji adresu w kursach
+- Wyświetlanie wykrytego miasta i dystansu w formularzu kursu
+
+### Zmienione
+- Godzina zlecenia jest teraz opcjonalna
+- Poprawione wyświetlanie historii przypisań i edycji
+
 ## [0.9.0] - 2025-02-19
 
 ### Dodane

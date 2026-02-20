@@ -127,9 +127,6 @@ export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
     if (!formData.date) {
       newErrors.date = 'Data jest wymagana'
     }
-    if (!formData.time) {
-      newErrors.time = 'Godzina jest wymagana'
-    }
     if (!formData.location.trim()) {
       newErrors.location = 'Lokalizacja jest wymagana'
     } else if (formData.location.trim().length > 200) {
@@ -255,7 +252,7 @@ export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
       </div>
 
       <div className="form-group">
-        <label htmlFor="time">Godzina *</label>
+        <label htmlFor="time">Godzina</label>
         <input
           type="time"
           id="time"
