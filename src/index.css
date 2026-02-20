@@ -1691,6 +1691,7 @@ button.btn-primary {
 .avail-close {
   display: flex;
   justify-content: center;
+  margin-top: 16px;
 }
 
 .avail-close button {

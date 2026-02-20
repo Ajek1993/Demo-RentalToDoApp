@@ -341,14 +341,6 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
         <div className="modal-content modal-actions-menu" onClick={(e) => e.stopPropagation()}>
           <h3 className="modal-title">{order.plate}</h3>
           <div className="modal-actions-list">
-            {order.insurance_company && (
-              <button
-                onClick={() => handleActionClick(() => window.open(`/insurance/${order.insurance_company}.pdf`, '_blank'))}
-                className="modal-action-item btn-print-oc-modal"
-              >
-                🖨️ Drukuj OC ({order.insurance_company})
-              </button>
-            )}
             {order.status === 'active' && (
               <>
                 <button
@@ -373,6 +365,14 @@ export function OrderCard({ order, currentUserId, onEdit, onComplete, onDelete, 
                   ✕ Usuń
                 </button>
               </>
+            )}
+            {order.insurance_company && (
+              <button
+                onClick={() => handleActionClick(() => window.open(`/insurance/${order.insurance_company}.pdf`, '_blank'))}
+                className="modal-action-item btn-print-oc-modal"
+              >
+                🖨️ Drukuj OC ({order.insurance_company})
+              </button>
             )}
 
             {order.status === 'completed' && (
