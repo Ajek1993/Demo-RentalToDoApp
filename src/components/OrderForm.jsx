@@ -1,5 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAvailability } from '../hooks/useAvailability'
+import { findVehicleByPlate } from '../lib/vehicleService'
+import { detectCityInLocation } from '../lib/cityService'
+import { calculateDistancePrice } from '../lib/priceCalculator'
 
 const INSURANCE_COMPANIES = ['PZU', 'WARTA', 'VIG', 'ALLIANZ', 'TUW', 'INNE']
 
@@ -55,6 +58,10 @@ export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
   const [submitting, setSubmitting] = useState(false)
   const [dateAvailability, setDateAvailability] = useState([])
   const { fetchDateAvailability } = useAvailability()
+  const [detectedMarka, setDetectedMarka] = useState('')
+  const [detectedDistance, setDetectedDistance] = useState(null)
+  const [detectedCity, setDetectedCity] = useState(null)
+  const [isOneWay, setIsOneWay] = useState(initialData?.is_one_way || false)
 
   useEffect(() => {
     if (formData.date) {
@@ -64,6 +71,26 @@ export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
     }
   }, [formData.date])
 
+  // Wykryj dystans z bazy miast przy zmianie lokalizacji
+  useEffect(() => {
+    async function detectDistance() {
+      if (formData.location.trim().length >= 3) {
+        const { city, distanceKm } = await detectCityInLocation(formData.location)
+        setDetectedDistance(distanceKm)
+        setDetectedCity(city)
+        // Resetuj isOneWay jeśli dystans <= 100km
+        if (distanceKm === null || distanceKm <= 100) {
+          setIsOneWay(false)
+        }
+      } else {
+        setDetectedDistance(null)
+        setDetectedCity(null)
+        setIsOneWay(false)
+      }
+    }
+    detectDistance()
+  }, [formData.location])
+
   function handleChange(e) {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
@@ -71,6 +98,23 @@ export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
       setErrors(prev => ({ ...prev, [name]: null }))
     }
   }
+
+  // Autocomplete marki przy zmianie numeru rejestracyjnego
+  const handlePlateChange = useCallback(async (e) => {
+    const value = e.target.value
+    setFormData(prev => ({ ...prev, plate: value }))
+    if (errors.plate) {
+      setErrors(prev => ({ ...prev, plate: null }))
+    }
+
+    // Szukaj marki gdy nr rej ma min 3 znaki
+    if (value.length >= 3) {
+      const marka = await findVehicleByPlate(value)
+      setDetectedMarka(marka || '')
+    } else {
+      setDetectedMarka('')
+    }
+  }, [errors.plate])
 
   function validate() {
     const newErrors = {}
@@ -114,7 +158,8 @@ export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
 
       await onSubmit({
         ...formData,
-        location: composedLocation
+        location: composedLocation,
+        is_one_way: isOneWay && detectedDistance && detectedDistance > 100
       })
     } catch (error) {
       console.error('Error submitting form:', error)
@@ -158,11 +203,16 @@ export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
           id="plate"
           name="plate"
           value={formData.plate}
-          onChange={handleChange}
+          onChange={handlePlateChange}
           placeholder="np. WA12345"
           disabled={submitting}
         />
         {errors.plate && <span className="error">{errors.plate}</span>}
+        {detectedMarka && (
+          <span className="detected-marka">
+            Pojazd: <strong>{detectedMarka}</strong>
+          </span>
+        )}
       </div>
 
       <div className="form-group">
@@ -254,7 +304,34 @@ export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
           disabled={submitting}
         />
         {errors.location && <span className="error">{errors.location}</span>}
+        {detectedCity && detectedDistance && (
+          <div className="detected-distance">
+            <span className="distance-badge">
+              {detectedCity}: {detectedDistance} km
+              {detectedDistance > 100 && (
+                <span className="distance-price">
+                  {' '}~{calculateDistancePrice(detectedDistance)} zł
+                  {isOneWay && <span className="one-way-price"> → {Math.round(calculateDistancePrice(detectedDistance) * 1.5)} zł (x1,5)</span>}
+                </span>
+              )}
+            </span>
+          </div>
+        )}
       </div>
+
+      {detectedDistance && detectedDistance > 100 && (
+        <div className="form-group">
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              checked={isOneWay}
+              onChange={(e) => setIsOneWay(e.target.checked)}
+              disabled={submitting}
+            />
+            Tylko w jedną stronę (mnożnik x1,5)
+          </label>
+        </div>
+      )}
 
       <div className="form-group">
         <label className="checkbox-label">

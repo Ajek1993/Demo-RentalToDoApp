@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import toast from 'react-hot-toast'
-import { calculatePrice } from '../lib/priceCalculator'
+import { calculatePriceAsync } from '../lib/priceCalculator'
 
 export function useOrders() {
   const [orders, setOrders] = useState([])
@@ -230,7 +230,7 @@ export function useOrders() {
     }
   }
 
-  async function createOrder({ plate, date, time, location, notes, insurance_company }) {
+  async function createOrder({ plate, date, time, location, notes, insurance_company, is_one_way }) {
     try {
       const { data: { user } } = await supabase.auth.getUser()
 
@@ -243,6 +243,7 @@ export function useOrders() {
           location,
           notes,
           insurance_company: insurance_company || null,
+          is_one_way: is_one_way || false,
           status: 'active',
           created_by: user.id
         }])
@@ -272,7 +273,7 @@ export function useOrders() {
 
       // Zapisz diff do order_edits
       if (oldOrder) {
-        const trackFields = ['plate', 'date', 'time', 'location', 'notes', 'insurance_company']
+        const trackFields = ['plate', 'date', 'time', 'location', 'notes', 'insurance_company', 'is_one_way']
         const changes = {}
         for (const field of trackFields) {
           const oldVal = oldOrder[field] ?? ''
@@ -289,6 +290,34 @@ export function useOrders() {
             changes
           })
         }
+      }
+
+      // Synchronizacja z kursem - jeśli istnieje powiązany kurs, zaktualizuj go
+      const { data: kurs } = await supabase
+        .from('kursy')
+        .select('id')
+        .eq('order_id', id)
+        .maybeSingle()
+
+      if (kurs) {
+        // Przelicz kwotę automatycznie (z obsługą miast z bazy)
+        const isOneWay = updates.is_one_way ?? data.is_one_way ?? false
+        const priceResult = await calculatePriceAsync(
+          updates.location || data.location,
+          updates.insurance_company || data.insurance_company,
+          { isOneWay }
+        )
+
+        await supabase
+          .from('kursy')
+          .update({
+            data: updates.date || data.date,
+            nr_rej: updates.plate || data.plate,
+            adres: updates.location || data.location,
+            kwota: priceResult.price
+            // marka pozostaje bez zmian (edytowana tylko w zakładce Kursy)
+          })
+          .eq('id', kurs.id)
       }
 
       // Nie trzeba fetchOrders - realtime załatwi aktualizację
@@ -351,8 +380,12 @@ export function useOrders() {
         const wykonawcaId = assignments?.[0]?.user_id || null
 
         if (wykonawcaId) {
-          // Oblicz kwotę automatycznie
-          const priceResult = calculatePrice(data.location, data.insurance_company)
+          // Oblicz kwotę automatycznie (z obsługą miast z bazy i mnożnika x1,5)
+          const priceResult = await calculatePriceAsync(
+            data.location,
+            data.insurance_company,
+            { isOneWay: data.is_one_way || false }
+          )
 
           // Utwórz kurs
           await supabase.from('kursy').insert({

@@ -1,19 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import ExcelJS from "exceljs";
 import { supabase } from "../lib/supabase";
 import Modal from "./Modal";
 import { getPeriods, filterByPeriod } from "../lib/periods";
 import { calculatePrice } from "../lib/priceCalculator";
+import { findVehicleByPlate } from "../lib/vehicleService";
 
-export default function KursyList({ currentUser, profile, onClose }) {
+export default function KursyList({ currentUser, profile, onClose, isAdmin }) {
   const [kursy, setKursy] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
+  const [editData, setEditData] = useState("");
+  const [editNrRej, setEditNrRej] = useState("");
   const [editMarka, setEditMarka] = useState("");
+  const [editAdres, setEditAdres] = useState("");
   const [editKwota, setEditKwota] = useState("");
   const [saving, setSaving] = useState(false);
+  const [editErrors, setEditErrors] = useState({});
   const [periods] = useState(getPeriods(12));
   const [selectedPeriod, setSelectedPeriod] = useState(0);
+  const [allProfiles, setAllProfiles] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(isAdmin ? "all" : currentUser.id);
 
   // Filtry
   const [filterDisplay, setFilterDisplay] = useState(false);
@@ -22,24 +29,64 @@ export default function KursyList({ currentUser, profile, onClose }) {
   const [filterMarka, setFilterMarka] = useState("");
 
   useEffect(() => {
+    async function fetchProfiles() {
+      if (!isAdmin) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, name")
+        .order("name");
+      setAllProfiles(data || []);
+    }
+    fetchProfiles();
+  }, [isAdmin]);
+
+  useEffect(() => {
     async function fetchKursy() {
       setLoading(true);
-      const { data, error } = await supabase
+
+      let query = supabase
         .from("kursy")
         .select("*")
-        .eq("wykonawca_id", currentUser.id)
         .order("data", { ascending: false });
+
+      // Admin może filtrować po użytkowniku lub widzieć wszystkie
+      if (isAdmin && selectedUser !== "all") {
+        query = query.eq("wykonawca_id", selectedUser);
+      } else if (!isAdmin) {
+        query = query.eq("wykonawca_id", currentUser.id);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error("Błąd pobierania kursów:", error);
         setLoading(false);
         return;
       }
+
+      // Dla admina - dołącz nazwy wykonawców
+      if (isAdmin && data && data.length > 0) {
+        const wykonawcaIds = [...new Set(data.map(k => k.wykonawca_id).filter(Boolean))];
+        if (wykonawcaIds.length > 0) {
+          const { data: profiles } = await supabase
+            .from("profiles")
+            .select("id, name")
+            .in("id", wykonawcaIds);
+
+          const profileMap = {};
+          profiles?.forEach(p => { profileMap[p.id] = p; });
+
+          data.forEach(kurs => {
+            kurs.wykonawca = profileMap[kurs.wykonawca_id] || null;
+          });
+        }
+      }
+
       setKursy(data || []);
       setLoading(false);
     }
     fetchKursy();
-  }, [currentUser.id]);
+  }, [currentUser.id, isAdmin, selectedUser]);
 
   async function handleExport() {
     const period = periods[selectedPeriod];
@@ -94,23 +141,103 @@ export default function KursyList({ currentUser, profile, onClose }) {
 
   function startEdit(kurs) {
     setEditing(kurs);
+    setEditData(kurs.data || "");
+    setEditNrRej(kurs.nr_rej || "");
     setEditMarka(kurs.marka || "");
+    setEditAdres(kurs.adres || "");
     setEditKwota(kurs.kwota || "0");
+    setEditErrors({});
   }
+
+  function validateEdit() {
+    const errors = {};
+
+    if (editNrRej.trim().length > 10) {
+      errors.nr_rej = "Nr rejestracyjny max 10 znaków";
+    }
+    if (editAdres.trim().length > 200) {
+      errors.adres = "Adres max 200 znaków";
+    }
+
+    setEditErrors(errors);
+    return Object.keys(errors).length === 0;
+  }
+
+  // Autocomplete marki po zmianie nr rejestracyjnego
+  const handleNrRejChange = useCallback(async (value) => {
+    setEditNrRej(value);
+    if (value.length >= 3) {
+      const marka = await findVehicleByPlate(value);
+      if (marka) {
+        setEditMarka(marka);
+      }
+    }
+  }, []);
 
   async function handleSaveEdit() {
     if (!editing) return;
+    if (!validateEdit()) return;
     setSaving(true);
 
     const { data, error } = await supabase
       .from("kursy")
       .update({
+        data: editData,
+        nr_rej: editNrRej,
         marka: editMarka,
+        adres: editAdres,
         kwota: parseFloat(editKwota) || 0,
       })
       .eq("id", editing.id)
       .select()
       .single();
+
+    // Zachowaj dane wykonawcy z edycji
+    if (data) {
+      data.wykonawca = editing.wykonawca;
+    }
+
+    // Synchronizacja Kurs → Order (jeśli istnieje powiązane zlecenie)
+    if (data && editing.order_id) {
+      // Pobierz stare dane zlecenia do historii zmian
+      const { data: oldOrder } = await supabase
+        .from("orders")
+        .select("date, plate, location")
+        .eq("id", editing.order_id)
+        .single();
+
+      // Aktualizuj zlecenie
+      await supabase
+        .from("orders")
+        .update({
+          date: editData,
+          plate: editNrRej,
+          location: editAdres,
+        })
+        .eq("id", editing.order_id);
+
+      // Zapisz historię zmian (jeśli coś się zmieniło)
+      if (oldOrder) {
+        const changes = {};
+        if (oldOrder.date !== editData) {
+          changes.date = [oldOrder.date, editData];
+        }
+        if (oldOrder.plate !== editNrRej) {
+          changes.plate = [oldOrder.plate, editNrRej];
+        }
+        if (oldOrder.location !== editAdres) {
+          changes.location = [oldOrder.location, editAdres];
+        }
+
+        if (Object.keys(changes).length > 0) {
+          await supabase.from("order_edits").insert({
+            order_id: editing.order_id,
+            edited_by: currentUser.id,
+            changes,
+          });
+        }
+      }
+    }
 
     setSaving(false);
 
@@ -158,6 +285,26 @@ export default function KursyList({ currentUser, profile, onClose }) {
         </div>
       ) : (
         <>
+          {/* Selektor użytkownika dla admina */}
+          {isAdmin && (
+            <div className="period-selector">
+              <label htmlFor="user-select">Pracownik:</label>
+              <select
+                id="user-select"
+                value={selectedUser}
+                onChange={(e) => setSelectedUser(e.target.value)}
+                className="period-select"
+              >
+                <option value="all">Wszyscy</option>
+                {allProfiles.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           {/* Dropdown okresu rozliczeniowego */}
           <div className="period-selector">
             <label htmlFor="period-select">Okres rozliczeniowy:</label>
@@ -248,6 +395,9 @@ export default function KursyList({ currentUser, profile, onClose }) {
                   <li key={kurs.id} className="kurs-item">
                     <div>
                       <b>{kurs.data}</b> | {kurs.nr_rej} | {kurs.marka || <em style={{ color: "var(--gray-400)" }}>brak marki</em>}
+                      {isAdmin && selectedUser === "all" && kurs.wykonawca && (
+                        <span className="kurs-wykonawca"> ({kurs.wykonawca.name})</span>
+                      )}
                     </div>
                     <div>
                       Adres: <span>{kurs.adres}</span>
@@ -274,17 +424,49 @@ export default function KursyList({ currentUser, profile, onClose }) {
               X
             </button>
             <h3>Edytuj kurs</h3>
-            <p style={{ fontSize: "0.9rem", color: "var(--gray-600)", marginBottom: "1rem" }}>
-              {editing.data} | {editing.nr_rej} | {editing.adres}
-            </p>
+            {isAdmin && editing.wykonawca && (
+              <p style={{ fontSize: "0.85rem", color: "var(--gray-500)", marginBottom: "0.5rem" }}>
+                Wykonawca: <strong>{editing.wykonawca.name}</strong>
+              </p>
+            )}
+            <label>
+              Data:
+              <input
+                type="date"
+                value={editData}
+                onChange={(e) => setEditData(e.target.value)}
+              />
+            </label>
+            <label>
+              Nr rejestracyjny:
+              <input
+                type="text"
+                value={editNrRej}
+                onChange={(e) => handleNrRejChange(e.target.value)}
+                placeholder="np. KR12345"
+                maxLength={10}
+              />
+              {editErrors.nr_rej && <span className="error">{editErrors.nr_rej}</span>}
+            </label>
             <label>
               Marka:
               <input
                 type="text"
                 value={editMarka}
                 onChange={(e) => setEditMarka(e.target.value)}
-                placeholder="np. Opel Astra"
+                placeholder="np. Opel Astra (auto-uzupełnienie z CSV)"
               />
+            </label>
+            <label>
+              Adres (miejsce wydania):
+              <input
+                type="text"
+                value={editAdres}
+                onChange={(e) => setEditAdres(e.target.value)}
+                placeholder="np. wydanie Balice OC"
+                maxLength={200}
+              />
+              {editErrors.adres && <span className="error">{editErrors.adres}</span>}
             </label>
             <label>
               Kwota (zl):
@@ -300,7 +482,7 @@ export default function KursyList({ currentUser, profile, onClose }) {
               type="button"
               className="button secondary"
               onClick={() => {
-                const result = calculatePrice(editing.adres);
+                const result = calculatePrice(editAdres);
                 setEditKwota(String(result.price));
               }}
               style={{ marginBottom: "8px" }}

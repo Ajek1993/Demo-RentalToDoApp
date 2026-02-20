@@ -29,12 +29,12 @@ export const pricingRules = [
     priority: 2
   },
 
-  // OC Pia - przed ogólnym OC
+  // OC Pia/Piekary - przed ogólnym OC
   {
     id: 'oc_pia',
-    name: 'Wydanie/odbiór OC Pia',
+    name: 'Wydanie/odbiór OC Pia/Piekary',
     operationTypes: ['wydanie', 'odbiór'],
-    locationKeywords: ['pia'],
+    locationKeywords: ['pia', 'piekary'],
     excludeKeywords: [],
     requiresOC: true,
     price: 45,
