@@ -79,7 +79,7 @@ export function OrderList({
   const [showCompleteConfirm, setShowCompleteConfirm] = useState(false)
   const [orderToComplete, setOrderToComplete] = useState(null)
   const [completeAssignments, setCompleteAssignments] = useState([])
-  const [collapsedGroups, setCollapsedGroups] = useState(new Set())
+  const [collapsedGroups, setCollapsedGroups] = useState(new Set(['overdue', 'tomorrow', 'later']))
   const searchInputRef = useRef(null)
 
   useEffect(() => {
@@ -336,8 +336,8 @@ export function OrderList({
                 if (group.orders.length === 0) return null
                 const isCollapsed = collapsedGroups.has(key)
                 return (
-                  <div className={`date-group ${key === 'overdue' ? 'date-group-overdue' : ''}`} key={key}>
-                    <button className="date-group-header" onClick={() => toggleGroup(key)}>
+                  <div className={`date-group date-group-${key}`} key={key}>
+                    <button className={`date-group-header ${!isCollapsed ? 'expanded' : ''}`} onClick={() => toggleGroup(key)}>
                       <span className={`chevron ${isCollapsed ? '' : 'open'}`}>›</span>
                       <span className="date-group-label">{group.label}</span>
                       <span className="date-group-count">{group.orders.length}</span>
