@@ -237,7 +237,7 @@ export function useOrders() {
       const { data, error } = await supabase
         .from('orders')
         .insert([{
-          plate,
+          plate: plate.toUpperCase().trim(),
           date,
           time: time || null,
           location,
@@ -266,6 +266,11 @@ export function useOrders() {
       const sanitizedUpdates = {
         ...updates,
         time: updates.time || null
+      }
+
+      // Konwertuj plate na UPPERCASE
+      if (sanitizedUpdates.plate) {
+        sanitizedUpdates.plate = sanitizedUpdates.plate.toUpperCase().trim()
       }
 
       const { data, error } = await supabase
@@ -318,7 +323,7 @@ export function useOrders() {
           .from('kursy')
           .update({
             data: updates.date || data.date,
-            nr_rej: updates.plate || data.plate,
+            nr_rej: (updates.plate || data.plate)?.toUpperCase()?.trim(),
             adres: updates.location || data.location,
             kwota: priceResult.price
             // marka pozostaje bez zmian (edytowana tylko w zakładce Kursy)
@@ -399,7 +404,7 @@ export function useOrders() {
             wykonawca_id: wykonawcaId,
             order_id: id,
             data: data.date,
-            nr_rej: data.plate || '',
+            nr_rej: (data.plate || '').toUpperCase().trim(),
             marka: '',
             adres: data.location || '',
             kwota: priceResult.price

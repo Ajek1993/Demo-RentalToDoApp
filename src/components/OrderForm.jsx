@@ -101,7 +101,7 @@ export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
 
   // Autocomplete marki przy zmianie numeru rejestracyjnego
   const handlePlateChange = useCallback(async (e) => {
-    const value = e.target.value
+    const value = e.target.value.toUpperCase().trim()
     setFormData(prev => ({ ...prev, plate: value }))
     if (errors.plate) {
       setErrors(prev => ({ ...prev, plate: null }))

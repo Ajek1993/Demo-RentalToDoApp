@@ -40,7 +40,8 @@ CREATE TABLE public.orders (
   created_by uuid REFERENCES public.profiles(id) ON DELETE CASCADE,
   created_at timestamptz DEFAULT now(),
   CONSTRAINT location_length CHECK (char_length(location) <= 200),
-  CONSTRAINT notes_length CHECK (char_length(notes) <= 2000)
+  CONSTRAINT notes_length CHECK (char_length(notes) <= 2000),
+  CONSTRAINT plate_uppercase CHECK (plate = UPPER(plate))
 );
 
 -- Przypisania użytkowników do zleceń
@@ -110,7 +111,8 @@ CREATE TABLE public.kursy (
   marka text,
   adres text NOT NULL,
   kwota numeric NOT NULL DEFAULT 0,
-  created_at timestamptz DEFAULT now()
+  created_at timestamptz DEFAULT now(),
+  CONSTRAINT nr_rej_uppercase CHECK (nr_rej = UPPER(nr_rej))
 );
 
 -- =============================================================================
