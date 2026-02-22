@@ -299,6 +299,35 @@ BEGIN
 END;
 $$;
 
+-- Reminder o dyspozycyjności (wywoływana przez pg_cron)
+CREATE OR REPLACE FUNCTION send_availability_reminder()
+RETURNS void AS $$
+DECLARE
+  v_service_url text;
+  v_push_secret text;
+BEGIN
+  v_service_url := 'https://xpjcopzdbovenbhykfsb.supabase.co';
+  SELECT decrypted_secret INTO v_push_secret
+    FROM vault.decrypted_secrets
+    WHERE name = 'push_secret'
+    LIMIT 1;
+
+  PERFORM net.http_post(
+    url := v_service_url || '/functions/v1/send-push',
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'X-Internal-Secret', COALESCE(v_push_secret, '')
+    ),
+    body := jsonb_build_object(
+      'title', 'Dyspozycyjność',
+      'body', 'Uzupełnij swoją dyspozycyjność na nadchodzący tydzień',
+      'url', '/',
+      'targetRole', 'user'
+    )
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- =============================================================================
 -- TRIGGERY
 -- =============================================================================
@@ -357,3 +386,21 @@ COMMENT ON FUNCTION notify_new_order() IS 'Wysyła push notification gdy utworzo
 COMMENT ON FUNCTION notify_completed_order() IS 'Wysyła push notification gdy zlecenie zostało zakończone';
 COMMENT ON FUNCTION notify_deleted_order() IS 'Wysyła push notification gdy zlecenie zostało usunięte';
 COMMENT ON FUNCTION delete_kurs_by_order_id(UUID) IS 'Usuwa kurs powiązany ze zleceniem (SECURITY DEFINER dla obejścia RLS)';
+COMMENT ON FUNCTION send_availability_reminder() IS 'Wysyła push reminder o dyspozycyjności do kierowców (role=user)';
+
+-- =============================================================================
+-- pg_cron — SCHEDULED JOBS
+-- =============================================================================
+-- WYMAGA: pg_cron włączone w Supabase Dashboard (Database → Extensions)
+
+SELECT cron.schedule(
+  'availability-reminder-wed',
+  '0 20 * * 3',
+  $$SELECT send_availability_reminder()$$
+);
+
+SELECT cron.schedule(
+  'availability-reminder-sun',
+  '0 20 * * 0',
+  $$SELECT send_availability_reminder()$$
+);

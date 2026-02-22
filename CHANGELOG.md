@@ -5,6 +5,14 @@ Wszystkie istotne zmiany w projekcie System Zleceń Wypożyczalni.
 Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.0.0/),
 wersjonowanie według [Semantic Versioning](https://semver.org/lang/pl/).
 
+## [0.9.3] - 2026-02-22
+
+### Dodane
+- Automatyczne powiadomienia push o dyspozycyjności dla kierowców (środa i niedziela, 21:00 CET)
+- Nowy parametr `targetRole` w Edge Function `send-push` — filtrowanie subskrybentów po roli
+- Funkcja SQL `send_availability_reminder()` wywoływana przez pg_cron
+- Migracja `017_availability_reminder_cron.sql`
+
 ## [0.9.2] - 2026-02-22
 
 ### Dodane
