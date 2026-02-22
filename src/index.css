@@ -420,13 +420,56 @@ button.btn-primary {
   transform: none;
 }
 
+/* Today - blue (primary) */
+.date-group-today > .date-group-header {
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--primary-color);
+}
+.date-group-today > .date-group-header:hover,
+.date-group-today > .date-group-header.expanded {
+  background: rgba(37, 99, 235, 0.15);
+}
+.date-group-today > .date-group-header .date-group-count {
+  background: rgba(37, 99, 235, 0.2);
+  color: var(--primary-color);
+}
+
+/* Tomorrow - amber (warning) */
+.date-group-tomorrow > .date-group-header {
+  background: rgba(245, 158, 11, 0.08);
+  color: var(--warning-color);
+}
+.date-group-tomorrow > .date-group-header:hover,
+.date-group-tomorrow > .date-group-header.expanded {
+  background: rgba(245, 158, 11, 0.15);
+}
+.date-group-tomorrow > .date-group-header .date-group-count {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--warning-color);
+}
+
+/* Later - gray (neutral, more visible) */
+.date-group-later > .date-group-header {
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
+.date-group-later > .date-group-header:hover,
+.date-group-later > .date-group-header.expanded {
+  background: var(--gray-200);
+}
+
+/* Overdue - red (danger) */
 .date-group-overdue > .date-group-header {
   background: rgba(239, 68, 68, 0.08);
   color: var(--danger-color);
 }
-
-.date-group-overdue > .date-group-header:hover {
+.date-group-overdue > .date-group-header:hover,
+.date-group-overdue > .date-group-header.expanded {
   background: rgba(239, 68, 68, 0.15);
+}
+.date-group-overdue > .date-group-header .date-group-count {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--danger-color);
 }
 
 .chevron {
@@ -463,11 +506,6 @@ button.btn-primary {
   color: var(--gray-800);
   font-size: 0.75rem;
   font-weight: 700;
-}
-
-.date-group-overdue > .date-group-header .date-group-count {
-  background: rgba(239, 68, 68, 0.2);
-  color: var(--danger-color);
 }
 
 .date-group-body {

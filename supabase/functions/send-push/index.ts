@@ -40,7 +40,7 @@ serve(async (req) => {
     )
 
     // Parsuj dane z requestu
-    const { title, body, url, userId } = await req.json()
+    const { title, body, url, userId, targetRole } = await req.json()
 
     // Inicjalizacja Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
@@ -48,11 +48,21 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // Pobierz wszystkie subskrypcje (lub tylko dla konkretnego usera jeśli podano userId)
-    let query = supabase.from('push_subscriptions').select('*')
+    // Pobierz subskrypcje — opcjonalnie filtrowane po roli lub z wykluczeniem usera
+    let query;
 
-    if (userId) {
-      query = query.neq('user_id', userId) // Nie wysyłaj do użytkownika, który wykonał akcję
+    if (targetRole) {
+      // Filtruj po roli użytkownika (inner join z profiles)
+      query = supabase
+        .from('push_subscriptions')
+        .select('*, profiles!inner(role)')
+        .eq('profiles.role', targetRole)
+    } else {
+      query = supabase.from('push_subscriptions').select('*')
+
+      if (userId) {
+        query = query.neq('user_id', userId) // Nie wysyłaj do użytkownika, który wykonał akcję
+      }
     }
 
     const { data: subscriptions, error } = await query

@@ -169,9 +169,10 @@ export default function KursyList({ currentUser, profile, onClose, isAdmin }) {
 
   // Autocomplete marki po zmianie nr rejestracyjnego
   const handleNrRejChange = useCallback(async (value) => {
-    setEditNrRej(value);
-    if (value.length >= 3) {
-      const marka = await findVehicleByPlate(value);
+    const uppercaseValue = value.toUpperCase().trim();
+    setEditNrRej(uppercaseValue);
+    if (uppercaseValue.length >= 3) {
+      const marka = await findVehicleByPlate(uppercaseValue);
       if (marka) {
         setEditMarka(marka);
       }
