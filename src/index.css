@@ -1127,7 +1127,8 @@ button.btn-primary {
 }
 
 /* Assignment Section */
-.assignment-section {
+.assignment-section,
+.assignment-history-section {
   margin-top: 0.75rem;
   padding-top: 0.75rem;
   border-top: 1px solid var(--gray-200);
@@ -2691,4 +2692,77 @@ button.btn-danger {
   height: 4px;
   border-radius: 50%;
   background: var(--gray-400);
+}
+
+/* ===================== Modal Assignment Header & Buttons (Mobile) ===================== */
+
+.modal-assignment-header {
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--gray-300);
+}
+
+.modal-header-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.modal-date-time {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--gray-800);
+}
+
+.modal-plate {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--gray-800);
+}
+
+.modal-header-location {
+  text-align: left;
+  color: var(--gray-600);
+  font-size: 0.95rem;
+}
+
+.modal-assignment-buttons {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.modal-assignment-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.modal-assignment-actions > button,
+.modal-assignment-actions > .assign-other-dropdown {
+  flex: 1;
+}
+
+.modal-assignment-actions > button,
+.modal-assignment-actions > .assign-other-dropdown > button {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  min-height: 52px;
+  height: auto;
+}
+
+@media (max-width: 639px) {
+  .assignment-section {
+    display: none !important;
+  }
+}
+
+@media (min-width: 640px) {
+  .modal-assignment-header,
+  .modal-assignment-buttons {
+    display: none !important;
+  }
 }

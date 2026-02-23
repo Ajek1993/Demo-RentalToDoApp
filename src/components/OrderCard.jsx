@@ -91,6 +91,7 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
     }
     await onAssign(order.id, currentUserId, currentUserId)
     await loadAssignments()
+    setShowActionsModal(false)
   }
 
   const handleUnassignSelf = () => {
@@ -116,6 +117,7 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
     await onAssign(order.id, userId, currentUserId)
     await loadAssignments()
     setShowAssignDropdown(false)
+    setShowActionsModal(false)
   }
 
   const availableUsers = allUsers.filter(
@@ -123,6 +125,71 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
   )
 
   const isMaxAssignmentsReached = activeAssignments.length >= 10
+
+  const renderAssignmentButtons = (variant = 'card') => {
+    if (order.status !== 'active') return null
+
+    const wrapperClass = variant === 'modal' ? 'modal-assignment-actions' : 'assignment-actions-compact'
+
+    return (
+      <div className={wrapperClass}>
+        {isCurrentUserAssigned ? (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              handleUnassignSelf()
+            }}
+            className="btn-compact btn-secondary"
+            disabled={!isOnline}
+          >
+            Wypisz się
+          </button>
+        ) : (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              handleAssignSelf()
+            }}
+            className="btn-compact btn-primary"
+            disabled={isMaxAssignmentsReached || !isOnline}
+          >
+            Zapisz się
+          </button>
+        )}
+
+        <div className="assign-other-dropdown">
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setShowAssignDropdown(!showAssignDropdown)
+            }}
+            className="btn-compact btn-secondary"
+            disabled={availableUsers.length === 0 || isMaxAssignmentsReached || !isOnline}
+            title={isMaxAssignmentsReached ? 'Osiągnięto maksymalną liczbę przypisanych (10)' : ''}
+          >
+            Przypisz
+          </button>
+
+          {showAssignDropdown && availableUsers.length > 0 && (
+            <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
+              {availableUsers.map(user => (
+                <button
+                  key={user.id}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleAssignOther(user.id)
+                  }}
+                  className="dropdown-item"
+                >
+                  {user.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   const handleCardClick = (e) => {
     // Nie otwieraj modalu na desktop (>= 640px)
@@ -282,68 +349,12 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
 
       {order.status === 'active' && (
         <div className="assignment-section" onClick={(e) => e.stopPropagation()}>
-          <div className="assignment-actions-compact">
-            {isCurrentUserAssigned ? (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleUnassignSelf()
-                }}
-                className="btn-compact btn-secondary"
-                disabled={!isOnline}
-              >
-                Wypisz się
-              </button>
-            ) : (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleAssignSelf()
-                }}
-                className="btn-compact btn-primary"
-                disabled={isMaxAssignmentsReached || !isOnline}
-              >
-                Zapisz się
-              </button>
-            )}
-
-            <div className="assign-other-dropdown">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setShowAssignDropdown(!showAssignDropdown)
-                }}
-                className="btn-compact btn-secondary"
-                disabled={availableUsers.length === 0 || isMaxAssignmentsReached || !isOnline}
-                title={isMaxAssignmentsReached ? 'Osiągnięto maksymalną liczbę przypisanych (10)' : ''}
-              >
-                Przypisz
-              </button>
-
-              {showAssignDropdown && availableUsers.length > 0 && (
-                <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
-                  {availableUsers.map(user => (
-                    <button
-                      key={user.id}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleAssignOther(user.id)
-                      }}
-                      className="dropdown-item"
-                    >
-                      {user.name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-          </div>
+          {renderAssignmentButtons()}
         </div>
       )}
 
       {showHistory && (assignments.length > 0 || edits.length > 0) && (
-        <div className="assignment-section" onClick={(e) => e.stopPropagation()}>
+        <div className="assignment-history-section" onClick={(e) => e.stopPropagation()}>
           <AssignmentHistory
             assignments={assignments}
             currentUserId={currentUserId}
@@ -356,7 +367,24 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
     {showActionsModal && (
       <div className="modal-overlay" onClick={() => setShowActionsModal(false)}>
         <div className="modal-content modal-actions-menu" onClick={(e) => e.stopPropagation()}>
-          <h3 className="modal-title">{order.plate}</h3>
+          <div className="modal-assignment-header">
+            <div className="modal-header-top-row">
+              <span className="modal-date-time">
+                {formatDate(order.date)}
+                {order.time && ` ${formatTime(order.time)}`}
+                {' — '}
+                {order.plate}
+              </span>
+            </div>
+            <div className="modal-header-location">
+              {order.location}
+            </div>
+          </div>
+
+          <div className="modal-assignment-buttons">
+            {renderAssignmentButtons('modal')}
+          </div>
+
           <div className="modal-actions-list">
             {order.status === 'active' && (
               <>

@@ -5,6 +5,18 @@ Wszystkie istotne zmiany w projekcie System Zleceń Wypożyczalni.
 Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.0.0/),
 wersjonowanie według [Semantic Versioning](https://semver.org/lang/pl/).
 
+## [0.9.5] - 2026-02-23
+
+### Dodane
+- Przyciski "Zapisz się" / "Przypisz" przeniesione do modalu akcji na urządzeniach mobilnych (<640px)
+- Header modalu z datą, godziną i lokalizacją zlecenia
+- Modal zamyka się automatycznie po przypisaniu lub zapisaniu się
+
+### Zmienione
+- Na mobilach `.assignment-section` na karcie jest ukryte — przyciski dostępne wyłącznie w modalu
+- Historia przypisań (📜) działa poprawnie na mobilach (oddzielna klasa `assignment-history-section`)
+- Refactor przycisków przypisywania do helper function `renderAssignmentButtons(variant)`
+
 ## [0.9.4] - 2026-02-23
 
 ### Poprawione
