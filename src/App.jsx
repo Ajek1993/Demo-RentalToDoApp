@@ -10,6 +10,7 @@ import { AvailabilityManager } from './components/AvailabilityManager'
 import { AdminAvailabilityView } from './components/AdminAvailabilityView'
 import { FeedbackModal } from './components/FeedbackModal'
 import KursyList from './components/KursyList'
+import { AdminUserManagement } from './components/AdminUserManagement'
 
 function useDarkMode() {
   const [dark, setDark] = useState(() => {
@@ -34,6 +35,7 @@ function App() {
   const [showAvailability, setShowAvailability] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
   const [showKursy, setShowKursy] = useState(false)
+  const [showUserManagement, setShowUserManagement] = useState(false)
   const [darkMode, toggleDarkMode] = useDarkMode()
   const [showMenu, setShowMenu] = useState(false)
   const [newPassword, setNewPassword] = useState('')
@@ -327,6 +329,16 @@ function App() {
                   <span className="header-menu-icon">🚗</span>
                   Kursy <span className="beta-badge">Beta</span>
                 </button>
+                {isAdmin && (
+                  <button
+                    className="header-menu-item"
+                    onClick={() => { setShowUserManagement(true); setShowMenu(false) }}
+                    disabled={!isOnline}
+                  >
+                    <span className="header-menu-icon">👥</span>
+                    Użytkownicy
+                  </button>
+                )}
                 {supported && (
                   <button
                     className="header-menu-item"
@@ -427,6 +439,10 @@ function App() {
             <KursyList currentUser={user} profile={profile} onClose={() => setShowKursy(false)} isAdmin={isAdmin} />
           </div>
         </div>
+      )}
+
+      {showUserManagement && isAdmin && (
+        <AdminUserManagement onClose={() => setShowUserManagement(false)} />
       )}
 
       <OrderList
