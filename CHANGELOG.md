@@ -5,6 +5,41 @@ Wszystkie istotne zmiany w projekcie System Zleceń Wypożyczalni.
 Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.0.0/),
 wersjonowanie według [Semantic Versioning](https://semver.org/lang/pl/).
 
+## [0.9.6] - 2026-02-23
+
+### Dodane
+- Pełna zgodność WCAG 2.1 AA — focus trap, Escape, przywracanie focusu w modalach (Modal.jsx)
+- Skip navigation link (`Przejdź do treści`) dla nawigacji klawiaturą
+- Klasa `.sr-only` i globalne reguły `focus-visible` w CSS
+- `role="dialog"` + `aria-modal` + `aria-label` na wszystkich 14 modalach w aplikacji
+- `role="tablist"` / `role="tab"` / `aria-selected` na zakładkach zleceń
+- `role="menu"` / `role="menuitem"` w dropdownie przypisywania i menu hamburgera
+- `role="alert"` + `aria-live="assertive"` na banerze offline
+- `aria-pressed` na przyciskach toggle (filtry, dyspozycyjność)
+- `aria-expanded` + `aria-controls` na elementach rozwijanych
+- `aria-hidden="true"` na dekoracyjnych emoji i ikonach SVG
+- Powiązanie `htmlFor`/`id` dla wszystkich pól formularzy (LoginForm, CompleteProfile, OrderForm, KursyList, AvailabilityManager, AdminUserManagement, FeedbackModal)
+- `<article>` dla kart zleceń, `<section>` dla grup dat, `<main id="main-content">` dla treści
+- `lang="pl"` w index.html (wcześniej: `lang="en"`)
+
+### Zmienione
+- Hierarchia nagłówków: `h4` → `h3` w AssignmentHistory i AdminAvailabilityView
+- Box-shadow focus zwiększony z `0.1` → `0.3` opacity (lepszy kontrast wskaźnika focusu)
+- Dodano `box-shadow` do selektorów `.period-select`, `.extra-filter-input`, `.kurs-form input` przy focusie
+- Opacity tekstu "brak nazwy" zwiększone z `0.45` → `0.6` (kontrast)
+
+## [0.9.5] - 2026-02-23
+
+### Dodane
+- Przyciski "Zapisz się" / "Przypisz" przeniesione do modalu akcji na urządzeniach mobilnych (<640px)
+- Header modalu z datą, godziną i lokalizacją zlecenia
+- Modal zamyka się automatycznie po przypisaniu lub zapisaniu się
+
+### Zmienione
+- Na mobilach `.assignment-section` na karcie jest ukryte — przyciski dostępne wyłącznie w modalu
+- Historia przypisań (📜) działa poprawnie na mobilach (oddzielna klasa `assignment-history-section`)
+- Refactor przycisków przypisywania do helper function `renderAssignmentButtons(variant)`
+
 ## [0.9.4] - 2026-02-23
 
 ### Poprawione

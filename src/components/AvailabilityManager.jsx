@@ -155,13 +155,14 @@ export function AvailabilityManager({ onClose }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content avail-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-content avail-modal" role="dialog" aria-modal="true" aria-label="Moja dyspozycyjność" onClick={(e) => e.stopPropagation()}>
         <h2>Moja dyspozycyjność</h2>
 
         <div className="avail-week-nav">
           <button
             className="btn-compact btn-secondary"
             onClick={() => setWeekOffset(prev => prev - 1)}
+            aria-label="Poprzedni tydzień"
           >
             &larr;
           </button>
@@ -169,6 +170,7 @@ export function AvailabilityManager({ onClose }) {
           <button
             className="btn-compact btn-secondary"
             onClick={() => setWeekOffset(prev => prev + 1)}
+            aria-label="Następny tydzień"
           >
             &rarr;
           </button>
@@ -207,12 +209,14 @@ export function AvailabilityManager({ onClose }) {
             <div className="avail-toggles">
               <button
                 className={`avail-fullday-toggle ${isFullDay ? 'active' : ''}`}
+                aria-pressed={isFullDay}
                 onClick={handleToggleFullDay}
               >
                 Cały dzień
               </button>
               <button
                 className={`avail-fullday-toggle ${isUnavailable ? 'active unavailable' : ''}`}
+                aria-pressed={isUnavailable}
                 onClick={handleToggleUnavailable}
               >
                 Brak
@@ -223,13 +227,17 @@ export function AvailabilityManager({ onClose }) {
               <div className="avail-slots-list">
                 {daySlots.map((slot, index) => (
                   <div key={index} className="avail-slot-row">
+                    <label htmlFor={`slot-start-${index}`} className="sr-only">Godzina od</label>
                     <input
+                      id={`slot-start-${index}`}
                       type="time"
                       value={slot.start_time}
                       onChange={(e) => handleSlotChange(index, 'start_time', e.target.value)}
                     />
-                    <span className="avail-slot-separator">-</span>
+                    <span className="avail-slot-separator" aria-hidden="true">-</span>
+                    <label htmlFor={`slot-end-${index}`} className="sr-only">Godzina do</label>
                     <input
+                      id={`slot-end-${index}`}
                       type="time"
                       value={slot.end_time}
                       onChange={(e) => handleSlotChange(index, 'end_time', e.target.value)}
@@ -238,6 +246,7 @@ export function AvailabilityManager({ onClose }) {
                       <button
                         className="btn-icon btn-danger avail-remove-slot"
                         onClick={() => handleRemoveSlot(index)}
+                        aria-label="Usuń slot czasowy"
                       >
                         &times;
                       </button>

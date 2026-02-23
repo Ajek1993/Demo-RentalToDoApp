@@ -292,7 +292,7 @@ button.btn-primary {
 .search-input:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
 }
 
 .search-input::placeholder {
@@ -363,7 +363,7 @@ button.btn-primary {
 .date-range-input:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
 }
 
 .filter-chip {
@@ -890,7 +890,7 @@ button.btn-primary {
 .form-group textarea:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
 }
 
 .form-group textarea {
@@ -1127,7 +1127,8 @@ button.btn-primary {
 }
 
 /* Assignment Section */
-.assignment-section {
+.assignment-section,
+.assignment-history-section {
   margin-top: 0.75rem;
   padding-top: 0.75rem;
   border-top: 1px solid var(--gray-200);
@@ -1198,8 +1199,8 @@ button.btn-primary {
 }
 
 /* Assignment History */
-.assignment-history h4,
-.edit-history-section h4 {
+.assignment-history h3,
+.edit-history-section h3 {
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--gray-500);
@@ -1495,7 +1496,7 @@ button.btn-primary {
 .auth-field input:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
 }
 
 .auth-error {
@@ -1979,7 +1980,7 @@ button.btn-primary {
 .insurance-select:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
 }
 
 /* Badge ubezpieczyciela na karcie zlecenia */
@@ -2143,6 +2144,7 @@ button.btn-primary {
 .period-select:focus {
   outline: none;
   border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
 }
 
 .kursy-stats {
@@ -2215,6 +2217,7 @@ button.btn-primary {
 .extra-filter-input:focus {
   border-color: var(--primary-color);
   outline: none;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
 }
 
 @media (max-width: 500px) {
@@ -2258,6 +2261,7 @@ button.btn-primary {
 
 .kurs-form input:focus {
   border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
 }
 
 .kurs-form .button {
@@ -2411,7 +2415,7 @@ button.btn-primary {
   margin-bottom: 0;
 }
 
-.admin-avail-day-section h4 {
+.admin-avail-day-section h3 {
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--gray-700);
@@ -2691,4 +2695,129 @@ button.btn-danger {
   height: 4px;
   border-radius: 50%;
   background: var(--gray-400);
+}
+
+/* ===================== Modal Assignment Header & Buttons (Mobile) ===================== */
+
+.modal-assignment-header {
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--gray-300);
+}
+
+.modal-header-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.modal-date-time {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--gray-800);
+}
+
+.modal-plate {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--gray-800);
+}
+
+.modal-header-location {
+  text-align: left;
+  color: var(--gray-600);
+  font-size: 0.95rem;
+}
+
+.modal-assignment-buttons {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.modal-assignment-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.modal-assignment-actions > button,
+.modal-assignment-actions > .assign-other-dropdown {
+  flex: 1;
+}
+
+.modal-assignment-actions > button,
+.modal-assignment-actions > .assign-other-dropdown > button {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  min-height: 52px;
+  height: auto;
+}
+
+@media (max-width: 639px) {
+  .assignment-section {
+    display: none !important;
+  }
+}
+
+@media (min-width: 640px) {
+  .modal-assignment-header,
+  .modal-assignment-buttons {
+    display: none !important;
+  }
+}
+
+/* Focus visible - keyboard navigation indicators */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Screen reader only - visually hidden but accessible */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip navigation link */
+.skip-nav {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.skip-nav:focus {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  width: auto;
+  height: auto;
+  padding: 8px 16px;
+  background: var(--primary-color);
+  color: white;
+  z-index: 10000;
+  clip: auto;
+  overflow: visible;
+  border-radius: 4px;
+  font-weight: 600;
+  text-decoration: none;
 }

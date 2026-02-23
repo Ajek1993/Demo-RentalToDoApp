@@ -272,6 +272,7 @@ export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
               key={type}
               type="button"
               className={`operation-type-btn ${operationType === type ? 'selected' : ''}`}
+              aria-pressed={operationType === type}
               onClick={() => {
                 const newType = operationType === type ? '' : type
                 setOperationType(newType)
@@ -353,17 +354,22 @@ export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
           )}
         </label>
         {ocSprwacy && (
-          <select
-            name="insurance_company"
-            value={formData.insurance_company || ''}
-            onChange={(e) => setFormData(prev => ({ ...prev, insurance_company: e.target.value }))}
-            disabled={submitting}
-            className="insurance-select"
-          >
-            {INSURANCE_COMPANIES.map(company => (
-              <option key={company} value={company}>{company}</option>
-            ))}
-          </select>
+          <>
+            <label htmlFor="insurance-company-select" className="sr-only">Ubezpieczyciel OC</label>
+            <select
+              id="insurance-company-select"
+              name="insurance_company"
+              value={formData.insurance_company || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, insurance_company: e.target.value }))}
+              disabled={submitting}
+              className="insurance-select"
+              aria-label="Wybierz ubezpieczyciela"
+            >
+              {INSURANCE_COMPANIES.map(company => (
+                <option key={company} value={company}>{company}</option>
+              ))}
+            </select>
+          </>
         )}
       </div>
 

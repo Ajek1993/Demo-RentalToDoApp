@@ -81,6 +81,9 @@ export function AdminUserManagement({ onClose }) {
     <div className="modal-overlay" onClick={onClose}>
       <div
         className="modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Zarządzanie użytkownikami"
         onClick={e => e.stopPropagation()}
         style={{ maxWidth: 540, width: '95%' }}
       >
@@ -95,7 +98,9 @@ export function AdminUserManagement({ onClose }) {
             Wyślij zaproszenie
           </h3>
           <form onSubmit={handleInvite} style={{ display: 'flex', gap: 8 }}>
+            <label htmlFor="invite-email" className="sr-only">Adres email zaproszenia</label>
             <input
+              id="invite-email"
               type="email"
               placeholder="adres@email.com"
               value={inviteEmail}
@@ -136,7 +141,7 @@ export function AdminUserManagement({ onClose }) {
                 <div key={u.id} className="admin-user-row">
                   <div className="admin-user-info">
                     <div className="admin-user-name">
-                      {u.name || <span style={{ opacity: 0.45, fontStyle: 'italic' }}>brak nazwy</span>}
+                      {u.name || <span style={{ opacity: 0.6, fontStyle: 'italic' }}>brak nazwy</span>}
                       {u.role === 'admin' && (
                         <span className="admin-badge">admin</span>
                       )}
@@ -164,6 +169,9 @@ export function AdminUserManagement({ onClose }) {
           <div className="modal-overlay" onClick={() => !deleteLoading && setDeleteConfirmId(null)}>
             <div
               className="modal-content"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Potwierdzenie usunięcia użytkownika"
               onClick={e => e.stopPropagation()}
               style={{ maxWidth: 360 }}
             >

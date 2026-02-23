@@ -30,7 +30,7 @@ export function OfflineBanner() {
   if (isOnline) return null
 
   return (
-    <div className="offline-banner">
+    <div className="offline-banner" role="alert" aria-live="assertive" aria-atomic="true">
       Brak połączenia z internetem
     </div>
   )

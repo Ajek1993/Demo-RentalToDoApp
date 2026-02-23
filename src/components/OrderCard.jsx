@@ -91,6 +91,7 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
     }
     await onAssign(order.id, currentUserId, currentUserId)
     await loadAssignments()
+    setShowActionsModal(false)
   }
 
   const handleUnassignSelf = () => {
@@ -116,6 +117,7 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
     await onAssign(order.id, userId, currentUserId)
     await loadAssignments()
     setShowAssignDropdown(false)
+    setShowActionsModal(false)
   }
 
   const availableUsers = allUsers.filter(
@@ -123,6 +125,74 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
   )
 
   const isMaxAssignmentsReached = activeAssignments.length >= 10
+
+  const renderAssignmentButtons = (variant = 'card') => {
+    if (order.status !== 'active') return null
+
+    const wrapperClass = variant === 'modal' ? 'modal-assignment-actions' : 'assignment-actions-compact'
+
+    return (
+      <div className={wrapperClass}>
+        {isCurrentUserAssigned ? (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              handleUnassignSelf()
+            }}
+            className="btn-compact btn-secondary"
+            disabled={!isOnline}
+          >
+            Wypisz się
+          </button>
+        ) : (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              handleAssignSelf()
+            }}
+            className="btn-compact btn-primary"
+            disabled={isMaxAssignmentsReached || !isOnline}
+          >
+            Zapisz się
+          </button>
+        )}
+
+        <div className="assign-other-dropdown">
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setShowAssignDropdown(!showAssignDropdown)
+            }}
+            className="btn-compact btn-secondary"
+            disabled={availableUsers.length === 0 || isMaxAssignmentsReached || !isOnline}
+            title={isMaxAssignmentsReached ? 'Osiągnięto maksymalną liczbę przypisanych (10)' : ''}
+            aria-expanded={showAssignDropdown}
+            aria-haspopup="true"
+          >
+            Przypisz
+          </button>
+
+          {showAssignDropdown && availableUsers.length > 0 && (
+            <div className="dropdown-menu" role="menu" onClick={(e) => e.stopPropagation()}>
+              {availableUsers.map(user => (
+                <button
+                  key={user.id}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleAssignOther(user.id)
+                  }}
+                  className="dropdown-item"
+                  role="menuitem"
+                >
+                  {user.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   const handleCardClick = (e) => {
     // Nie otwieraj modalu na desktop (>= 640px)
@@ -157,7 +227,7 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
 
   return (
     <>
-      <div className={`order-card status-${order.status}`} onClick={handleCardClick}>
+      <article className={`order-card status-${order.status}`} onClick={handleCardClick}>
         <div className="order-top-row">
             {activeAssignments.length > 0 && activeAssignments[0] ? (
               <span className="first-assigned-badge">
@@ -175,6 +245,7 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
                     setShowHistory(!showHistory)
                   }}
                   title="Historia"
+                  aria-label="Historia przypisań"
                 >
                   📜
                   {activeAssignments.length > 0 && (
@@ -190,6 +261,7 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
                     setShowNotesPopup(!showNotesPopup)
                   }}
                   title="Notatki"
+                  aria-label="Pokaż notatki"
                 >
                   i
                 </button>
@@ -223,6 +295,7 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
               }}
               className="btn-icon btn-print-oc"
               title={`Drukuj OC - ${order.insurance_company}`}
+              aria-label={`Drukuj dokument OC ${order.insurance_company}`}
             >
               🖨️
             </button>
@@ -232,10 +305,10 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
               <button onClick={() => onComplete(order.id)} className="btn-complete btn-success" disabled={!isOnline}>
                 Zakończ
               </button>
-              <button onClick={() => onEdit(order)} className="btn-icon btn-secondary" title="Edytuj" disabled={!isOnline}>
+              <button onClick={() => onEdit(order)} className="btn-icon btn-secondary" title="Edytuj" aria-label="Edytuj zlecenie" disabled={!isOnline}>
                 ✏️
               </button>
-              <button onClick={() => onDelete(order.id)} className="btn-icon btn-danger" title="Usuń" disabled={!isOnline}>
+              <button onClick={() => onDelete(order.id)} className="btn-icon btn-danger" title="Usuń" aria-label="Usuń zlecenie" disabled={!isOnline}>
                 ✕
               </button>
             </>
@@ -243,10 +316,10 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
 
           {order.status === 'completed' && (
             <>
-              <button onClick={() => onRestore(order.id)} className="btn-icon btn-primary" title="Przywróć" disabled={!isOnline}>
+              <button onClick={() => onRestore(order.id)} className="btn-icon btn-primary" title="Przywróć" aria-label="Przywróć zlecenie" disabled={!isOnline}>
                 ↶
               </button>
-              <button onClick={() => onDelete(order.id)} className="btn-icon btn-danger" title="Usuń" disabled={!isOnline}>
+              <button onClick={() => onDelete(order.id)} className="btn-icon btn-danger" title="Usuń" aria-label="Usuń zlecenie" disabled={!isOnline}>
                 ✕
               </button>
             </>
@@ -254,11 +327,11 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
 
           {order.status === 'deleted' && (
             <>
-              <button onClick={() => onRestore(order.id)} className="btn-icon btn-primary" title="Przywróć" disabled={!isOnline}>
+              <button onClick={() => onRestore(order.id)} className="btn-icon btn-primary" title="Przywróć" aria-label="Przywróć zlecenie" disabled={!isOnline}>
                 ↶
               </button>
               {isAdmin && (
-                <button onClick={() => setShowPermanentDeleteConfirm(true)} className="btn-icon btn-danger" title="Usuń na stałe" disabled={!isOnline}>
+                <button onClick={() => setShowPermanentDeleteConfirm(true)} className="btn-icon btn-danger" title="Usuń na stałe" aria-label="Usuń zlecenie na stałe" disabled={!isOnline}>
                   🗑️
                 </button>
               )}
@@ -282,68 +355,12 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
 
       {order.status === 'active' && (
         <div className="assignment-section" onClick={(e) => e.stopPropagation()}>
-          <div className="assignment-actions-compact">
-            {isCurrentUserAssigned ? (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleUnassignSelf()
-                }}
-                className="btn-compact btn-secondary"
-                disabled={!isOnline}
-              >
-                Wypisz się
-              </button>
-            ) : (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleAssignSelf()
-                }}
-                className="btn-compact btn-primary"
-                disabled={isMaxAssignmentsReached || !isOnline}
-              >
-                Zapisz się
-              </button>
-            )}
-
-            <div className="assign-other-dropdown">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setShowAssignDropdown(!showAssignDropdown)
-                }}
-                className="btn-compact btn-secondary"
-                disabled={availableUsers.length === 0 || isMaxAssignmentsReached || !isOnline}
-                title={isMaxAssignmentsReached ? 'Osiągnięto maksymalną liczbę przypisanych (10)' : ''}
-              >
-                Przypisz
-              </button>
-
-              {showAssignDropdown && availableUsers.length > 0 && (
-                <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
-                  {availableUsers.map(user => (
-                    <button
-                      key={user.id}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleAssignOther(user.id)
-                      }}
-                      className="dropdown-item"
-                    >
-                      {user.name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-          </div>
+          {renderAssignmentButtons()}
         </div>
       )}
 
       {showHistory && (assignments.length > 0 || edits.length > 0) && (
-        <div className="assignment-section" onClick={(e) => e.stopPropagation()}>
+        <div className="assignment-history-section" onClick={(e) => e.stopPropagation()}>
           <AssignmentHistory
             assignments={assignments}
             currentUserId={currentUserId}
@@ -351,12 +368,29 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
           />
         </div>
       )}
-    </div>
+    </article>
 
     {showActionsModal && (
       <div className="modal-overlay" onClick={() => setShowActionsModal(false)}>
-        <div className="modal-content modal-actions-menu" onClick={(e) => e.stopPropagation()}>
-          <h3 className="modal-title">{order.plate}</h3>
+        <div className="modal-content modal-actions-menu" role="dialog" aria-modal="true" aria-label="Akcje zlecenia" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-assignment-header">
+            <div className="modal-header-top-row">
+              <span className="modal-date-time">
+                {formatDate(order.date)}
+                {order.time && ` ${formatTime(order.time)}`}
+                {' — '}
+                {order.plate}
+              </span>
+            </div>
+            <div className="modal-header-location">
+              {order.location}
+            </div>
+          </div>
+
+          <div className="modal-assignment-buttons">
+            {renderAssignmentButtons('modal')}
+          </div>
+
           <div className="modal-actions-list">
             {order.status === 'active' && (
               <>
@@ -448,7 +482,7 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
 
     {showUnassignConfirm && (
       <div className="modal-overlay" onClick={handleCancelUnassign}>
-        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-content" role="dialog" aria-modal="true" aria-label="Potwierdzenie wypisania" onClick={(e) => e.stopPropagation()}>
           <h2>Potwierdzenie wypisania</h2>
           <p>Czy na pewno chcesz wypisać się z tego zlecenia?</p>
           <div className="modal-actions">
@@ -465,7 +499,7 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
 
     {showPermanentDeleteConfirm && (
       <div className="modal-overlay" onClick={() => setShowPermanentDeleteConfirm(false)}>
-        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-content" role="dialog" aria-modal="true" aria-label="Trwałe usunięcie zlecenia" onClick={(e) => e.stopPropagation()}>
           <h2>Trwałe usunięcie</h2>
           <p>Czy na pewno chcesz <strong>na stałe</strong> usunąć zlecenie <strong>{order.plate}</strong>?</p>
           <p style={{ color: '#dc2626', fontSize: '0.9em' }}>Ta operacja jest nieodwracalna - zlecenie i cała jego historia zostaną usunięte z bazy danych.</p>

@@ -134,8 +134,9 @@ export function LoginForm() {
               </p>
               <form onSubmit={handleResetPassword}>
                 <div className="auth-field">
-                  <label>Email:</label>
+                  <label htmlFor="reset-email">Email:</label>
                   <input
+                    id="reset-email"
                     type="email"
                     value={resetEmail}
                     onChange={(e) => setResetEmail(e.target.value)}
@@ -173,8 +174,9 @@ export function LoginForm() {
         <form onSubmit={handleSubmit}>
           {isSignUp && (
             <div className="auth-field">
-              <label>Imię i nazwisko:</label>
+              <label htmlFor="login-name">Imię i nazwisko:</label>
               <input
+                id="login-name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -184,8 +186,9 @@ export function LoginForm() {
           )}
 
           <div className="auth-field">
-            <label>Email:</label>
+            <label htmlFor="login-email">Email:</label>
             <input
+              id="login-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -194,8 +197,9 @@ export function LoginForm() {
           </div>
 
           <div className="auth-field">
-            <label>Hasło:</label>
+            <label htmlFor="login-password">Hasło:</label>
             <input
+              id="login-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
