@@ -11,6 +11,7 @@ import { AdminAvailabilityView } from './components/AdminAvailabilityView'
 import { FeedbackModal } from './components/FeedbackModal'
 import KursyList from './components/KursyList'
 import { AdminUserManagement } from './components/AdminUserManagement'
+import { CompleteProfile } from './components/CompleteProfile'
 
 function useDarkMode() {
   const [dark, setDark] = useState(() => {
@@ -28,7 +29,7 @@ function useDarkMode() {
 }
 
 function App() {
-  const { user, profile, loading, signOut, passwordRecovery, updatePassword, isAdmin } = useAuth()
+  const { user, profile, loading, signOut, passwordRecovery, updatePassword, isAdmin, needsProfileSetup } = useAuth()
   const isOnline = useOnlineStatus()
   const { subscribed, supported, subscribe, unsubscribe, loading: pushLoading } = usePushNotifications()
   const [showPushSettings, setShowPushSettings] = useState(false)
@@ -132,6 +133,10 @@ function App() {
 
   if (!user) {
     return <LoginForm />
+  }
+
+  if (needsProfileSetup) {
+    return <CompleteProfile />
   }
 
   if (passwordRecovery) {
