@@ -1,5 +1,32 @@
 const CHANGELOG = [
   {
+    version: '0.9.6',
+    date: '2026-02-23',
+    changes: [
+      'Pełna zgodność WCAG 2.1 AA (focus trap, ARIA roles, semantic HTML)',
+      'Skip navigation link dla nawigacji klawiaturą',
+      'Powiązanie htmlFor/id dla wszystkich pól formularzy',
+    ],
+  },
+  {
+    version: '0.9.5',
+    date: '2026-02-23',
+    changes: [
+      'Przyciski "Zapisz się" / "Przypisz" przeniesione do modalu akcji na mobile',
+      'Header modalu z datą, godziną i lokalizacją zlecenia',
+      'Modal zamyka się automatycznie po przypisaniu lub zapisaniu się',
+    ],
+  },
+  {
+    version: '0.9.4',
+    date: '2026-02-23',
+    changes: [
+      'Automatyczne przekierowanie po uzupełnieniu profilu',
+      'Dynamiczne nagłówki CORS w edge functions',
+      'Wyłączona publiczna rejestracja',
+    ],
+  },
+  {
     version: '0.9.3',
     date: '2026-02-22',
     changes: [
