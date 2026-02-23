@@ -2610,7 +2610,11 @@ button.btn-danger {
 /* About Modal */
 .about-modal {
   max-width: 420px;
+  max-height: 60vh;
   text-align: left;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .about-version {
@@ -2639,6 +2643,12 @@ button.btn-danger {
   color: var(--gray-500);
   font-size: 0.875rem;
   margin-bottom: 1.25rem;
+}
+
+.about-changelog {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .about-changelog h3 {
