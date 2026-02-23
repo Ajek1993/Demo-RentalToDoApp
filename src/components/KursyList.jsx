@@ -292,7 +292,7 @@ export default function KursyList({ currentUser, profile, onClose, isAdmin }) {
 
   return (
     <div className="kursy-panel">
-      <button type="button" className="panel-close" onClick={onClose}>
+      <button type="button" className="panel-close" onClick={onClose} aria-label="Zamknij panel kursów">
         X
       </button>
 
@@ -347,6 +347,8 @@ export default function KursyList({ currentUser, profile, onClose, isAdmin }) {
 
           <button
             className="button secondary"
+            aria-expanded={filterDisplay}
+            aria-controls="kurs-extra-filters"
             onClick={() => setFilterDisplay((d) => !d)}
             style={{ marginBottom: "12px" }}
           >
@@ -354,36 +356,39 @@ export default function KursyList({ currentUser, profile, onClose, isAdmin }) {
           </button>
 
           {filterDisplay && (
-            <div className="extra-filters" style={{ display: "flex" }}>
-              <label>
+            <div id="kurs-extra-filters" className="extra-filters" style={{ display: "flex" }}>
+              <label htmlFor="kurs-filter-date">
                 Data:
-                <input
-                  type="date"
-                  value={filterDate}
-                  onChange={(e) => setFilterDate(e.target.value)}
-                  className="extra-filter-input"
-                />
               </label>
-              <label>
+              <input
+                id="kurs-filter-date"
+                type="date"
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+                className="extra-filter-input"
+              />
+              <label htmlFor="kurs-filter-nr">
                 Nr rejestracyjny:
-                <input
-                  type="text"
-                  value={filterNr}
-                  onChange={(e) => setFilterNr(e.target.value)}
-                  placeholder="np. KR12345"
-                  className="extra-filter-input"
-                />
               </label>
-              <label>
+              <input
+                id="kurs-filter-nr"
+                type="text"
+                value={filterNr}
+                onChange={(e) => setFilterNr(e.target.value)}
+                placeholder="np. KR12345"
+                className="extra-filter-input"
+              />
+              <label htmlFor="kurs-filter-marka">
                 Marka:
-                <input
-                  type="text"
-                  value={filterMarka}
-                  onChange={(e) => setFilterMarka(e.target.value)}
-                  placeholder="np. Opel"
-                  className="extra-filter-input"
-                />
               </label>
+              <input
+                id="kurs-filter-marka"
+                type="text"
+                value={filterMarka}
+                onChange={(e) => setFilterMarka(e.target.value)}
+                placeholder="np. Opel"
+                className="extra-filter-input"
+              />
             </div>
           )}
 
@@ -441,9 +446,9 @@ export default function KursyList({ currentUser, profile, onClose, isAdmin }) {
       )}
 
       {editing && (
-        <Modal onClose={() => setEditing(null)}>
+        <Modal onClose={() => setEditing(null)} ariaLabel="Edytuj kurs">
           <div className="kurs-form">
-            <button type="button" className="panel-close" onClick={() => setEditing(null)}>
+            <button type="button" className="panel-close" onClick={() => setEditing(null)} aria-label="Zamknij edycję kursu">
               X
             </button>
             <h3>Edytuj kurs</h3>
@@ -452,60 +457,55 @@ export default function KursyList({ currentUser, profile, onClose, isAdmin }) {
                 Wykonawca: <strong>{editing.wykonawca.name}</strong>
               </p>
             )}
-            <label>
-              Data:
-              <input
-                type="date"
-                value={editData}
-                onChange={(e) => setEditData(e.target.value)}
-              />
-            </label>
-            <label>
-              Nr rejestracyjny:
-              <input
-                type="text"
-                value={editNrRej}
-                onChange={(e) => handleNrRejChange(e.target.value)}
-                placeholder="np. KR12345"
-                maxLength={10}
-              />
-              {editErrors.nr_rej && <span className="error">{editErrors.nr_rej}</span>}
-            </label>
-            <label>
-              Marka:
-              <input
-                type="text"
-                value={editMarka}
-                onChange={(e) => setEditMarka(e.target.value)}
-                placeholder="np. Opel Astra (auto-uzupełnienie z CSV)"
-              />
-            </label>
-            <label>
-              Adres (miejsce wydania):
-              <input
-                type="text"
-                value={editAdres}
-                onChange={(e) => setEditAdres(e.target.value)}
-                placeholder="np. wydanie Balice OC"
-                maxLength={200}
-              />
-              {editErrors.adres && <span className="error">{editErrors.adres}</span>}
-              {detectedCity && detectedDistance && (
-                <span className="detected-marka">
-                  {detectedCity}: {detectedDistance} km
-                </span>
-              )}
-            </label>
-            <label>
-              Kwota (zl):
-              <input
-                type="number"
-                min="0"
-                step="1"
-                value={editKwota}
-                onChange={(e) => setEditKwota(e.target.value)}
-              />
-            </label>
+            <label htmlFor="kurs-edit-data">Data:</label>
+            <input
+              id="kurs-edit-data"
+              type="date"
+              value={editData}
+              onChange={(e) => setEditData(e.target.value)}
+            />
+            <label htmlFor="kurs-edit-nrrej">Nr rejestracyjny:</label>
+            <input
+              id="kurs-edit-nrrej"
+              type="text"
+              value={editNrRej}
+              onChange={(e) => handleNrRejChange(e.target.value)}
+              placeholder="np. KR12345"
+              maxLength={10}
+            />
+            {editErrors.nr_rej && <span className="error">{editErrors.nr_rej}</span>}
+            <label htmlFor="kurs-edit-marka">Marka:</label>
+            <input
+              id="kurs-edit-marka"
+              type="text"
+              value={editMarka}
+              onChange={(e) => setEditMarka(e.target.value)}
+              placeholder="np. Opel Astra (auto-uzupełnienie z CSV)"
+            />
+            <label htmlFor="kurs-edit-adres">Adres (miejsce wydania):</label>
+            <input
+              id="kurs-edit-adres"
+              type="text"
+              value={editAdres}
+              onChange={(e) => setEditAdres(e.target.value)}
+              placeholder="np. wydanie Balice OC"
+              maxLength={200}
+            />
+            {editErrors.adres && <span className="error">{editErrors.adres}</span>}
+            {detectedCity && detectedDistance && (
+              <span className="detected-marka">
+                {detectedCity}: {detectedDistance} km
+              </span>
+            )}
+            <label htmlFor="kurs-edit-kwota">Kwota (zl):</label>
+            <input
+              id="kurs-edit-kwota"
+              type="number"
+              min="0"
+              step="1"
+              value={editKwota}
+              onChange={(e) => setEditKwota(e.target.value)}
+            />
             <button
               type="button"
               className="button secondary"

@@ -30,7 +30,7 @@ const CHANGELOG = [
 export function AboutModal({ onClose }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content about-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-content about-modal" role="dialog" aria-modal="true" aria-label="O programie" onClick={(e) => e.stopPropagation()}>
         <h2>O programie</h2>
 
         <div className="about-version">

@@ -46,8 +46,9 @@ export function CompleteProfile() {
         </p>
         <form onSubmit={handleSubmit}>
           <div className="auth-field">
-            <label>Imię i nazwisko</label>
+            <label htmlFor="complete-name">Imię i nazwisko</label>
             <input
+              id="complete-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -57,8 +58,9 @@ export function CompleteProfile() {
             />
           </div>
           <div className="auth-field">
-            <label>Hasło</label>
+            <label htmlFor="complete-password">Hasło</label>
             <input
+              id="complete-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -67,8 +69,9 @@ export function CompleteProfile() {
             />
           </div>
           <div className="auth-field">
-            <label>Potwierdź hasło</label>
+            <label htmlFor="complete-password-confirm">Potwierdź hasło</label>
             <input
+              id="complete-password-confirm"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}

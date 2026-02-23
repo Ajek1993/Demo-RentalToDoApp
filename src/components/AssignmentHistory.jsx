@@ -33,7 +33,7 @@ export function AssignmentHistory({ assignments, currentUserId, edits }) {
     <div className="assignment-history">
       {hasAssignments && (
         <>
-          <h4>Przypisani:</h4>
+          <h3>Przypisani:</h3>
           <ul>
             {activeAssignments.map((assignment, index) => (
               <li
@@ -77,7 +77,7 @@ export function AssignmentHistory({ assignments, currentUserId, edits }) {
 
       {hasEdits && (
         <div className="edit-history-section">
-          <h4>Edycje:</h4>
+          <h3>Edycje:</h3>
           {edits.map((edit) => (
             <div key={edit.id} className="edit-history-item">
               <div className="edit-history-header">

@@ -308,72 +308,83 @@ function App() {
               onClick={() => setShowMenu(v => !v)}
               className="btn-icon"
               title="Menu"
+              aria-label="Menu"
+              aria-expanded={showMenu}
+              aria-haspopup="true"
             >
               ⚙️
             </button>
             {showMenu && (
-              <div className="header-menu">
+              <div className="header-menu" role="menu">
                 <button
                   className="header-menu-item"
+                  role="menuitem"
                   onClick={() => { toggleDarkMode(); setShowMenu(false) }}
                 >
-                  <span className="header-menu-icon">{darkMode ? '☀️' : '🌙'}</span>
+                  <span className="header-menu-icon" aria-hidden="true">{darkMode ? '☀️' : '🌙'}</span>
                   {darkMode ? 'Tryb jasny' : 'Tryb ciemny'}
                 </button>
                 <button
                   className="header-menu-item"
+                  role="menuitem"
                   onClick={() => { setShowAvailability(true); setShowMenu(false) }}
                   disabled={!isOnline}
                 >
-                  <span className="header-menu-icon">📅</span>
+                  <span className="header-menu-icon" aria-hidden="true">📅</span>
                   {isAdmin ? 'Dyspozycyjność' : 'Moja dyspozycyjność'}
                 </button>
                 <button
                   className="header-menu-item"
+                  role="menuitem"
                   onClick={() => { setShowKursy(true); setShowMenu(false) }}
                   disabled={!isOnline}
                 >
-                  <span className="header-menu-icon">🚗</span>
+                  <span className="header-menu-icon" aria-hidden="true">🚗</span>
                   Kursy <span className="beta-badge">Beta</span>
                 </button>
                 {isAdmin && (
                   <button
                     className="header-menu-item"
+                    role="menuitem"
                     onClick={() => { setShowUserManagement(true); setShowMenu(false) }}
                     disabled={!isOnline}
                   >
-                    <span className="header-menu-icon">👥</span>
+                    <span className="header-menu-icon" aria-hidden="true">👥</span>
                     Użytkownicy
                   </button>
                 )}
                 {supported && (
                   <button
                     className="header-menu-item"
+                    role="menuitem"
                     onClick={() => { togglePushSettings(); setShowMenu(false) }}
                     disabled={!isOnline}
                   >
-                    <span className="header-menu-icon">🔔</span>
+                    <span className="header-menu-icon" aria-hidden="true">🔔</span>
                     Powiadomienia
                   </button>
                 )}
                 <button
                   className="header-menu-item"
+                  role="menuitem"
                   onClick={() => { setShowFeedback(true); setShowMenu(false) }}
                   disabled={!isOnline}
                 >
-                  <span className="header-menu-icon">💬</span>
+                  <span className="header-menu-icon" aria-hidden="true">💬</span>
                   Feedback
                 </button>
                 <button
                   className="header-menu-item"
+                  role="menuitem"
                   onClick={() => { setShowAbout(true); setShowMenu(false) }}
                 >
-                  <span className="header-menu-icon">ℹ️</span>
+                  <span className="header-menu-icon" aria-hidden="true">ℹ️</span>
                   O programie
                 </button>
                 <div className="header-menu-divider"></div>
                 <button
                   className="header-menu-item header-menu-item-danger"
+                  role="menuitem"
                   onClick={() => { signOut(); setShowMenu(false) }}
                   disabled={!isOnline}
                 >
@@ -453,7 +464,7 @@ function App() {
 
       {showKursy && (
         <div className="modal-overlay" onClick={() => setShowKursy(false)}>
-          <div className="modal-content kursy-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content kursy-modal" role="dialog" aria-modal="true" aria-label="Kursy" onClick={(e) => e.stopPropagation()}>
             <KursyList currentUser={user} profile={profile} onClose={() => setShowKursy(false)} isAdmin={isAdmin} />
           </div>
         </div>
@@ -463,22 +474,24 @@ function App() {
         <AdminUserManagement onClose={() => setShowUserManagement(false)} />
       )}
 
-      <OrderList
-        currentUser={user}
-        isAdmin={isAdmin}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        showOnlyMine={showOnlyMine}
-        setShowOnlyMine={setShowOnlyMine}
-        dateFrom={dateFrom}
-        setDateFrom={setDateFrom}
-        dateTo={dateTo}
-        setDateTo={setDateTo}
-        showFilters={showFilters}
-        setShowFilters={setShowFilters}
-        showSearch={showSearch}
-        setShowSearch={setShowSearch}
-      />
+      <main id="main-content">
+        <OrderList
+          currentUser={user}
+          isAdmin={isAdmin}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          showOnlyMine={showOnlyMine}
+          setShowOnlyMine={setShowOnlyMine}
+          dateFrom={dateFrom}
+          setDateFrom={setDateFrom}
+          dateTo={dateTo}
+          setDateTo={setDateTo}
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
+          showSearch={showSearch}
+          setShowSearch={setShowSearch}
+        />
+      </main>
     </div>
   )
 }

@@ -73,19 +73,21 @@ export function AdminAvailabilityView({ onClose }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content admin-avail-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-content admin-avail-modal" role="dialog" aria-modal="true" aria-label="Dyspozycyjność kierowców" onClick={(e) => e.stopPropagation()}>
         <h2>Dyspozycyjność kierowców</h2>
 
         <div className="admin-avail-controls">
           <div className="admin-avail-mode">
             <button
               className={`filter-chip ${dateRange === 'single' ? 'active' : ''}`}
+              aria-pressed={dateRange === 'single'}
               onClick={() => setDateRange('single')}
             >
               Jeden dzień
             </button>
             <button
               className={`filter-chip ${dateRange === 'range' ? 'active' : ''}`}
+              aria-pressed={dateRange === 'range'}
               onClick={() => setDateRange('range')}
             >
               Zakres dat
@@ -93,26 +95,26 @@ export function AdminAvailabilityView({ onClose }) {
           </div>
 
           <div className="admin-avail-dates">
-            <label>
+            <label htmlFor="avail-start-date">
               {dateRange === 'single' ? 'Data:' : 'Od:'}
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="date-range-input"
-              />
             </label>
+            <input
+              id="avail-start-date"
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="date-range-input"
+            />
             {dateRange === 'range' && (
               <>
-                <label>
-                  Do:
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="date-range-input"
-                  />
-                </label>
+                <label htmlFor="avail-end-date">Do:</label>
+                <input
+                  id="avail-end-date"
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="date-range-input"
+                />
                 <button
                   className="btn-compact btn-primary"
                   onClick={loadDateRange}
@@ -159,7 +161,7 @@ export function AdminAvailabilityView({ onClose }) {
                 .sort(([a], [b]) => a.localeCompare(b))
                 .map(([date, persons]) => (
                   <div key={date} className="admin-avail-day-section">
-                    <h4>{formatDisplayDate(date)}</h4>
+                    <h3>{formatDisplayDate(date)}</h3>
                     {persons.length === 0 ? (
                       <p className="admin-avail-empty">Brak zgłoszeń</p>
                     ) : (

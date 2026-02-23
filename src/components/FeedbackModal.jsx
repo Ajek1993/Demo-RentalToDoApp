@@ -30,11 +30,13 @@ export function FeedbackModal({ userId, onClose }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 400 }}>
+      <div className="modal-content" role="dialog" aria-modal="true" aria-label="Wyślij feedback" onClick={e => e.stopPropagation()} style={{ maxWidth: 400 }}>
         <h2>Feedback</h2>
         <form onSubmit={handleSubmit} className="order-form">
           <div className="form-group">
+            <label htmlFor="feedback-message">Twój feedback</label>
             <textarea
+              id="feedback-message"
               value={message}
               onChange={e => setMessage(e.target.value)}
               placeholder="Opisz problem lub podziel się sugestią..."

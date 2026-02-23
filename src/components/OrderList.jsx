@@ -226,21 +226,30 @@ export function OrderList({
 
   return (
     <div className="order-list-container">
-      <div className="tabs">
+      <div className="tabs" role="tablist" aria-label="Status zleceń">
         <button
           className={`tab ${activeTab === 'active' ? 'active' : ''}`}
+          role="tab"
+          aria-selected={activeTab === 'active'}
+          id="tab-active"
           onClick={() => setActiveTab('active')}
         >
           Aktywne ({orders.filter(o => o.status === 'active').length})
         </button>
         <button
           className={`tab ${activeTab === 'completed' ? 'active' : ''}`}
+          role="tab"
+          aria-selected={activeTab === 'completed'}
+          id="tab-completed"
           onClick={() => setActiveTab('completed')}
         >
           Zakończone ({orders.filter(o => o.status === 'completed').length})
         </button>
         <button
           className={`tab ${activeTab === 'deleted' ? 'active' : ''}`}
+          role="tab"
+          aria-selected={activeTab === 'deleted'}
+          id="tab-deleted"
           onClick={() => setActiveTab('deleted')}
         >
           Usunięte ({orders.filter(o => o.status === 'deleted').length})
@@ -253,12 +262,15 @@ export function OrderList({
               className={`toolbar-icon-btn ${showFilters ? 'active' : ''} ${(showOnlyMine || dateFrom || dateTo) ? 'has-active-filter' : ''}`}
               onClick={() => setShowFilters(prev => !prev)}
               title="Filtry"
+              aria-label="Pokaż filtry"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
             </button>
             {showSearch ? (
               <div className="search-wrapper search-expanded">
+                <label htmlFor="order-search" className="sr-only">Szukaj zleceń</label>
                 <input
+                  id="order-search"
                   ref={searchInputRef}
                   type="text"
                   className="search-input"
@@ -272,6 +284,7 @@ export function OrderList({
                 <button
                   className="search-clear"
                   onClick={() => { setSearchQuery(''); setShowSearch(false) }}
+                  aria-label="Zamknij wyszukiwanie"
                 >
                   ✕
                 </button>
@@ -282,8 +295,9 @@ export function OrderList({
                 onClick={() => setShowSearch(true)}
                 title="Szukaj"
                 style={{ marginLeft: 'auto' }}
+                aria-label="Szukaj zleceń"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               </button>
             )}
           </div>
@@ -293,19 +307,22 @@ export function OrderList({
             <div className="filter-panel filter-panel-mobile">
               <button
                 className={`filter-chip ${showOnlyMine ? 'active' : ''}`}
+                aria-pressed={showOnlyMine}
                 onClick={() => setShowOnlyMine(prev => !prev)}
               >
                 Moje
               </button>
-              <label className="date-range-label">Od</label>
+              <label htmlFor="filter-date-from" className="date-range-label">Od</label>
               <input
+                id="filter-date-from"
                 type="date"
                 className="date-range-input"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
               />
-              <label className="date-range-label">Do</label>
+              <label htmlFor="filter-date-to" className="date-range-label">Do</label>
               <input
+                id="filter-date-to"
                 type="date"
                 className="date-range-input"
                 value={dateTo}
@@ -315,6 +332,7 @@ export function OrderList({
                 <button
                   className="filter-chip"
                   onClick={() => { setDateFrom(''); setDateTo('') }}
+                  aria-label="Wyczyść filtr dat"
                 >
                   ✕
                 </button>
@@ -336,14 +354,14 @@ export function OrderList({
                 if (group.orders.length === 0) return null
                 const isCollapsed = collapsedGroups.has(key)
                 return (
-                  <div className={`date-group date-group-${key}`} key={key}>
-                    <button className={`date-group-header ${!isCollapsed ? 'expanded' : ''}`} onClick={() => toggleGroup(key)}>
+                  <section className={`date-group date-group-${key}`} key={key} aria-label={group.label}>
+                    <button className={`date-group-header ${!isCollapsed ? 'expanded' : ''}`} aria-expanded={!isCollapsed} aria-controls={`date-group-body-${key}`} onClick={() => toggleGroup(key)}>
                       <span className={`chevron ${isCollapsed ? '' : 'open'}`}>›</span>
                       <span className="date-group-label">{group.label}</span>
                       <span className="date-group-count">{group.orders.length}</span>
                     </button>
                     {!isCollapsed && (
-                      <div className="date-group-body">
+                      <div id={`date-group-body-${key}`} className="date-group-body">
                         {group.orders.map(order => (
                           <OrderCard
                             key={order.id}
@@ -363,7 +381,7 @@ export function OrderList({
                         ))}
                       </div>
                     )}
-                  </div>
+                  </section>
                 )
               })
             ) : (
@@ -387,13 +405,13 @@ export function OrderList({
             )}
           </div>
 
-          <button className="fab" onClick={handleAddOrder} title="Dodaj zlecenie" disabled={!isOnline}>
+          <button className="fab" onClick={handleAddOrder} title="Dodaj zlecenie" aria-label="Dodaj nowe zlecenie" disabled={!isOnline}>
         +
       </button>
 
       {showModal && (
         <div className="modal-overlay" onClick={handleCloseModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" role="dialog" aria-modal="true" aria-label={editingOrder ? 'Edytuj zlecenie' : 'Nowe zlecenie'} onClick={(e) => e.stopPropagation()}>
             <h2>{editingOrder ? 'Edytuj zlecenie' : 'Nowe zlecenie'}</h2>
             <OrderForm
               onSubmit={handleSubmitOrder}
@@ -407,7 +425,7 @@ export function OrderList({
 
       {showDeleteConfirm && (
         <div className="modal-overlay" onClick={handleCancelDelete}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" role="dialog" aria-modal="true" aria-label="Potwierdzenie usunięcia" onClick={(e) => e.stopPropagation()}>
             <h2>Potwierdzenie usunięcia</h2>
             <p>
               {deleteAssignments.length > 0 ? (
@@ -436,7 +454,7 @@ export function OrderList({
 
       {showCompleteConfirm && (
         <div className="modal-overlay" onClick={handleCancelComplete}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" role="dialog" aria-modal="true" aria-label="Potwierdzenie zakończenia" onClick={(e) => e.stopPropagation()}>
             <h2>Potwierdzenie zakończenia</h2>
             <p>
               {completeAssignments.filter(a => !a.unassigned_at).length > 0 ? (
