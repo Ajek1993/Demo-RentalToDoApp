@@ -8,8 +8,18 @@ export function useAuth() {
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [passwordRecovery, setPasswordRecovery] = useState(false)
+  const [needsProfileSetup, setNeedsProfileSetup] = useState(() =>
+    sessionStorage.getItem('pendingProfileSetup') === 'true'
+  )
 
   useEffect(() => {
+    // Wykryj zaproszenie (type=invite w hash URL)
+    const hash = window.location.hash
+    if (hash.includes('type=invite')) {
+      sessionStorage.setItem('pendingProfileSetup', 'true')
+      setNeedsProfileSetup(true)
+    }
+
     // Pobierz aktualną sesję
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
@@ -124,6 +134,26 @@ export function useAuth() {
     }
   }
 
+  async function completeProfile(name, password) {
+    try {
+      const { error: passwordError } = await supabase.auth.updateUser({ password })
+      if (passwordError) throw passwordError
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ name })
+        .eq('id', user.id)
+      if (profileError) throw profileError
+
+      sessionStorage.removeItem('pendingProfileSetup')
+      setNeedsProfileSetup(false)
+      await fetchProfile(user.id)
+      return { error: null }
+    } catch (error) {
+      return { error }
+    }
+  }
+
   const isAdmin = profile?.role === 'admin'
 
   return {
@@ -131,11 +161,13 @@ export function useAuth() {
     profile,
     loading,
     passwordRecovery,
+    needsProfileSetup,
     isAdmin,
     signUp,
     signIn,
     signOut,
     resetPassword,
-    updatePassword
+    updatePassword,
+    completeProfile
   }
 }

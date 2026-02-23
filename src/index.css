@@ -2602,3 +2602,93 @@ button.btn-danger {
   background-color: var(--danger-color);
   color: white;
 }
+
+/* About Modal */
+.about-modal {
+  max-width: 420px;
+  text-align: left;
+}
+
+.about-version {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.about-app-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.about-version-badge {
+  background: var(--primary-color);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+
+.about-description {
+  color: var(--gray-500);
+  font-size: 0.875rem;
+  margin-bottom: 1.25rem;
+}
+
+.about-changelog h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
+
+.about-release {
+  margin-bottom: 0.75rem;
+}
+
+.about-release-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.about-release-version {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--gray-900);
+}
+
+.about-release-date {
+  font-size: 0.75rem;
+  color: var(--gray-400);
+}
+
+.about-release-changes {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.about-release-changes li {
+  font-size: 0.8rem;
+  color: var(--gray-600);
+  padding: 0.1rem 0;
+  padding-left: 0.75rem;
+  position: relative;
+}
+
+.about-release-changes li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55rem;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--gray-400);
+}

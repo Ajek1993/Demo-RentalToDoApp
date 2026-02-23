@@ -5,6 +5,15 @@ Wszystkie istotne zmiany w projekcie System Zleceń Wypożyczalni.
 Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.0.0/),
 wersjonowanie według [Semantic Versioning](https://semver.org/lang/pl/).
 
+## [0.9.4] - 2026-02-23
+
+### Poprawione
+- Automatyczne przekierowanie po uzupełnieniu profilu (bez konieczności F5)
+- Dynamiczne nagłówki CORS w edge functions — obsługa localhost:5173 obok produkcji
+
+### Zmienione
+- Wyłączona publiczna rejestracja (flaga `REGISTRATION_ENABLED` w LoginForm)
+
 ## [0.9.3] - 2026-02-22
 
 ### Dodane
