@@ -6,7 +6,7 @@ import webpush from 'npm:web-push@3.6.7'
 
 // CORS headers
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://to-do-app-abacus.vercel.app',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
@@ -14,6 +14,13 @@ serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
+  }
+
+  // Weryfikacja shared secret — funkcja wywoływana wyłącznie z triggerów PostgreSQL
+  const secret = req.headers.get('X-Internal-Secret')
+  const expectedSecret = Deno.env.get('PUSH_SECRET')
+  if (!expectedSecret || secret !== expectedSecret) {
+    return new Response('Unauthorized', { status: 401, headers: corsHeaders })
   }
 
   try {
@@ -33,7 +40,7 @@ serve(async (req) => {
     )
 
     // Parsuj dane z requestu
-    const { title, body, url, userId } = await req.json()
+    const { title, body, url, userId, targetRole } = await req.json()
 
     // Inicjalizacja Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
@@ -41,11 +48,21 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // Pobierz wszystkie subskrypcje (lub tylko dla konkretnego usera jeśli podano userId)
-    let query = supabase.from('push_subscriptions').select('*')
+    // Pobierz subskrypcje — opcjonalnie filtrowane po roli lub z wykluczeniem usera
+    let query;
 
-    if (userId) {
-      query = query.neq('user_id', userId) // Nie wysyłaj do użytkownika, który wykonał akcję
+    if (targetRole) {
+      // Filtruj po roli użytkownika (inner join z profiles)
+      query = supabase
+        .from('push_subscriptions')
+        .select('*, profiles!inner(role)')
+        .eq('profiles.role', targetRole)
+    } else {
+      query = supabase.from('push_subscriptions').select('*')
+
+      if (userId) {
+        query = query.neq('user_id', userId) // Nie wysyłaj do użytkownika, który wykonał akcję
+      }
     }
 
     const { data: subscriptions, error } = await query

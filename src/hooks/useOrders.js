@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import toast from 'react-hot-toast'
+import { calculatePriceAsync } from '../lib/priceCalculator'
 
 export function useOrders() {
   const [orders, setOrders] = useState([])
@@ -66,7 +67,6 @@ export function useOrders() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'orders' },
         async (payload) => {
-          console.log('🔥 EVENT PRZYSZEDŁ:', payload.eventType, payload.new)
           const { eventType, new: newRow, old: oldRow } = payload
 
           if (eventType === 'INSERT') {
@@ -230,19 +230,20 @@ export function useOrders() {
     }
   }
 
-  async function createOrder({ plate, date, time, location, notes, insurance_company }) {
+  async function createOrder({ plate, date, time, location, notes, insurance_company, is_one_way }) {
     try {
       const { data: { user } } = await supabase.auth.getUser()
 
       const { data, error } = await supabase
         .from('orders')
         .insert([{
-          plate,
+          plate: plate.toUpperCase().trim(),
           date,
-          time,
+          time: time || null,
           location,
           notes,
           insurance_company: insurance_company || null,
+          is_one_way: is_one_way || false,
           status: 'active',
           created_by: user.id
         }])
@@ -261,9 +262,20 @@ export function useOrders() {
 
   async function updateOrder(id, updates, oldOrder) {
     try {
+      // Zamień pusty string time na null (PostgreSQL nie akceptuje pustego stringa dla typu time)
+      const sanitizedUpdates = {
+        ...updates,
+        time: updates.time || null
+      }
+
+      // Konwertuj plate na UPPERCASE
+      if (sanitizedUpdates.plate) {
+        sanitizedUpdates.plate = sanitizedUpdates.plate.toUpperCase().trim()
+      }
+
       const { data, error } = await supabase
         .from('orders')
-        .update(updates)
+        .update(sanitizedUpdates)
         .eq('id', id)
         .select()
         .single()
@@ -272,7 +284,7 @@ export function useOrders() {
 
       // Zapisz diff do order_edits
       if (oldOrder) {
-        const trackFields = ['plate', 'date', 'time', 'location', 'notes', 'insurance_company']
+        const trackFields = ['plate', 'date', 'time', 'location', 'notes', 'insurance_company', 'is_one_way']
         const changes = {}
         for (const field of trackFields) {
           const oldVal = oldOrder[field] ?? ''
@@ -291,6 +303,34 @@ export function useOrders() {
         }
       }
 
+      // Synchronizacja z kursem - jeśli istnieje powiązany kurs, zaktualizuj go
+      const { data: kurs } = await supabase
+        .from('kursy')
+        .select('id')
+        .eq('order_id', id)
+        .maybeSingle()
+
+      if (kurs) {
+        // Przelicz kwotę automatycznie (z obsługą miast z bazy)
+        const isOneWay = updates.is_one_way ?? data.is_one_way ?? false
+        const priceResult = await calculatePriceAsync(
+          updates.location || data.location,
+          updates.insurance_company || data.insurance_company,
+          { isOneWay }
+        )
+
+        await supabase
+          .from('kursy')
+          .update({
+            data: updates.date || data.date,
+            nr_rej: (updates.plate || data.plate)?.toUpperCase()?.trim(),
+            adres: updates.location || data.location,
+            kwota: priceResult.price
+            // marka pozostaje bez zmian (edytowana tylko w zakładce Kursy)
+          })
+          .eq('id', kurs.id)
+      }
+
       // Nie trzeba fetchOrders - realtime załatwi aktualizację
       return { data, error: null }
     } catch (error) {
@@ -301,6 +341,14 @@ export function useOrders() {
 
   async function deleteOrder(id) {
     try {
+      // Usuń kurs powiązany z tym zleceniem (jeśli istnieje)
+      const { error: deleteKursError } = await supabase
+        .rpc('delete_kurs_by_order_id', { p_order_id: id })
+
+      if (deleteKursError) {
+        console.error('Error deleting kurs:', deleteKursError)
+      }
+
       const { data, error } = await supabase
         .from('orders')
         .update({ status: 'deleted' })
@@ -329,6 +377,46 @@ export function useOrders() {
 
       if (error) throw error
 
+      // Automatyczne tworzenie kursu dla pierwszego przypisanego
+      try {
+        // Pobierz pierwszego przypisanego (najwcześniejszy assigned_at, aktywny)
+        const { data: assignments } = await supabase
+          .from('assignments')
+          .select('user_id')
+          .eq('order_id', id)
+          .is('unassigned_at', null)
+          .order('assigned_at', { ascending: true })
+          .limit(1)
+
+        const wykonawcaId = assignments?.[0]?.user_id || null
+
+        if (wykonawcaId) {
+          // Oblicz kwotę automatycznie (z obsługą miast z bazy i mnożnika x1,5)
+          const priceResult = await calculatePriceAsync(
+            data.location,
+            data.insurance_company,
+            { isOneWay: data.is_one_way || false }
+          )
+
+          // Utwórz kurs
+          await supabase.from('kursy').insert({
+            user_id: wykonawcaId,
+            wykonawca_id: wykonawcaId,
+            order_id: id,
+            data: data.date,
+            nr_rej: (data.plate || '').toUpperCase().trim(),
+            marka: '',
+            adres: data.location || '',
+            kwota: priceResult.price
+          })
+        }
+      } catch (kursError) {
+        // Ignoruj błąd duplikatu (kurs już istnieje dla tego zlecenia)
+        if (!kursError.message?.includes('duplicate') && !kursError.message?.includes('unique')) {
+          console.error('Error creating kurs:', kursError)
+        }
+      }
+
       // Nie trzeba fetchOrders - realtime załatwi aktualizację
       return { data, error: null }
     } catch (error) {
@@ -339,6 +427,14 @@ export function useOrders() {
 
   async function restoreOrder(id) {
     try {
+      // Usuń kurs powiązany z tym zleceniem (używa funkcji SECURITY DEFINER)
+      const { error: deleteError } = await supabase
+        .rpc('delete_kurs_by_order_id', { p_order_id: id })
+
+      if (deleteError) {
+        console.error('Error deleting kurs:', deleteError)
+      }
+
       const { data, error } = await supabase
         .from('orders')
         .update({ status: 'active' })
@@ -352,6 +448,53 @@ export function useOrders() {
       return { data, error: null }
     } catch (error) {
       console.error('Error restoring order:', error)
+      return { data: null, error }
+    }
+  }
+
+  async function permanentlyDeleteOrder(id) {
+    try {
+      // Usuń kurs powiązany z tym zleceniem (jeśli istnieje)
+      const { error: deleteKursError } = await supabase
+        .rpc('delete_kurs_by_order_id', { p_order_id: id })
+
+      if (deleteKursError) {
+        console.error('Error deleting kurs:', deleteKursError)
+      }
+
+      // Usuń przypisania
+      const { error: assignmentsError } = await supabase
+        .from('assignments')
+        .delete()
+        .eq('order_id', id)
+
+      if (assignmentsError) {
+        console.error('Error deleting assignments:', assignmentsError)
+      }
+
+      // Usuń historię edycji
+      const { error: editsError } = await supabase
+        .from('order_edits')
+        .delete()
+        .eq('order_id', id)
+
+      if (editsError) {
+        console.error('Error deleting order_edits:', editsError)
+      }
+
+      // Usuń zlecenie na stałe
+      const { error } = await supabase
+        .from('orders')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+
+      toast.success('Zlecenie usunięte na stałe', { icon: '🗑️' })
+      return { data: null, error: null }
+    } catch (error) {
+      console.error('Error permanently deleting order:', error)
+      toast.error(`Błąd usuwania: ${error.message}`)
       return { data: null, error }
     }
   }
@@ -458,6 +601,7 @@ export function useOrders() {
     deleteOrder,
     completeOrder,
     restoreOrder,
+    permanentlyDeleteOrder,
     assignToOrder,
     unassignFromOrder,
     fetchAssignments,
