@@ -12,6 +12,7 @@ import { FeedbackModal } from './components/FeedbackModal'
 import KursyList from './components/KursyList'
 import { AdminUserManagement } from './components/AdminUserManagement'
 import { CompleteProfile } from './components/CompleteProfile'
+import { AboutModal } from './components/AboutModal'
 
 function useDarkMode() {
   const [dark, setDark] = useState(() => {
@@ -37,6 +38,7 @@ function App() {
   const [showFeedback, setShowFeedback] = useState(false)
   const [showKursy, setShowKursy] = useState(false)
   const [showUserManagement, setShowUserManagement] = useState(false)
+  const [showAbout, setShowAbout] = useState(false)
   const [darkMode, toggleDarkMode] = useDarkMode()
   const [showMenu, setShowMenu] = useState(false)
   const [newPassword, setNewPassword] = useState('')
@@ -362,6 +364,13 @@ function App() {
                   <span className="header-menu-icon">💬</span>
                   Feedback
                 </button>
+                <button
+                  className="header-menu-item"
+                  onClick={() => { setShowAbout(true); setShowMenu(false) }}
+                >
+                  <span className="header-menu-icon">ℹ️</span>
+                  O programie
+                </button>
                 <div className="header-menu-divider"></div>
                 <button
                   className="header-menu-item header-menu-item-danger"
@@ -436,6 +445,10 @@ function App() {
 
       {showFeedback && (
         <FeedbackModal userId={user.id} onClose={() => setShowFeedback(false)} />
+      )}
+
+      {showAbout && (
+        <AboutModal onClose={() => setShowAbout(false)} />
       )}
 
       {showKursy && (

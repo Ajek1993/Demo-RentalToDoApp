@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 
+const REGISTRATION_ENABLED = false
+
 export function LoginForm() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
@@ -28,6 +30,11 @@ export function LoginForm() {
     }
 
     try {
+      if (isSignUp && !REGISTRATION_ENABLED) {
+        setError('Rejestracja jest wyłączona')
+        setLoading(false)
+        return
+      }
       if (isSignUp) {
         const { error } = await signUp(email, password, name)
         if (error) throw error
@@ -219,17 +226,19 @@ export function LoginForm() {
           </div>
         )}
 
-        <div className="auth-switch">
-          <button
-            onClick={() => {
-              setIsSignUp(!isSignUp)
-              setError('')
-            }}
-            className="auth-link"
-          >
-            {isSignUp ? 'Masz już konto? Zaloguj się' : 'Nie masz konta? Zarejestruj się'}
-          </button>
-        </div>
+        {REGISTRATION_ENABLED && (
+          <div className="auth-switch">
+            <button
+              onClick={() => {
+                setIsSignUp(!isSignUp)
+                setError('')
+              }}
+              className="auth-link"
+            >
+              {isSignUp ? 'Masz już konto? Zaloguj się' : 'Nie masz konta? Zarejestruj się'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

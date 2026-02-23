@@ -31,6 +31,8 @@ export function CompleteProfile() {
     if (err) {
       setError(err.message || 'Wystąpił błąd. Spróbuj ponownie.')
       setLoading(false)
+    } else {
+      window.location.reload()
     }
   }
 
