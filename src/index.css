@@ -2491,3 +2491,114 @@ button.btn-primary {
   color: var(--warning-color);
   font-weight: 600;
 }
+
+/* ===================== Admin User Management ===================== */
+
+.admin-invite-section {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+[data-theme="dark"] .admin-invite-section {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.admin-users-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.admin-user-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  gap: 10px;
+}
+
+[data-theme="dark"] .admin-user-row {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.admin-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.admin-user-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.admin-user-email {
+  font-size: 0.8rem;
+  opacity: 0.6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-badge {
+  display: inline-block;
+  padding: 1px 7px;
+  background: rgba(37, 99, 235, 0.12);
+  color: var(--primary-color);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pending-badge {
+  display: inline-block;
+  padding: 1px 7px;
+  background: rgba(234, 179, 8, 0.12);
+  color: #b45309;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+[data-theme="dark"] .pending-badge {
+  color: #fbbf24;
+}
+
+.btn-danger-small {
+  padding: 5px 12px;
+  font-size: 0.82rem;
+  min-height: 32px;
+  background-color: var(--danger-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+
+.btn-danger-small:hover {
+  opacity: 0.85;
+}
+
+button.btn-danger {
+  background-color: var(--danger-color);
+  color: white;
+}
