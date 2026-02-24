@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { useOrders } from '../hooks/useOrders'
+import { supabase } from '../lib/supabase'
 import { OrderCard } from './OrderCard'
 import { OrderForm } from './OrderForm'
 import { useOnlineStatus } from './OfflineBanner'
@@ -70,7 +71,9 @@ export function OrderList({
 }) {
   const { orders, loading, myAssignedOrderIds, createOrder, updateOrder, deleteOrder, completeOrder, restoreOrder, permanentlyDeleteOrder, assignToOrder, unassignFromOrder, fetchAssignments, fetchOrderEdits } = useOrders()
   const isOnline = useOnlineStatus()
+  const [allUsers, setAllUsers] = useState([])
   const [activeTab, setActiveTab] = useState('active')
+  const [tabSwitching, setTabSwitching] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [editingOrder, setEditingOrder] = useState(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -83,10 +86,22 @@ export function OrderList({
   const searchInputRef = useRef(null)
 
   useEffect(() => {
+    supabase.from('profiles').select('id, name').order('name')
+      .then(({ data }) => setAllUsers(data || []))
+  }, [])
+
+  useEffect(() => {
     if (showSearch && searchInputRef.current) {
       searchInputRef.current.focus()
     }
   }, [showSearch])
+
+  const handleTabChange = useCallback((tab) => {
+    if (tab === activeTab) return
+    setTabSwitching(true)
+    setActiveTab(tab)
+    setTimeout(() => setTabSwitching(false), 500)
+  }, [activeTab])
 
   const toggleGroup = useCallback((groupKey) => {
     setCollapsedGroups(prev => {
@@ -232,7 +247,7 @@ export function OrderList({
           role="tab"
           aria-selected={activeTab === 'active'}
           id="tab-active"
-          onClick={() => setActiveTab('active')}
+          onClick={() => handleTabChange('active')}
         >
           Aktywne ({orders.filter(o => o.status === 'active').length})
         </button>
@@ -241,7 +256,7 @@ export function OrderList({
           role="tab"
           aria-selected={activeTab === 'completed'}
           id="tab-completed"
-          onClick={() => setActiveTab('completed')}
+          onClick={() => handleTabChange('completed')}
         >
           Zakończone ({orders.filter(o => o.status === 'completed').length})
         </button>
@@ -250,7 +265,7 @@ export function OrderList({
           role="tab"
           aria-selected={activeTab === 'deleted'}
           id="tab-deleted"
-          onClick={() => setActiveTab('deleted')}
+          onClick={() => handleTabChange('deleted')}
         >
           Usunięte ({orders.filter(o => o.status === 'deleted').length})
         </button>
@@ -341,7 +356,11 @@ export function OrderList({
           )}
 
           <div className="orders-container">
-            {filteredOrders.length === 0 ? (
+            {tabSwitching ? (
+              <div className="loading-container">
+                <div className="spinner"></div>
+              </div>
+            ) : filteredOrders.length === 0 ? (
               <div className="empty-state">
                 <p>
                   {activeTab === 'active' && (showOnlyMine ? 'Brak przypisanych do Ciebie zleceń' : 'Brak aktywnych zleceń')}
@@ -377,6 +396,7 @@ export function OrderList({
                             onUnassign={unassignFromOrder}
                             fetchAssignments={fetchAssignments}
                             fetchOrderEdits={fetchOrderEdits}
+                            allUsers={allUsers}
                           />
                         ))}
                       </div>
@@ -400,6 +420,7 @@ export function OrderList({
                   onUnassign={unassignFromOrder}
                   fetchAssignments={fetchAssignments}
                   fetchOrderEdits={fetchOrderEdits}
+                  allUsers={allUsers}
                 />
               ))
             )}

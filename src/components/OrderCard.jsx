@@ -1,13 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, memo } from 'react'
 import { supabase } from '../lib/supabase'
 import { AssignmentHistory } from './AssignmentHistory'
 import { useOnlineStatus } from './OfflineBanner'
 
-export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, onDelete, onRestore, onPermanentlyDelete, onAssign, onUnassign, fetchAssignments, fetchOrderEdits }) {
+export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, onDelete, onRestore, onPermanentlyDelete, onAssign, onUnassign, fetchAssignments, fetchOrderEdits, allUsers }) {
   const isOnline = useOnlineStatus()
   const [assignments, setAssignments] = useState([])
   const [edits, setEdits] = useState([])
-  const [allUsers, setAllUsers] = useState([])
   const [showAssignDropdown, setShowAssignDropdown] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
   const [showActionsModal, setShowActionsModal] = useState(false)
@@ -19,8 +18,6 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
 
   useEffect(() => {
     loadAssignments()
-    loadEdits()
-    loadAllUsers()
 
     // Real-time subscription dla assignments tego zlecenia
     const channel = supabase
@@ -56,6 +53,13 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
     }
   }, [order.id])
 
+  // Lazy load edits only when history is opened
+  useEffect(() => {
+    if (showHistory && edits.length === 0) {
+      loadEdits()
+    }
+  }, [showHistory])
+
   async function loadAssignments() {
     const { data } = await fetchAssignments(order.id)
     setAssignments(data)
@@ -64,20 +68,6 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
   async function loadEdits() {
     const { data } = await fetchOrderEdits(order.id)
     setEdits(data)
-  }
-
-  async function loadAllUsers() {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, name')
-        .order('name')
-
-      if (error) throw error
-      setAllUsers(data || [])
-    } catch (error) {
-      console.error('Error loading users:', error)
-    }
   }
 
   // Filtruj tylko aktywne przypisania (nie wypisane)
@@ -258,9 +248,9 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
               <span className="first-assigned-badge">
                 {activeAssignments[0].user_profile?.name || 'Nieznany'}
               </span>
-            ) : order.status === 'active' ? (
+            ) : (
               <span className="unassigned-badge">Nieprzydzielone</span>
-            ) : null}
+            )}
             <div className="top-row-icons">
               {(assignments.length > 0 || edits.length > 0) && (
                 <button
@@ -568,4 +558,4 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
     )}
     </>
   )
-}
+})
