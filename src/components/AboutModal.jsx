@@ -1,5 +1,16 @@
 const CHANGELOG = [
   {
+    version: '0.9.7',
+    date: '2026-02-24',
+    changes: [
+      'Admin może wypisać inną osobę ze zlecenia (z historii przypisań)',
+      'Historia pokazuje kto przypisał / wypisał inną osobę',
+      'Naprawiono resetowanie stanu subskrypcji push po ręcznym wypisaniu',
+      'Wklejona data pozostaje widoczna w polu "Szybkie wklejanie daty"',
+      'Naprawiono styl focus na checkboxach (bez box-shadow)',
+    ],
+  },
+  {
     version: '0.9.6',
     date: '2026-02-23',
     changes: [
