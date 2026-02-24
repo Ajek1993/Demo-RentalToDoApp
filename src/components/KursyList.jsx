@@ -6,7 +6,7 @@ import { getPeriods, filterByPeriod } from "../lib/periods";
 import { calculatePriceAsync } from "../lib/priceCalculator";
 import { findVehicleByPlate } from "../lib/vehicleService";
 
-export default function KursyList({ currentUser, profile, onClose, isAdmin }) {
+export default function KursyList({ currentUser, profile, onClose }) {
   const [kursy, setKursy] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
@@ -21,26 +21,11 @@ export default function KursyList({ currentUser, profile, onClose, isAdmin }) {
   const [detectedDistance, setDetectedDistance] = useState(null);
   const [periods] = useState(getPeriods(12));
   const [selectedPeriod, setSelectedPeriod] = useState(0);
-  const [allProfiles, setAllProfiles] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(isAdmin ? "all" : currentUser.id);
-
   // Filtry
   const [filterDisplay, setFilterDisplay] = useState(false);
   const [filterDate, setFilterDate] = useState("");
   const [filterNr, setFilterNr] = useState("");
   const [filterMarka, setFilterMarka] = useState("");
-
-  useEffect(() => {
-    async function fetchProfiles() {
-      if (!isAdmin) return;
-      const { data } = await supabase
-        .from("profiles")
-        .select("id, name")
-        .order("name");
-      setAllProfiles(data || []);
-    }
-    fetchProfiles();
-  }, [isAdmin]);
 
   useEffect(() => {
     async function fetchKursy() {
@@ -51,12 +36,7 @@ export default function KursyList({ currentUser, profile, onClose, isAdmin }) {
         .select("*")
         .order("data", { ascending: false });
 
-      // Admin może filtrować po użytkowniku lub widzieć wszystkie
-      if (isAdmin && selectedUser !== "all") {
-        query = query.eq("wykonawca_id", selectedUser);
-      } else if (!isAdmin) {
-        query = query.eq("wykonawca_id", currentUser.id);
-      }
+      query = query.eq("wykonawca_id", currentUser.id);
 
       const { data, error } = await query;
 
@@ -66,29 +46,11 @@ export default function KursyList({ currentUser, profile, onClose, isAdmin }) {
         return;
       }
 
-      // Dla admina - dołącz nazwy wykonawców
-      if (isAdmin && data && data.length > 0) {
-        const wykonawcaIds = [...new Set(data.map(k => k.wykonawca_id).filter(Boolean))];
-        if (wykonawcaIds.length > 0) {
-          const { data: profiles } = await supabase
-            .from("profiles")
-            .select("id, name")
-            .in("id", wykonawcaIds);
-
-          const profileMap = {};
-          profiles?.forEach(p => { profileMap[p.id] = p; });
-
-          data.forEach(kurs => {
-            kurs.wykonawca = profileMap[kurs.wykonawca_id] || null;
-          });
-        }
-      }
-
       setKursy(data || []);
       setLoading(false);
     }
     fetchKursy();
-  }, [currentUser.id, isAdmin, selectedUser]);
+  }, [currentUser.id]);
 
   async function handleExport() {
     const period = periods[selectedPeriod];
@@ -291,26 +253,6 @@ export default function KursyList({ currentUser, profile, onClose, isAdmin }) {
         </div>
       ) : (
         <>
-          {/* Selektor użytkownika dla admina */}
-          {isAdmin && (
-            <div className="period-selector">
-              <label htmlFor="user-select">Pracownik:</label>
-              <select
-                id="user-select"
-                value={selectedUser}
-                onChange={(e) => setSelectedUser(e.target.value)}
-                className="period-select"
-              >
-                <option value="all">Wszyscy</option>
-                {allProfiles.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
           {/* Dropdown okresu rozliczeniowego */}
           <div className="period-selector">
             <label htmlFor="period-select">Okres rozliczeniowy:</label>
@@ -406,9 +348,6 @@ export default function KursyList({ currentUser, profile, onClose, isAdmin }) {
                   <li key={kurs.id} className="kurs-item">
                     <div>
                       <b>{kurs.data}</b> | {kurs.nr_rej} | {kurs.marka || <em style={{ color: "var(--gray-400)" }}>brak marki</em>}
-                      {isAdmin && selectedUser === "all" && kurs.wykonawca && (
-                        <span className="kurs-wykonawca"> ({kurs.wykonawca.name})</span>
-                      )}
                     </div>
                     <div>
                       Adres: <span>{kurs.adres}</span>
@@ -435,11 +374,6 @@ export default function KursyList({ currentUser, profile, onClose, isAdmin }) {
               X
             </button>
             <h3>Edytuj kurs</h3>
-            {isAdmin && editing.wykonawca && (
-              <p style={{ fontSize: "0.85rem", color: "var(--gray-500)", marginBottom: "0.5rem" }}>
-                Wykonawca: <strong>{editing.wykonawca.name}</strong>
-              </p>
-            )}
             <label htmlFor="kurs-edit-data">Data:</label>
             <input
               id="kurs-edit-data"

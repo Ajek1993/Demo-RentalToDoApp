@@ -1,5 +1,14 @@
 const CHANGELOG = [
   {
+    version: '0.9.8',
+    date: '2026-02-24',
+    changes: [
+      'Optymalizacja ładowania danych przy przełączaniu zakładek (~45 → ~15 zapytań)',
+      'Lista użytkowników pobierana raz zamiast per karta',
+      'Historia edycji ładowana lazy (dopiero po otwarciu)',
+    ],
+  },
+  {
     version: '0.9.7',
     date: '2026-02-24',
     changes: [

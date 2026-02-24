@@ -1219,8 +1219,9 @@ button.btn-primary {
 
 .assignment-history li {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.5rem;
   padding: 0.35rem 0.5rem;
   background: var(--gray-50);
   border-radius: 0;
@@ -1236,15 +1237,15 @@ button.btn-primary {
 }
 
 .assignment-name {
-  flex: 1;
   font-size: 0.82rem;
   color: var(--gray-900);
 }
 
 .assignment-time {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   color: var(--gray-600);
   font-family: monospace;
+  width: 100%;
 }
 
 .first-badge {
@@ -1324,7 +1325,6 @@ button.btn-primary {
   font-size: 0.72rem;
   color: var(--gray-500);
   font-style: italic;
-  white-space: nowrap;
 }
 
 .unassigned-by-info {
