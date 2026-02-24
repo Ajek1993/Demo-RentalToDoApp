@@ -460,7 +460,7 @@ function App() {
       {showKursy && (
         <div className="modal-overlay" onClick={() => setShowKursy(false)}>
           <div className="modal-content kursy-modal" role="dialog" aria-modal="true" aria-label="Kursy" onClick={(e) => e.stopPropagation()}>
-            <KursyList currentUser={user} profile={profile} onClose={() => setShowKursy(false)} isAdmin={isAdmin} />
+            <KursyList currentUser={user} profile={profile} onClose={() => setShowKursy(false)} />
           </div>
         </div>
       )}
