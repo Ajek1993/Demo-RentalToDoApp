@@ -141,9 +141,13 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
     setShowActionsModal(false)
   }
 
-  const availableUsers = allUsers.filter(
-    user => !activeAssignments.some(a => a.user_id === user.id)
-  )
+  const availableUsers = allUsers
+    .filter(user => !activeAssignments.some(a => a.user_id === user.id))
+    .sort((a, b) => {
+      const surnameA = (a.name || '').split(' ').slice(1).join(' ') || a.name || ''
+      const surnameB = (b.name || '').split(' ').slice(1).join(' ') || b.name || ''
+      return surnameA.localeCompare(surnameB, 'pl')
+    })
 
   const isMaxAssignmentsReached = activeAssignments.length >= 10
 
