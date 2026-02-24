@@ -173,7 +173,6 @@ export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
       const date = `${year}-${month}-${day}`
       setFormData(prev => ({ ...prev, date, time }))
       setErrors(prev => ({ ...prev, date: null, time: null }))
-      e.target.value = ''
     }
   }
 
