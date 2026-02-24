@@ -5,6 +5,27 @@ Wszystkie istotne zmiany w projekcie System Zleceń Wypożyczalni.
 Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.0.0/),
 wersjonowanie według [Semantic Versioning](https://semver.org/lang/pl/).
 
+## [0.9.8] - 2026-02-24
+
+### Zmienione
+- Optymalizacja ładowania danych przy przełączaniu zakładek (~45 → ~15 zapytań do Supabase)
+- Lista użytkowników (`profiles`) pobierana raz na poziomie `OrderList` zamiast per karta
+- Historia edycji (`order_edits`) ładowana lazy — dopiero po otwarciu historii przypisań
+- `OrderCard` opakowany w `React.memo` dla uniknięcia zbędnych re-renderów
+- Usunięto filtr admina po użytkowniku z `KursyList` (każdy widzi tylko swoje kursy)
+- Poprawiono układ elementów listy historii przypisań (zawijanie tekstu)
+
+## [0.9.7] - 2026-02-24
+
+### Dodane
+- Admin może wypisać inną osobę ze zlecenia (z widoku historii przypisań)
+- Historia przypisań pokazuje kto przypisał / wypisał inną osobę
+
+### Naprawione
+- Resetowanie stanu subskrypcji push po ręcznym wypisaniu
+- Wklejona data pozostaje widoczna w polu „Szybkie wklejanie daty"
+- Styl focus na checkboxach (usunięto box-shadow)
+
 ## [0.9.6] - 2026-02-23
 
 ### Dodane
