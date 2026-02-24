@@ -886,7 +886,7 @@ button.btn-primary {
   transition: border-color 0.2s;
 }
 
-.form-group input:focus,
+.form-group input:not([type="checkbox"]):focus,
 .form-group textarea:focus {
   outline: none;
   border-color: var(--primary-color);
@@ -1276,6 +1276,39 @@ button.btn-primary {
   font-family: inherit;
 }
 
+.btn-unassign-other {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--gray-400);
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+  margin-left: 0.25rem;
+}
+
+.btn-unassign-other:hover {
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+}
+
+.btn-unassign-other:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.btn-unassign-other:disabled:hover {
+  background: transparent;
+  color: var(--gray-400);
+}
+
 .assignment-history li.unassigned {
   opacity: 0.6;
   background: var(--gray-100);
@@ -1284,6 +1317,18 @@ button.btn-primary {
 .assignment-history li.unassigned .assignment-name {
   text-decoration: line-through;
   color: var(--gray-500);
+}
+
+.assigned-by-info,
+.unassigned-by-info {
+  font-size: 0.72rem;
+  color: var(--gray-500);
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.unassigned-by-info {
+  color: #dc2626;
 }
 
 /* Modal Actions */
@@ -2767,13 +2812,11 @@ button.btn-danger {
   height: auto;
 }
 
-@media (max-width: 639px) {
+@media (min-width: 640px) {
   .assignment-section {
     display: none !important;
   }
-}
 
-@media (min-width: 640px) {
   .modal-assignment-header,
   .modal-assignment-buttons {
     display: none !important;

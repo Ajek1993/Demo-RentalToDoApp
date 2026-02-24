@@ -13,6 +13,8 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
   const [showActionsModal, setShowActionsModal] = useState(false)
   const [showNotesPopup, setShowNotesPopup] = useState(false)
   const [showUnassignConfirm, setShowUnassignConfirm] = useState(false)
+  const [showUnassignOtherConfirm, setShowUnassignOtherConfirm] = useState(false)
+  const [unassignOtherTarget, setUnassignOtherTarget] = useState(null)
   const [showPermanentDeleteConfirm, setShowPermanentDeleteConfirm] = useState(false)
 
   useEffect(() => {
@@ -108,6 +110,25 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
     setShowUnassignConfirm(false)
   }
 
+  const handleUnassignOther = (userId, userName) => {
+    setUnassignOtherTarget({ userId, userName })
+    setShowUnassignOtherConfirm(true)
+  }
+
+  const handleConfirmUnassignOther = async () => {
+    if (unassignOtherTarget) {
+      await onUnassign(order.id, unassignOtherTarget.userId, currentUserId)
+      await loadAssignments()
+    }
+    setShowUnassignOtherConfirm(false)
+    setUnassignOtherTarget(null)
+  }
+
+  const handleCancelUnassignOther = () => {
+    setShowUnassignOtherConfirm(false)
+    setUnassignOtherTarget(null)
+  }
+
   const handleAssignOther = async (userId) => {
     // Sprawdź czy nie przekroczono limitu 10 osób
     if (activeAssignments.length >= 10) {
@@ -120,9 +141,13 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
     setShowActionsModal(false)
   }
 
-  const availableUsers = allUsers.filter(
-    user => !activeAssignments.some(a => a.user_id === user.id)
-  )
+  const availableUsers = allUsers
+    .filter(user => !activeAssignments.some(a => a.user_id === user.id))
+    .sort((a, b) => {
+      const surnameA = (a.name || '').split(' ').slice(1).join(' ') || a.name || ''
+      const surnameB = (b.name || '').split(' ').slice(1).join(' ') || b.name || ''
+      return surnameA.localeCompare(surnameB, 'pl')
+    })
 
   const isMaxAssignmentsReached = activeAssignments.length >= 10
 
@@ -287,6 +312,7 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
         </div>
 
         <div className="order-actions">
+          {order.status === 'active' && renderAssignmentButtons()}
           {order.insurance_company && (
             <button
               onClick={(e) => {
@@ -365,6 +391,9 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
             assignments={assignments}
             currentUserId={currentUserId}
             edits={edits}
+            onUnassignOther={order.status === 'active' ? handleUnassignOther : undefined}
+            orderId={order.id}
+            isOnline={isOnline}
           />
         </div>
       )}
@@ -491,6 +520,23 @@ export function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, o
             </button>
             <button onClick={handleConfirmUnassign} className="btn-danger">
               Wypisz się
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {showUnassignOtherConfirm && unassignOtherTarget && (
+      <div className="modal-overlay" onClick={handleCancelUnassignOther}>
+        <div className="modal-content" role="dialog" aria-modal="true" aria-label="Potwierdzenie wypisania osoby" onClick={(e) => e.stopPropagation()}>
+          <h2>Wypisanie z zlecenia</h2>
+          <p>Czy na pewno chcesz wypisać <strong>{unassignOtherTarget.userName}</strong> z tego zlecenia?</p>
+          <div className="modal-actions">
+            <button onClick={handleCancelUnassignOther} className="btn-secondary">
+              Anuluj
+            </button>
+            <button onClick={handleConfirmUnassignOther} className="btn-danger">
+              Wypisz
             </button>
           </div>
         </div>

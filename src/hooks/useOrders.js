@@ -161,9 +161,13 @@ export function useOrders() {
                   .single()
 
                 if (order) {
-                  toast.success(`${userName} przypisał się do ${order.plate}`, {
-                    icon: '👤'
-                  })
+                  if (assignment.user_id !== assignment.assigned_by && assignment.assigned_by_profile) {
+                    const assignerName = assignment.assigned_by_profile.name || 'Ktoś'
+                    const assigneeName = assignment.user_profile?.name || 'Kogoś'
+                    toast.success(`${assignerName} przypisał ${assigneeName} do ${order.plate}`, { icon: '👤' })
+                  } else {
+                    toast.success(`${userName} przypisał się do ${order.plate}`, { icon: '👤' })
+                  }
                 }
               }
             }

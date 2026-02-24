@@ -136,7 +136,7 @@ export function useAuth() {
 
   async function completeProfile(name, password) {
     try {
-      const { error: passwordError } = await supabase.auth.updateUser({ password })
+      const { error: passwordError } = await supabase.auth.updateUser({ password, data: { name, display_name: name } })
       if (passwordError) throw passwordError
 
       const { error: profileError } = await supabase

@@ -6,7 +6,7 @@ const FIELD_LABELS = {
   notes: 'Notatki'
 }
 
-export function AssignmentHistory({ assignments, currentUserId, edits }) {
+export function AssignmentHistory({ assignments, currentUserId, edits, onUnassignOther, orderId, isOnline }) {
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp)
     return date.toLocaleString('pl-PL', {
@@ -43,11 +43,29 @@ export function AssignmentHistory({ assignments, currentUserId, edits }) {
                 <span className="assignment-name">
                   {assignment.user_profile?.name || 'Nieznany'}
                 </span>
+                {assignment.assigned_by &&
+                 assignment.assigned_by !== assignment.user_id &&
+                 assignment.assigned_by_profile && (
+                  <span className="assigned-by-info">
+                    (przypisany przez {assignment.assigned_by_profile.name})
+                  </span>
+                )}
                 <span className="assignment-time">
                   {formatTimestamp(assignment.assigned_at)}
                 </span>
                 {index === 0 && (
                   <span className="first-badge">Pierwszy</span>
+                )}
+                {onUnassignOther && assignment.user_id !== currentUserId && (
+                  <button
+                    className="btn-unassign-other"
+                    onClick={() => onUnassignOther(assignment.user_id, assignment.user_profile?.name || 'Nieznany')}
+                    disabled={!isOnline}
+                    title={`Wypisz ${assignment.user_profile?.name || 'Nieznany'}`}
+                    aria-label={`Wypisz ${assignment.user_profile?.name || 'Nieznany'} z tego zlecenia`}
+                  >
+                    ✕
+                  </button>
                 )}
               </li>
             ))}
@@ -64,6 +82,20 @@ export function AssignmentHistory({ assignments, currentUserId, edits }) {
                     <span className="assignment-name">
                       {assignment.user_profile?.name || 'Nieznany'}
                     </span>
+                    {assignment.assigned_by &&
+                     assignment.assigned_by !== assignment.user_id &&
+                     assignment.assigned_by_profile && (
+                      <span className="assigned-by-info">
+                        (przypisany przez {assignment.assigned_by_profile.name})
+                      </span>
+                    )}
+                    {assignment.unassigned_by &&
+                     assignment.unassigned_by !== assignment.user_id &&
+                     assignment.unassigned_by_profile && (
+                      <span className="unassigned-by-info">
+                        (wypisany przez {assignment.unassigned_by_profile.name})
+                      </span>
+                    )}
                     <span className="assignment-time">
                       {formatTimestamp(assignment.assigned_at)} - {formatTimestamp(assignment.unassigned_at)}
                     </span>

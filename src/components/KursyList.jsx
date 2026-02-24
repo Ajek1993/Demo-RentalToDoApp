@@ -179,23 +179,6 @@ export default function KursyList({ currentUser, profile, onClose, isAdmin }) {
     }
   }, []);
 
-  // Automatyczne obliczanie ceny przy zmianie adresu
-  useEffect(() => {
-    if (!editing) return;
-
-    async function autoCalculatePrice() {
-      if (editAdres.trim().length >= 3) {
-        const result = await calculatePriceAsync(editAdres);
-        setEditKwota(String(result.price));
-        setDetectedCity(result.detectedCity);
-        setDetectedDistance(result.distanceKm);
-      } else {
-        setDetectedCity(null);
-        setDetectedDistance(null);
-      }
-    }
-    autoCalculatePrice();
-  }, [editAdres, editing]);
 
   async function handleSaveEdit() {
     if (!editing) return;
