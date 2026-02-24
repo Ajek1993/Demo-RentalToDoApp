@@ -13,7 +13,7 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray
 }
 
-export function usePushNotifications() {
+export function usePushNotifications(userId) {
   const [subscribed, setSubscribed] = useState(false)
   const [loading, setLoading] = useState(true)
   const [supported, setSupported] = useState(false)
@@ -21,7 +21,7 @@ export function usePushNotifications() {
   useEffect(() => {
     checkSupport()
     checkSubscription()
-  }, [])
+  }, [userId])
 
   const checkSupport = () => {
     const isSupported =
@@ -43,7 +43,21 @@ export function usePushNotifications() {
       const registration = await navigator.serviceWorker.ready
       const subscription = await registration.pushManager.getSubscription()
 
-      setSubscribed(!!subscription)
+      if (subscription && userId) {
+        // Browser has a subscription - verify it exists in DB for current user
+        const subscriptionJSON = subscription.toJSON()
+        const { data } = await supabase
+          .from('push_subscriptions')
+          .select('id')
+          .eq('endpoint', subscriptionJSON.endpoint)
+          .eq('user_id', userId)
+          .maybeSingle()
+
+        setSubscribed(!!data)
+      } else {
+        setSubscribed(false)
+      }
+
       setLoading(false)
     } catch (error) {
       console.error('Error checking subscription:', error)
@@ -122,15 +136,24 @@ export function usePushNotifications() {
 
       if (subscription) {
         // Usuń z przeglądarki
-        await subscription.unsubscribe()
+        const unsubscribed = await subscription.unsubscribe()
+        if (!unsubscribed) {
+          throw new Error('Browser failed to unsubscribe from push notifications')
+        }
 
         // Usuń z Supabase
         const subscriptionJSON = subscription.toJSON()
 
-        const { error } = await supabase
+        const { data: { user } } = await supabase.auth.getUser()
+
+        const query = supabase
           .from('push_subscriptions')
           .delete()
           .eq('endpoint', subscriptionJSON.endpoint)
+
+        const { error } = user
+          ? await query.eq('user_id', user.id)
+          : await query
 
         if (error) throw error
       }

@@ -32,7 +32,7 @@ function useDarkMode() {
 function App() {
   const { user, profile, loading, signOut, passwordRecovery, updatePassword, isAdmin, needsProfileSetup } = useAuth()
   const isOnline = useOnlineStatus()
-  const { subscribed, supported, subscribe, unsubscribe, loading: pushLoading } = usePushNotifications()
+  const { subscribed, supported, subscribe, unsubscribe, loading: pushLoading } = usePushNotifications(user?.id)
   const [showPushSettings, setShowPushSettings] = useState(false)
   const [showAvailability, setShowAvailability] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
@@ -59,21 +59,16 @@ function App() {
   // Automatyczna subskrypcja przy pierwszym zalogowaniu
   useEffect(() => {
     if (user && !subscribed && !pushLoading && supported) {
-      // Sprawdź rzeczywiste uprawnienia przeglądarki
+      // Auto-subscribe ONLY when never asked before (permission === 'default')
+      // When 'granted' but !subscribed - user may have explicitly unsubscribed, don't re-subscribe
       if (Notification.permission === 'default') {
-        // Nie pytano jeszcze - pytaj automatycznie
-        const timer = setTimeout(() => {
-          handleSubscribe()
-        }, 2000)
-        return () => clearTimeout(timer)
-      } else if (Notification.permission === 'granted' && !subscribed) {
-        // Zgoda udzielona, ale brak subskrypcji - pytaj ponownie
         const timer = setTimeout(() => {
           handleSubscribe()
         }, 2000)
         return () => clearTimeout(timer)
       }
-      // Jeśli 'denied' - nie pytaj, user odmówił
+      // 'granted' + !subscribed → user consciously disabled, respect that
+      // 'denied' → user blocked notifications, don't ask
     }
   }, [user, subscribed, pushLoading, supported])
 
