@@ -3,7 +3,14 @@ const FIELD_LABELS = {
   date: 'Data',
   time: 'Godzina',
   location: 'Lokalizacja',
-  notes: 'Notatki'
+  notes: 'Notatki',
+  insurance_company: 'Ubezpieczyciel',
+  is_one_way: 'Kurs jednostronny'
+}
+
+const formatValue = (field, val) => {
+  if (field === 'is_one_way') return val === 'true' ? 'Tak' : 'Nie'
+  return val || '(puste)'
 }
 
 export function AssignmentHistory({ assignments, currentUserId, edits, onUnassignOther, orderId, isOnline }) {
@@ -124,9 +131,9 @@ export function AssignmentHistory({ assignments, currentUserId, edits, onUnassig
                 {Object.entries(edit.changes).map(([field, [oldVal, newVal]]) => (
                   <div key={field} className="edit-change">
                     <span className="edit-field-label">{FIELD_LABELS[field] || field}:</span>
-                    <span className="edit-old-value">{oldVal || '(puste)'}</span>
+                    <span className="edit-old-value">{formatValue(field, oldVal)}</span>
                     <span className="edit-arrow">&rarr;</span>
-                    <span className="edit-new-value">{newVal || '(puste)'}</span>
+                    <span className="edit-new-value">{formatValue(field, newVal)}</span>
                   </div>
                 ))}
               </div>

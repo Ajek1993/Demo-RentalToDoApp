@@ -5,6 +5,12 @@ Wszystkie istotne zmiany w projekcie System Zleceń Wypożyczalni.
 Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.0.0/),
 wersjonowanie według [Semantic Versioning](https://semver.org/lang/pl/).
 
+## [0.9.9] - 2026-02-26
+
+### Dodane
+- Rozszerzone grupowanie dat w zakładce Aktywne: Pojutrze, Ten tydzień, Przyszły tydzień
+- Nowe grupy domyślnie zwinięte; tylko „Dzisiaj" rozwinięte
+
 ## [0.9.8] - 2026-02-24
 
 ### Zmienione

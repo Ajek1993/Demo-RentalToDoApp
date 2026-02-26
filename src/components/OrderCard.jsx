@@ -1,9 +1,9 @@
-import { useState, useEffect, memo } from 'react'
+import { useState, useEffect, useRef, memo } from 'react'
 import { supabase } from '../lib/supabase'
 import { AssignmentHistory } from './AssignmentHistory'
 import { useOnlineStatus } from './OfflineBanner'
 
-export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, onDelete, onRestore, onPermanentlyDelete, onAssign, onUnassign, fetchAssignments, fetchOrderEdits, allUsers }) {
+export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, onDelete, onRestore, onPermanentlyDelete, onAssign, onUnassign, fetchAssignments, fetchOrderEdits, allUsers, autoOpen = false }) {
   const isOnline = useOnlineStatus()
   const [assignments, setAssignments] = useState([])
   const [edits, setEdits] = useState([])
@@ -15,9 +15,11 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
   const [showUnassignOtherConfirm, setShowUnassignOtherConfirm] = useState(false)
   const [unassignOtherTarget, setUnassignOtherTarget] = useState(null)
   const [showPermanentDeleteConfirm, setShowPermanentDeleteConfirm] = useState(false)
+  const mouseDownOnOverlay = useRef(false)
 
   useEffect(() => {
     loadAssignments()
+    loadEdits()
 
     // Real-time subscription dla assignments tego zlecenia
     const channel = supabase
@@ -52,6 +54,11 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
       supabase.removeChannel(channel)
     }
   }, [order.id])
+
+  // Deep link: auto-otwórz modal akcji gdy autoOpen=true
+  useEffect(() => {
+    if (autoOpen) setShowActionsModal(true)
+  }, [autoOpen])
 
   // Lazy load edits only when history is opened
   useEffect(() => {
@@ -242,7 +249,7 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
 
   return (
     <>
-      <article className={`order-card status-${order.status}`} onClick={handleCardClick}>
+      <article id={`order-card-${order.id}`} className={`order-card status-${order.status}`} onClick={handleCardClick}>
         <div className="order-top-row">
             {activeAssignments.length > 0 && activeAssignments[0] ? (
               <span className="first-assigned-badge">
@@ -266,6 +273,19 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
                   {activeAssignments.length > 0 && (
                     <span className="history-badge">{activeAssignments.length}</span>
                   )}
+                </button>
+              )}
+              {order.insurance_company && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    window.open(`/insurance/${order.insurance_company}.pdf`, '_blank')
+                  }}
+                  className="btn-icon btn-print-oc"
+                  title={`Drukuj OC - ${order.insurance_company}`}
+                  aria-label={`Drukuj dokument OC ${order.insurance_company}`}
+                >
+                  🖨️
                 </button>
               )}
               {order.notes && (
@@ -303,19 +323,6 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
 
         <div className="order-actions">
           {order.status === 'active' && renderAssignmentButtons()}
-          {order.insurance_company && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                window.open(`/insurance/${order.insurance_company}.pdf`, '_blank')
-              }}
-              className="btn-icon btn-print-oc"
-              title={`Drukuj OC - ${order.insurance_company}`}
-              aria-label={`Drukuj dokument OC ${order.insurance_company}`}
-            >
-              🖨️
-            </button>
-          )}
           {order.status === 'active' && (
             <>
               <button onClick={() => onComplete(order.id)} className="btn-complete btn-success" disabled={!isOnline}>
@@ -390,7 +397,11 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
     </article>
 
     {showActionsModal && (
-      <div className="modal-overlay" onClick={() => setShowActionsModal(false)}>
+      <div
+        className="modal-overlay"
+        onMouseDown={(e) => { mouseDownOnOverlay.current = e.target === e.currentTarget }}
+        onClick={(e) => { if (e.target === e.currentTarget && mouseDownOnOverlay.current) setShowActionsModal(false) }}
+      >
         <div className="modal-content modal-actions-menu" role="dialog" aria-modal="true" aria-label="Akcje zlecenia" onClick={(e) => e.stopPropagation()}>
           <div className="modal-assignment-header">
             <div className="modal-header-top-row">
@@ -500,7 +511,11 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
     )}
 
     {showUnassignConfirm && (
-      <div className="modal-overlay" onClick={handleCancelUnassign}>
+      <div
+        className="modal-overlay"
+        onMouseDown={(e) => { mouseDownOnOverlay.current = e.target === e.currentTarget }}
+        onClick={(e) => { if (e.target === e.currentTarget && mouseDownOnOverlay.current) handleCancelUnassign() }}
+      >
         <div className="modal-content" role="dialog" aria-modal="true" aria-label="Potwierdzenie wypisania" onClick={(e) => e.stopPropagation()}>
           <h2>Potwierdzenie wypisania</h2>
           <p>Czy na pewno chcesz wypisać się z tego zlecenia?</p>
@@ -517,7 +532,11 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
     )}
 
     {showUnassignOtherConfirm && unassignOtherTarget && (
-      <div className="modal-overlay" onClick={handleCancelUnassignOther}>
+      <div
+        className="modal-overlay"
+        onMouseDown={(e) => { mouseDownOnOverlay.current = e.target === e.currentTarget }}
+        onClick={(e) => { if (e.target === e.currentTarget && mouseDownOnOverlay.current) handleCancelUnassignOther() }}
+      >
         <div className="modal-content" role="dialog" aria-modal="true" aria-label="Potwierdzenie wypisania osoby" onClick={(e) => e.stopPropagation()}>
           <h2>Wypisanie z zlecenia</h2>
           <p>Czy na pewno chcesz wypisać <strong>{unassignOtherTarget.userName}</strong> z tego zlecenia?</p>
@@ -534,7 +553,11 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
     )}
 
     {showPermanentDeleteConfirm && (
-      <div className="modal-overlay" onClick={() => setShowPermanentDeleteConfirm(false)}>
+      <div
+        className="modal-overlay"
+        onMouseDown={(e) => { mouseDownOnOverlay.current = e.target === e.currentTarget }}
+        onClick={(e) => { if (e.target === e.currentTarget && mouseDownOnOverlay.current) setShowPermanentDeleteConfirm(false) }}
+      >
         <div className="modal-content" role="dialog" aria-modal="true" aria-label="Trwałe usunięcie zlecenia" onClick={(e) => e.stopPropagation()}>
           <h2>Trwałe usunięcie</h2>
           <p>Czy na pewno chcesz <strong>na stałe</strong> usunąć zlecenie <strong>{order.plate}</strong>?</p>

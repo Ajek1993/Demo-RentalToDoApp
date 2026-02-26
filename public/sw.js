@@ -45,17 +45,20 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
   const urlToOpen = event.notification.data?.url || '/';
+  const orderId = new URL(urlToOpen, self.location.origin).searchParams.get('order');
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((windowClients) => {
         // Sprawdź czy jest już otwarte okno aplikacji
         for (let client of windowClients) {
-          if (client.url.includes(urlToOpen) && 'focus' in client) {
-            return client.focus();
+          if (client.url.startsWith(self.location.origin)) {
+            client.focus();
+            if (orderId) client.postMessage({ type: 'OPEN_ORDER', orderId });
+            return;
           }
         }
-        // Jeśli nie ma otwartego okna, otwórz nowe
+        // Jeśli nie ma otwartego okna, otwórz nowe z URL
         if (clients.openWindow) {
           return clients.openWindow(urlToOpen);
         }

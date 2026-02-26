@@ -1,5 +1,13 @@
 const CHANGELOG = [
   {
+    version: '0.9.9',
+    date: '2026-02-26',
+    changes: [
+      'Rozszerzone grupowanie dat: Pojutrze, Ten tydzień, Przyszły tydzień',
+      'Nowe grupy domyślnie zwinięte; tylko „Dzisiaj" rozwinięte',
+    ],
+  },
+  {
     version: '0.9.8',
     date: '2026-02-24',
     changes: [
