@@ -41,11 +41,13 @@ function App() {
   const [showAbout, setShowAbout] = useState(false)
   const [darkMode, toggleDarkMode] = useDarkMode()
   const [showMenu, setShowMenu] = useState(false)
+  const [highlightOrderId, setHighlightOrderId] = useState(null)
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [passwordError, setPasswordError] = useState('')
   const [passwordLoading, setPasswordLoading] = useState(false)
   const menuRef = useRef(null)
+  const mouseDownOnOverlay = useRef(false)
 
   // Search & filters state (shared with OrderList)
   const [searchQuery, setSearchQuery] = useState('')
@@ -111,6 +113,27 @@ function App() {
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [showMenu])
+
+  // Deep link: odczytaj ?order=ID z URL przy załadowaniu
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const orderId = params.get('order')
+    if (orderId) {
+      setHighlightOrderId(orderId)
+      window.history.replaceState({}, '', '/')
+    }
+  }, [])
+
+  // Deep link: nasłuchuj wiadomości z Service Worker (gdy aplikacja otwarta)
+  useEffect(() => {
+    const handler = (event) => {
+      if (event.data?.type === 'OPEN_ORDER') {
+        setHighlightOrderId(event.data.orderId)
+      }
+    }
+    navigator.serviceWorker?.addEventListener('message', handler)
+    return () => navigator.serviceWorker?.removeEventListener('message', handler)
+  }, [])
 
   // Focus search input on desktop when shown
   useEffect(() => {
@@ -458,7 +481,11 @@ function App() {
       )}
 
       {showKursy && (
-        <div className="modal-overlay" onClick={() => setShowKursy(false)}>
+        <div
+          className="modal-overlay"
+          onMouseDown={(e) => { mouseDownOnOverlay.current = e.target === e.currentTarget }}
+          onClick={(e) => { if (e.target === e.currentTarget && mouseDownOnOverlay.current) setShowKursy(false) }}
+        >
           <div className="modal-content kursy-modal" role="dialog" aria-modal="true" aria-label="Kursy" onClick={(e) => e.stopPropagation()}>
             <KursyList currentUser={user} profile={profile} onClose={() => setShowKursy(false)} />
           </div>
@@ -485,6 +512,8 @@ function App() {
           setShowFilters={setShowFilters}
           showSearch={showSearch}
           setShowSearch={setShowSearch}
+          highlightOrderId={highlightOrderId}
+          onHighlightConsumed={() => setHighlightOrderId(null)}
         />
       </main>
     </div>

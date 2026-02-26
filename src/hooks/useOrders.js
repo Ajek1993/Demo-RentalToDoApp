@@ -292,7 +292,7 @@ export function useOrders() {
         const changes = {}
         for (const field of trackFields) {
           const oldVal = oldOrder[field] ?? ''
-          const newVal = updates[field] ?? ''
+          const newVal = sanitizedUpdates[field] ?? ''
           if (String(oldVal) !== String(newVal)) {
             changes[field] = [String(oldVal), String(newVal)]
           }

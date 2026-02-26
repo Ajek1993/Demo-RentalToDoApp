@@ -18,27 +18,46 @@ function groupOrdersByDate(orders) {
   const todayStr = toLocalDateStr(today)
 
   const tomorrow = new Date(today)
-  tomorrow.setDate(tomorrow.getDate() + 1)
+  tomorrow.setDate(today.getDate() + 1)
   const tomorrowStr = toLocalDateStr(tomorrow)
 
+  const dayAfterTomorrow = new Date(today)
+  dayAfterTomorrow.setDate(today.getDate() + 2)
+  const dayAfterTomorrowStr = toLocalDateStr(dayAfterTomorrow)
+
+  // Koniec bieżącego tygodnia = najbliższa niedziela (tydzień pon–nie)
+  const dow = today.getDay() // 0=Nie, 1=Pon, …, 6=Sob
+  const daysUntilSunday = dow === 0 ? 0 : 7 - dow
+  const endOfThisWeek = new Date(today)
+  endOfThisWeek.setDate(today.getDate() + daysUntilSunday)
+  const endOfThisWeekStr = toLocalDateStr(endOfThisWeek)
+
+  // Przyszły tydzień: pon po endOfThisWeek … +6 dni
+  const startOfNextWeek = new Date(endOfThisWeek)
+  startOfNextWeek.setDate(endOfThisWeek.getDate() + 1)
+  const endOfNextWeek = new Date(startOfNextWeek)
+  endOfNextWeek.setDate(startOfNextWeek.getDate() + 6)
+  const endOfNextWeekStr = toLocalDateStr(endOfNextWeek)
+
   const groups = {
-    overdue: { label: 'Przeterminowane', orders: [] },
-    today: { label: 'Dzisiaj', orders: [] },
-    tomorrow: { label: 'Jutro', orders: [] },
-    later: { label: 'Później', orders: [] },
+    overdue:          { label: 'Przeterminowane',   orders: [] },
+    today:            { label: 'Dzisiaj',            orders: [] },
+    tomorrow:         { label: 'Jutro',              orders: [] },
+    dayAfterTomorrow: { label: 'Pojutrze',           orders: [] },
+    thisWeek:         { label: 'Ten tydzień',        orders: [] },
+    nextWeek:         { label: 'Przyszły tydzień',   orders: [] },
+    later:            { label: 'Później',            orders: [] },
   }
 
   for (const order of orders) {
     const d = order.date
-    if (!d || d < todayStr) {
-      groups.overdue.orders.push(order)
-    } else if (d === todayStr) {
-      groups.today.orders.push(order)
-    } else if (d === tomorrowStr) {
-      groups.tomorrow.orders.push(order)
-    } else {
-      groups.later.orders.push(order)
-    }
+    if (!d || d < todayStr)            groups.overdue.orders.push(order)
+    else if (d === todayStr)            groups.today.orders.push(order)
+    else if (d === tomorrowStr)         groups.tomorrow.orders.push(order)
+    else if (d === dayAfterTomorrowStr) groups.dayAfterTomorrow.orders.push(order)
+    else if (d <= endOfThisWeekStr)     groups.thisWeek.orders.push(order)
+    else if (d <= endOfNextWeekStr)     groups.nextWeek.orders.push(order)
+    else                                groups.later.orders.push(order)
   }
 
   // Sortuj wewnątrz grup: date ASC, time ASC
@@ -46,9 +65,7 @@ function groupOrdersByDate(orders) {
     if (a.date !== b.date) return (a.date || '').localeCompare(b.date || '')
     return (a.time || '').localeCompare(b.time || '')
   }
-  for (const g of Object.values(groups)) {
-    g.orders.sort(sortFn)
-  }
+  for (const g of Object.values(groups)) g.orders.sort(sortFn)
 
   return groups
 }
@@ -67,7 +84,9 @@ export function OrderList({
   showFilters,
   setShowFilters,
   showSearch,
-  setShowSearch
+  setShowSearch,
+  highlightOrderId,
+  onHighlightConsumed
 }) {
   const { orders, loading, myAssignedOrderIds, createOrder, updateOrder, deleteOrder, completeOrder, restoreOrder, permanentlyDeleteOrder, assignToOrder, unassignFromOrder, fetchAssignments, fetchOrderEdits } = useOrders()
   const isOnline = useOnlineStatus()
@@ -75,6 +94,7 @@ export function OrderList({
   const [activeTab, setActiveTab] = useState('active')
   const [tabSwitching, setTabSwitching] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const [modalMinimized, setModalMinimized] = useState(false)
   const [editingOrder, setEditingOrder] = useState(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [orderToDelete, setOrderToDelete] = useState(null)
@@ -82,8 +102,11 @@ export function OrderList({
   const [showCompleteConfirm, setShowCompleteConfirm] = useState(false)
   const [orderToComplete, setOrderToComplete] = useState(null)
   const [completeAssignments, setCompleteAssignments] = useState([])
-  const [collapsedGroups, setCollapsedGroups] = useState(new Set(['overdue', 'tomorrow', 'later']))
+  const [collapsedGroups, setCollapsedGroups] = useState(
+    new Set(['overdue', 'tomorrow', 'dayAfterTomorrow', 'thisWeek', 'nextWeek', 'later'])
+  )
   const searchInputRef = useRef(null)
+  const mouseDownOnOverlay = useRef(false)
 
   useEffect(() => {
     supabase.from('profiles').select('id, name').order('name')
@@ -95,6 +118,16 @@ export function OrderList({
       searchInputRef.current.focus()
     }
   }, [showSearch])
+
+  // Deep link: gdy orders załadowane i highlightOrderId ustawiony — przewiń do karty
+  useEffect(() => {
+    if (!highlightOrderId || loading) return
+    const el = document.getElementById(`order-card-${highlightOrderId}`)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      onHighlightConsumed?.()
+    }
+  }, [highlightOrderId, loading, orders])
 
   const handleTabChange = useCallback((tab) => {
     if (tab === activeTab) return
@@ -140,9 +173,10 @@ export function OrderList({
     if (dateTo) {
       result = result.filter(order => order.date <= dateTo)
     }
+    const sortDir = activeTab === 'active' ? 1 : -1
     result.sort((a, b) => {
-      if (a.date !== b.date) return (a.date || '').localeCompare(b.date || '')
-      return (a.time || '').localeCompare(b.time || '')
+      if (a.date !== b.date) return sortDir * (a.date || '').localeCompare(b.date || '')
+      return sortDir * (a.time || '').localeCompare(b.time || '')
     })
     return result
   }, [orders, activeTab, showOnlyMine, myAssignedOrderIds, searchQuery, dateFrom, dateTo])
@@ -154,17 +188,30 @@ export function OrderList({
 
   const handleAddOrder = () => {
     setEditingOrder(null)
+    setModalMinimized(false)
     setShowModal(true)
   }
 
   const handleEditOrder = (order) => {
     setEditingOrder(order)
+    setModalMinimized(false)
     setShowModal(true)
   }
 
   const handleCloseModal = () => {
     setShowModal(false)
+    setModalMinimized(false)
     setEditingOrder(null)
+  }
+
+  const handleMinimizeModal = () => {
+    setShowModal(false)
+    setModalMinimized(true)
+  }
+
+  const handleResumeDraft = () => {
+    setModalMinimized(false)
+    setShowModal(true)
   }
 
   const handleSubmitOrder = async (formData) => {
@@ -397,6 +444,7 @@ export function OrderList({
                             fetchAssignments={fetchAssignments}
                             fetchOrderEdits={fetchOrderEdits}
                             allUsers={allUsers}
+                            autoOpen={highlightOrderId === order.id}
                           />
                         ))}
                       </div>
@@ -421,6 +469,7 @@ export function OrderList({
                   fetchAssignments={fetchAssignments}
                   fetchOrderEdits={fetchOrderEdits}
                   allUsers={allUsers}
+                  autoOpen={highlightOrderId === order.id}
                 />
               ))
             )}
@@ -430,11 +479,18 @@ export function OrderList({
         +
       </button>
 
-      {showModal && (
-        <div className="modal-overlay" onClick={handleCloseModal}>
+      {(showModal || modalMinimized) && (
+        <div
+          className="modal-overlay"
+          style={modalMinimized ? { display: 'none' } : undefined}
+          onMouseDown={(e) => { mouseDownOnOverlay.current = e.target === e.currentTarget }}
+          onClick={(e) => { if (e.target === e.currentTarget && mouseDownOnOverlay.current) handleMinimizeModal() }}
+        >
           <div className="modal-content" role="dialog" aria-modal="true" aria-label={editingOrder ? 'Edytuj zlecenie' : 'Nowe zlecenie'} onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close-btn" onClick={handleCloseModal} aria-label="Zamknij formularz">✕</button>
             <h2>{editingOrder ? 'Edytuj zlecenie' : 'Nowe zlecenie'}</h2>
             <OrderForm
+              key={editingOrder?.id ?? 'new'}
               onSubmit={handleSubmitOrder}
               initialData={editingOrder}
               onCancel={handleCloseModal}
@@ -444,8 +500,25 @@ export function OrderList({
         </div>
       )}
 
+      {modalMinimized && (
+        <div className="draft-resume-banner" onClick={handleResumeDraft}>
+          <span>📝 {editingOrder ? `Edytujesz ${editingOrder.plate}` : 'Nowe zlecenie'} – kliknij, aby kontynuować</span>
+          <button
+            className="draft-discard-btn"
+            onClick={(e) => { e.stopPropagation(); handleCloseModal() }}
+            aria-label="Odrzuć szkic"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {showDeleteConfirm && (
-        <div className="modal-overlay" onClick={handleCancelDelete}>
+        <div
+          className="modal-overlay"
+          onMouseDown={(e) => { mouseDownOnOverlay.current = e.target === e.currentTarget }}
+          onClick={(e) => { if (e.target === e.currentTarget && mouseDownOnOverlay.current) handleCancelDelete() }}
+        >
           <div className="modal-content" role="dialog" aria-modal="true" aria-label="Potwierdzenie usunięcia" onClick={(e) => e.stopPropagation()}>
             <h2>Potwierdzenie usunięcia</h2>
             <p>
@@ -474,7 +547,11 @@ export function OrderList({
       )}
 
       {showCompleteConfirm && (
-        <div className="modal-overlay" onClick={handleCancelComplete}>
+        <div
+          className="modal-overlay"
+          onMouseDown={(e) => { mouseDownOnOverlay.current = e.target === e.currentTarget }}
+          onClick={(e) => { if (e.target === e.currentTarget && mouseDownOnOverlay.current) handleCancelComplete() }}
+        >
           <div className="modal-content" role="dialog" aria-modal="true" aria-label="Potwierdzenie zakończenia" onClick={(e) => e.stopPropagation()}>
             <h2>Potwierdzenie zakończenia</h2>
             <p>
