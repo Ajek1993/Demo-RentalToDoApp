@@ -1,6 +1,7 @@
+/* global clients */
 // Service Worker dla Push Notifications
 
-self.addEventListener('install', (event) => {
+self.addEventListener('install', () => {
   console.log('Service Worker: Installed');
   self.skipWaiting();
 });

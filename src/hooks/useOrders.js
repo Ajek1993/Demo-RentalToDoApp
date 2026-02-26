@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import toast from 'react-hot-toast'
 import { calculatePriceAsync } from '../lib/priceCalculator'
@@ -48,6 +48,7 @@ export function useOrders() {
         supabase.removeChannel(channelRef.current)
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function setupRealtimeSubscription() {
