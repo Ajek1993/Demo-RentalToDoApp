@@ -5,8 +5,10 @@ import Modal from "./Modal";
 import { getPeriods, filterByPeriod } from "../lib/periods";
 import { calculatePriceAsync } from "../lib/priceCalculator";
 import { findVehicleByPlate } from "../lib/vehicleService";
+import { useScrollLock } from "../hooks/useScrollLock";
 
 export default function KursyList({ currentUser, profile, onClose }) {
+  useScrollLock();
   const [kursy, setKursy] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
@@ -237,14 +239,13 @@ export default function KursyList({ currentUser, profile, onClose }) {
 
   return (
     <div className="kursy-panel">
-      <button type="button" className="panel-close" onClick={onClose} aria-label="Zamknij panel kursów">
-        X
-      </button>
-
       <div className="kursy-header">
         <h2>
           Kursy <span className="beta-badge">Beta</span>
         </h2>
+        <button type="button" className="modal-close-btn" onClick={onClose} aria-label="Zamknij panel kursów">
+          ✕
+        </button>
       </div>
 
       {loading ? (
@@ -370,8 +371,8 @@ export default function KursyList({ currentUser, profile, onClose }) {
       {editing && (
         <Modal onClose={() => setEditing(null)} ariaLabel="Edytuj kurs">
           <div className="kurs-form">
-            <button type="button" className="panel-close" onClick={() => setEditing(null)} aria-label="Zamknij edycję kursu">
-              X
+            <button type="button" className="modal-close-btn" onClick={() => setEditing(null)} aria-label="Zamknij edycję kursu">
+              ✕
             </button>
             <h3>Edytuj kurs</h3>
             <label htmlFor="kurs-edit-data">Data:</label>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAvailability } from '../hooks/useAvailability'
+import { useScrollLock } from '../hooks/useScrollLock'
 
 const DAY_NAMES = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Ndz']
 
@@ -32,6 +33,7 @@ function formatShortDate(date) {
 }
 
 export function AvailabilityManager({ onClose }) {
+  useScrollLock()
   const { loading, fetchMyWeek, saveDaySlots } = useAvailability()
   const [weekOffset, setWeekOffset] = useState(0)
   const [weekDates, setWeekDates] = useState(() => getWeekDates(0))
@@ -40,17 +42,18 @@ export function AvailabilityManager({ onClose }) {
   const [daySlots, setDaySlots] = useState([])
   const [saving, setSaving] = useState(false)
 
-  useEffect(() => {
-    const dates = getWeekDates(weekOffset)
-    setWeekDates(dates)
-    loadWeek(dates)
-  }, [weekOffset])
-
-  async function loadWeek(dates) {
+  const loadWeek = useCallback(async (dates) => {
     const dateStrs = dates.map(toDateStr)
     const data = await fetchMyWeek(dateStrs)
     setWeekData(data)
-  }
+  }, [fetchMyWeek])
+
+  useEffect(() => {
+    const dates = getWeekDates(weekOffset)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setWeekDates(dates)
+    loadWeek(dates)
+  }, [weekOffset, loadWeek])
 
   const openDayEditor = (date) => {
     const dateStr = toDateStr(date)
@@ -156,6 +159,7 @@ export function AvailabilityManager({ onClose }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content avail-modal" role="dialog" aria-modal="true" aria-label="Moja dyspozycyjność" onClick={(e) => e.stopPropagation()}>
+        <button className="modal-close-btn" onClick={onClose} aria-label="Zamknij">✕</button>
         <h2>Moja dyspozycyjność</h2>
 
         <div className="avail-week-nav">
@@ -288,10 +292,6 @@ export function AvailabilityManager({ onClose }) {
           </div>
         )}
 
-        <div className="avail-close">
-          <button className="btn-secondary" onClick={onClose}>Zamknij</button>
-
-        </div>
       </div>
     </div>
   )

@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Toaster, toast } from 'react-hot-toast'
 import { useAuth } from './hooks/useAuth'
-import { useOnlineStatus } from './components/OfflineBanner'
+import { useOnlineStatus } from './hooks/useOnlineStatus'
 import { usePushNotifications } from './hooks/usePushNotifications'
+import { useScrollLock } from './hooks/useScrollLock'
 import { LoginForm } from './components/LoginForm'
 import { OrderList } from './components/OrderList'
 import { OfflineBanner } from './components/OfflineBanner'
@@ -13,6 +14,7 @@ import KursyList from './components/KursyList'
 import { AdminUserManagement } from './components/AdminUserManagement'
 import { CompleteProfile } from './components/CompleteProfile'
 import { AboutModal } from './components/AboutModal'
+import { ErrorBoundary } from './components/ErrorBoundary'
 
 function useDarkMode() {
   const [dark, setDark] = useState(() => {
@@ -58,6 +60,22 @@ function App() {
   const [showSearch, setShowSearch] = useState(false)
   const searchInputRef = useRef(null)
 
+  useScrollLock(showKursy || showPushSettings)
+
+  const handleSubscribe = useCallback(async () => {
+    try {
+      await subscribe()
+      toast.success('Powiadomienia włączone!')
+    } catch (error) {
+      console.error('Failed to subscribe:', error)
+      if (error.message.includes('denied')) {
+        toast.error('Odmówiono dostępu do powiadomień')
+      } else {
+        toast.error('Nie udało się włączyć powiadomień')
+      }
+    }
+  }, [subscribe])
+
   // Automatyczna subskrypcja przy pierwszym zalogowaniu
   useEffect(() => {
     if (user && !subscribed && !pushLoading && supported) {
@@ -72,21 +90,7 @@ function App() {
       // 'granted' + !subscribed → user consciously disabled, respect that
       // 'denied' → user blocked notifications, don't ask
     }
-  }, [user, subscribed, pushLoading, supported])
-
-  const handleSubscribe = async () => {
-    try {
-      await subscribe()
-      toast.success('Powiadomienia włączone!')
-    } catch (error) {
-      console.error('Failed to subscribe:', error)
-      if (error.message.includes('denied')) {
-        toast.error('Odmówiono dostępu do powiadomień')
-      } else {
-        toast.error('Nie udało się włączyć powiadomień')
-      }
-    }
-  }
+  }, [user, subscribed, pushLoading, supported, handleSubscribe])
 
   const handleUnsubscribe = async () => {
     try {
@@ -238,7 +242,8 @@ function App() {
           },
         }}
       />
-      <OfflineBanner />
+      <ErrorBoundary>
+        <OfflineBanner />
       <header className="app-header">
         <div className="header-left">
           <h1>Witaj, {profile?.name || 'Użytkownik'}</h1>
@@ -516,6 +521,7 @@ function App() {
           onHighlightConsumed={() => setHighlightOrderId(null)}
         />
       </main>
+      </ErrorBoundary>
     </div>
   )
 }

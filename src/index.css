@@ -2229,9 +2229,20 @@ button.btn-primary {
 
 .kursy-header {
   display: flex;
-  flex-direction: column;
   justify-content: space-between;
   align-items: center;
+}
+
+.kursy-header h2 {
+  margin-bottom: 0;
+  flex: 1;
+  text-align: center;
+}
+
+.kursy-header .modal-close-btn {
+  position: static;
+  flex-shrink: 0;
+  margin-left: -28px;
 }
 
 .kursy-list {
@@ -2692,6 +2703,59 @@ button.btn-primary {
 [data-theme="dark"] .admin-invite-section {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.1);
+}
+
+.admin-invite-title {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.admin-invite-form {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-invite-form input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--gray-300);
+  padding: 10px 12px;
+}
+
+[data-theme="dark"] .admin-invite-form input {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.admin-invite-form .btn-primary {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.admin-invite-hint {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  opacity: 0.65;
+}
+
+.admin-users-section {
+  margin-top: 24px;
+}
+
+.admin-users-empty {
+  text-align: center;
+  padding: 24px 0;
+  opacity: 0.6;
+}
+
+@media (max-width: 480px) {
+  .admin-invite-form {
+    flex-direction: column;
+  }
+
+  .admin-invite-form .btn-primary {
+    width: 100%;
+  }
 }
 
 .admin-users-list {

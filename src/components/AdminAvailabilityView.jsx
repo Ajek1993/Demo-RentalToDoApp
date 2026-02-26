@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAvailability } from '../hooks/useAvailability'
+import { useScrollLock } from '../hooks/useScrollLock'
 
 const DAY_NAMES = ['Niedz', 'Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob']
 
@@ -18,6 +19,7 @@ function formatDisplayDate(dateStr) {
 }
 
 export function AdminAvailabilityView({ onClose }) {
+  useScrollLock()
   const { fetchDateAvailability } = useAvailability()
   const [selectedDate, setSelectedDate] = useState(toDateStr(new Date()))
   const [dateRange, setDateRange] = useState('single') // 'single' | 'range'
@@ -26,18 +28,19 @@ export function AdminAvailabilityView({ onClose }) {
   const [rangeAvailability, setRangeAvailability] = useState({})
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    if (dateRange === 'single' && selectedDate) {
-      loadSingleDate(selectedDate)
-    }
-  }, [selectedDate, dateRange])
-
-  async function loadSingleDate(date) {
+  const loadSingleDate = useCallback(async (date) => {
     setLoading(true)
     const data = await fetchDateAvailability(date)
     setAvailability(data)
     setLoading(false)
-  }
+  }, [fetchDateAvailability])
+
+  useEffect(() => {
+    if (dateRange === 'single' && selectedDate) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      loadSingleDate(selectedDate)
+    }
+  }, [selectedDate, dateRange, loadSingleDate])
 
   async function loadDateRange() {
     if (!selectedDate || !endDate) return
@@ -74,6 +77,7 @@ export function AdminAvailabilityView({ onClose }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content admin-avail-modal" role="dialog" aria-modal="true" aria-label="Dyspozycyjność kierowców" onClick={(e) => e.stopPropagation()}>
+        <button className="modal-close-btn" onClick={onClose} aria-label="Zamknij">✕</button>
         <h2>Dyspozycyjność kierowców</h2>
 
         <div className="admin-avail-controls">
@@ -185,9 +189,6 @@ export function AdminAvailabilityView({ onClose }) {
           </div>
         )}
 
-        <div className="avail-close">
-          <button className="btn-secondary" onClick={onClose}>Zamknij</button>
-        </div>
       </div>
     </div>
   )

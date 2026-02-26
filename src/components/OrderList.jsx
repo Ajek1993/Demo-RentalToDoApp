@@ -3,7 +3,8 @@ import { useOrders } from '../hooks/useOrders'
 import { supabase } from '../lib/supabase'
 import { OrderCard } from './OrderCard'
 import { OrderForm } from './OrderForm'
-import { useOnlineStatus } from './OfflineBanner'
+import { useOnlineStatus } from '../hooks/useOnlineStatus'
+import { useScrollLock } from '../hooks/useScrollLock'
 
 function toLocalDateStr(date) {
   const y = date.getFullYear()
@@ -108,6 +109,8 @@ export function OrderList({
   const searchInputRef = useRef(null)
   const mouseDownOnOverlay = useRef(false)
 
+  useScrollLock((showModal && !modalMinimized) || showDeleteConfirm || showCompleteConfirm)
+
   useEffect(() => {
     supabase.from('profiles').select('id, name').order('name')
       .then(({ data }) => setAllUsers(data || []))
@@ -127,7 +130,7 @@ export function OrderList({
       el.scrollIntoView({ behavior: 'smooth', block: 'center' })
       onHighlightConsumed?.()
     }
-  }, [highlightOrderId, loading, orders])
+  }, [highlightOrderId, loading, orders, onHighlightConsumed])
 
   const handleTabChange = useCallback((tab) => {
     if (tab === activeTab) return
@@ -520,6 +523,7 @@ export function OrderList({
           onClick={(e) => { if (e.target === e.currentTarget && mouseDownOnOverlay.current) handleCancelDelete() }}
         >
           <div className="modal-content" role="dialog" aria-modal="true" aria-label="Potwierdzenie usunięcia" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close-btn" onClick={handleCancelDelete} aria-label="Zamknij">✕</button>
             <h2>Potwierdzenie usunięcia</h2>
             <p>
               {deleteAssignments.length > 0 ? (
@@ -553,6 +557,7 @@ export function OrderList({
           onClick={(e) => { if (e.target === e.currentTarget && mouseDownOnOverlay.current) handleCancelComplete() }}
         >
           <div className="modal-content" role="dialog" aria-modal="true" aria-label="Potwierdzenie zakończenia" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close-btn" onClick={handleCancelComplete} aria-label="Zamknij">✕</button>
             <h2>Potwierdzenie zakończenia</h2>
             <p>
               {completeAssignments.filter(a => !a.unassigned_at).length > 0 ? (

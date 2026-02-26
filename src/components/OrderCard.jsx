@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef, memo } from 'react'
+import { useState, useEffect, useRef, memo, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { AssignmentHistory } from './AssignmentHistory'
-import { useOnlineStatus } from './OfflineBanner'
+import { useOnlineStatus } from '../hooks/useOnlineStatus'
+import { useScrollLock } from '../hooks/useScrollLock'
 
 export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin, onEdit, onComplete, onDelete, onRestore, onPermanentlyDelete, onAssign, onUnassign, fetchAssignments, fetchOrderEdits, allUsers, autoOpen = false }) {
   const isOnline = useOnlineStatus()
@@ -16,6 +17,18 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
   const [unassignOtherTarget, setUnassignOtherTarget] = useState(null)
   const [showPermanentDeleteConfirm, setShowPermanentDeleteConfirm] = useState(false)
   const mouseDownOnOverlay = useRef(false)
+
+  useScrollLock(showActionsModal || showUnassignConfirm || showUnassignOtherConfirm || showPermanentDeleteConfirm)
+
+  const loadAssignments = useCallback(async () => {
+    const { data } = await fetchAssignments(order.id)
+    setAssignments(data)
+  }, [order.id, fetchAssignments])
+
+  const loadEdits = useCallback(async () => {
+    const { data } = await fetchOrderEdits(order.id)
+    setEdits(data)
+  }, [order.id, fetchOrderEdits])
 
   useEffect(() => {
     loadAssignments()
@@ -53,7 +66,7 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [order.id])
+  }, [order.id, loadAssignments, loadEdits])
 
   // Deep link: auto-otwórz modal akcji gdy autoOpen=true
   useEffect(() => {
@@ -61,21 +74,12 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
   }, [autoOpen])
 
   // Lazy load edits only when history is opened
+  // eslint-disable react-hooks/exhaustive-deps
   useEffect(() => {
     if (showHistory && edits.length === 0) {
       loadEdits()
     }
-  }, [showHistory])
-
-  async function loadAssignments() {
-    const { data } = await fetchAssignments(order.id)
-    setAssignments(data)
-  }
-
-  async function loadEdits() {
-    const { data } = await fetchOrderEdits(order.id)
-    setEdits(data)
-  }
+  }, [showHistory, loadEdits])
 
   // Filtruj tylko aktywne przypisania (nie wypisane)
   const activeAssignments = assignments.filter(a => a.unassigned_at === null)
@@ -403,6 +407,7 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
         onClick={(e) => { if (e.target === e.currentTarget && mouseDownOnOverlay.current) setShowActionsModal(false) }}
       >
         <div className="modal-content modal-actions-menu" role="dialog" aria-modal="true" aria-label="Akcje zlecenia" onClick={(e) => e.stopPropagation()}>
+          <button className="modal-close-btn" onClick={() => setShowActionsModal(false)} aria-label="Zamknij">✕</button>
           <div className="modal-assignment-header">
             <div className="modal-header-top-row">
               <span className="modal-date-time">
@@ -517,6 +522,7 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
         onClick={(e) => { if (e.target === e.currentTarget && mouseDownOnOverlay.current) handleCancelUnassign() }}
       >
         <div className="modal-content" role="dialog" aria-modal="true" aria-label="Potwierdzenie wypisania" onClick={(e) => e.stopPropagation()}>
+          <button className="modal-close-btn" onClick={handleCancelUnassign} aria-label="Zamknij">✕</button>
           <h2>Potwierdzenie wypisania</h2>
           <p>Czy na pewno chcesz wypisać się z tego zlecenia?</p>
           <div className="modal-actions">
@@ -538,6 +544,7 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
         onClick={(e) => { if (e.target === e.currentTarget && mouseDownOnOverlay.current) handleCancelUnassignOther() }}
       >
         <div className="modal-content" role="dialog" aria-modal="true" aria-label="Potwierdzenie wypisania osoby" onClick={(e) => e.stopPropagation()}>
+          <button className="modal-close-btn" onClick={handleCancelUnassignOther} aria-label="Zamknij">✕</button>
           <h2>Wypisanie z zlecenia</h2>
           <p>Czy na pewno chcesz wypisać <strong>{unassignOtherTarget.userName}</strong> z tego zlecenia?</p>
           <div className="modal-actions">
@@ -559,6 +566,7 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
         onClick={(e) => { if (e.target === e.currentTarget && mouseDownOnOverlay.current) setShowPermanentDeleteConfirm(false) }}
       >
         <div className="modal-content" role="dialog" aria-modal="true" aria-label="Trwałe usunięcie zlecenia" onClick={(e) => e.stopPropagation()}>
+          <button className="modal-close-btn" onClick={() => setShowPermanentDeleteConfirm(false)} aria-label="Zamknij">✕</button>
           <h2>Trwałe usunięcie</h2>
           <p>Czy na pewno chcesz <strong>na stałe</strong> usunąć zlecenie <strong>{order.plate}</strong>?</p>
           <p style={{ color: '#dc2626', fontSize: '0.9em' }}>Ta operacja jest nieodwracalna - zlecenie i cała jego historia zostaną usunięte z bazy danych.</p>

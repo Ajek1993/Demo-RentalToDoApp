@@ -1,4 +1,15 @@
+import { useScrollLock } from '../hooks/useScrollLock'
+
 const CHANGELOG = [
+  {
+    version: '1.0.0',
+    date: '2026-02-27',
+    changes: [
+      'Blokowanie przewijania tła pod modalami na urządzeniach mobilnych',
+      'Ujednolicony przycisk zamykania (✕) we wszystkich modalach',
+      'Poprawki layoutu panelu zarządzania użytkownikami',
+    ],
+  },
   {
     version: '0.9.9',
     date: '2026-02-26',
@@ -8,7 +19,7 @@ const CHANGELOG = [
     ],
   },
   {
-    version: '0.9.9',
+    version: '0.9.8',
     date: '2026-02-24',
     changes: [
       'Optymalizacja ładowania danych przy przełączaniu zakładek (~45 → ~15 zapytań)',
@@ -83,9 +94,12 @@ const CHANGELOG = [
 ]
 
 export function AboutModal({ onClose }) {
+  useScrollLock()
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content about-modal" role="dialog" aria-modal="true" aria-label="O programie" onClick={(e) => e.stopPropagation()}>
+        <button className="modal-close-btn" onClick={onClose} aria-label="Zamknij">✕</button>
         <h2>O programie</h2>
 
         <div className="about-version">
