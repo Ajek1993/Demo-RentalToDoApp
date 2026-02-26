@@ -8,7 +8,7 @@ const CHANGELOG = [
     ],
   },
   {
-    version: '0.9.8',
+    version: '0.9.9',
     date: '2026-02-24',
     changes: [
       'Optymalizacja ładowania danych przy przełączaniu zakładek (~45 → ~15 zapytań)',

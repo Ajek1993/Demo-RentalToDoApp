@@ -809,6 +809,16 @@ button.btn-primary {
   user-select: none;
 }
 
+@media (min-width: 640px) {
+  .order-date,
+  .order-time,
+  .order-plate,
+  .order-location,
+  .order-notes {
+    user-select: text;
+  }
+}
+
 .btn-icon {
   min-width: 36px;
   width: 36px;

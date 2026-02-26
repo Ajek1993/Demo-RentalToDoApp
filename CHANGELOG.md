@@ -10,6 +10,7 @@ wersjonowanie według [Semantic Versioning](https://semver.org/lang/pl/).
 ### Dodane
 - Rozszerzone grupowanie dat w zakładce Aktywne: Pojutrze, Ten tydzień, Przyszły tydzień
 - Nowe grupy domyślnie zwinięte; tylko „Dzisiaj" rozwinięte
+- Możliwość zaznaczania tekstu na kartach zleceń na desktopie (data, godzina, nr rejestracyjny, adres, notatki)
 
 ## [0.9.8] - 2026-02-24
 
