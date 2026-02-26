@@ -13,7 +13,7 @@ const formatValue = (field, val) => {
   return val || '(puste)'
 }
 
-export function AssignmentHistory({ assignments, currentUserId, edits, onUnassignOther, orderId, isOnline }) {
+export function AssignmentHistory({ assignments, currentUserId, edits, onUnassignOther, isOnline }) {
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp)
     return date.toLocaleString('pl-PL', {

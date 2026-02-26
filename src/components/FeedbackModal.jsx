@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { toast } from 'react-hot-toast'
+import { useScrollLock } from '../hooks/useScrollLock'
 
 export function FeedbackModal({ userId, onClose }) {
+  useScrollLock()
   const [message, setMessage] = useState('')
   const [sending, setSending] = useState(false)
 
@@ -31,6 +33,7 @@ export function FeedbackModal({ userId, onClose }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" role="dialog" aria-modal="true" aria-label="Wyślij feedback" onClick={e => e.stopPropagation()} style={{ maxWidth: 400 }}>
+        <button className="modal-close-btn" onClick={onClose} aria-label="Zamknij">✕</button>
         <h2>Feedback</h2>
         <form onSubmit={handleSubmit} className="order-form">
           <div className="form-group">

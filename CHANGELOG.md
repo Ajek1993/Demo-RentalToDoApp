@@ -5,6 +5,27 @@ Wszystkie istotne zmiany w projekcie System Zleceń Wypożyczalni.
 Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.0.0/),
 wersjonowanie według [Semantic Versioning](https://semver.org/lang/pl/).
 
+## [1.0.0] - 2026-02-27
+
+### Dodane
+- Hook `useScrollLock` — blokowanie przewijania tła pod modalami na mobile (iOS scroll lock)
+- Ujednolicony przycisk zamykania (✕) we wszystkich modalach
+- ErrorBoundary - komponent do łapania błędów renderowania z przyjaznym UI
+- Testy jednostkowe (Vitest + React Testing Library) dla: useAuth, useOrders, OrderForm, ErrorBoundary
+
+### Naprawione
+- Scroll tła pod modalami inline (FeedbackModal, AboutModal, AvailabilityManager, AdminAvailabilityView, AdminUserManagement, OrderCard, OrderList, KursyList)
+- Layout panelu zarządzania użytkownikami na mobile (formularz zaproszenia)
+- Wszystkie błędy ESLint (15 errors) - 0 errors, 0 warnings
+- Refs w Modal.jsx - przenieść assignment do useEffect
+- Async functions w komponentach - konwersja na useCallback tam gdzie wymagane
+
+### Zmienione
+- Scroll lock w Modal.jsx wydzielony do reusable hooka `useScrollLock`
+- useOnlineStatus wydzielony do osobnego pliku `src/hooks/useOnlineStatus.js`
+- OfflineBanner - import hooka z nowej lokalizacji
+- sw.js - zmiana `eslint-env` na `global` komentarz
+
 ## [0.9.9] - 2026-02-26
 
 ### Dodane

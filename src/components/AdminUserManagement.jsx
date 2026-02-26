@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { toast } from 'react-hot-toast'
+import { useScrollLock } from '../hooks/useScrollLock'
 
 export function AdminUserManagement({ onClose }) {
+  useScrollLock()
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [inviteEmail, setInviteEmail] = useState('')
@@ -87,17 +89,13 @@ export function AdminUserManagement({ onClose }) {
         onClick={e => e.stopPropagation()}
         style={{ maxWidth: 540, width: '95%' }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <h2 style={{ margin: 0 }}>Zarządzanie użytkownikami</h2>
-          <button onClick={onClose} className="btn-icon" title="Zamknij">✕</button>
-        </div>
+        <button className="modal-close-btn" onClick={onClose} aria-label="Zamknij">✕</button>
+        <h2>Zarządzanie użytkownikami</h2>
 
         {/* Formularz zaproszenia */}
         <div className="admin-invite-section">
-          <h3 style={{ marginTop: 0, marginBottom: 10, fontSize: '0.95rem', fontWeight: 600 }}>
-            Wyślij zaproszenie
-          </h3>
-          <form onSubmit={handleInvite} style={{ display: 'flex', gap: 8 }}>
+          <h3 className="admin-invite-title">Wyślij zaproszenie</h3>
+          <form onSubmit={handleInvite} className="admin-invite-form">
             <label htmlFor="invite-email" className="sr-only">Adres email zaproszenia</label>
             <input
               id="invite-email"
@@ -106,7 +104,6 @@ export function AdminUserManagement({ onClose }) {
               value={inviteEmail}
               onChange={e => setInviteEmail(e.target.value)}
               required
-              style={{ flex: 1 }}
               disabled={inviteLoading}
             />
             <button
@@ -117,22 +114,22 @@ export function AdminUserManagement({ onClose }) {
               {inviteLoading ? 'Wysyłanie...' : 'Wyślij link'}
             </button>
           </form>
-          <p style={{ margin: '8px 0 0', fontSize: '0.8rem', opacity: 0.65 }}>
+          <p className="admin-invite-hint">
             Użytkownik otrzyma magiczny link do utworzenia konta.
           </p>
         </div>
 
-        <div style={{ marginTop: 24 }}>
-          <h3 style={{ marginTop: 0, marginBottom: 10, fontSize: '0.95rem', fontWeight: 600 }}>
+        <div className="admin-users-section">
+          <h3 className="admin-invite-title">
             Użytkownicy ({users.length})
           </h3>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '24px 0', opacity: 0.6 }}>
+            <div className="admin-users-empty">
               Ładowanie...
             </div>
           ) : users.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '24px 0', opacity: 0.6 }}>
+            <div className="admin-users-empty">
               Brak użytkowników
             </div>
           ) : (

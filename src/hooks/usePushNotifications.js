@@ -21,6 +21,7 @@ export function usePushNotifications(userId) {
   useEffect(() => {
     checkSupport()
     checkSubscription()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId])
 
   const checkSupport = () => {

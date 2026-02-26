@@ -38,7 +38,7 @@ function parseLocationString(locationString) {
   return { operationType, hasOC, cleanLocation }
 }
 
-export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
+export function OrderForm({ onSubmit, initialData, onCancel }) {
   // Parsuj initialData.location przy edycji
   const parsedLocation = parseLocationString(initialData?.location)
 
@@ -69,7 +69,7 @@ export function OrderForm({ onSubmit, initialData, onCancel, isAdmin }) {
     } else {
       setDateAvailability([])
     }
-  }, [formData.date])
+  }, [formData.date, fetchDateAvailability])
 
   // Wykryj dystans z bazy miast przy zmianie lokalizacji
   useEffect(() => {

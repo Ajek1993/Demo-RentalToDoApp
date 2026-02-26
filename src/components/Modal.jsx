@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useScrollLock } from '../hooks/useScrollLock'
 
 export default function Modal({ children, onClose, ariaLabel }) {
   const modalRef = useRef(null)
@@ -6,7 +7,11 @@ export default function Modal({ children, onClose, ariaLabel }) {
   const onCloseRef = useRef(onClose)
   const mouseDownOnOverlay = useRef(false)
 
-  onCloseRef.current = onClose
+  useScrollLock()
+
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
 
   useEffect(() => {
     // Save previous focus to restore later
@@ -14,13 +19,6 @@ export default function Modal({ children, onClose, ariaLabel }) {
 
     // Focus the modal container
     modalRef.current?.focus()
-
-    // iOS scroll lock
-    const scrollY = window.scrollY
-    document.body.style.overflow = 'hidden'
-    document.body.style.position = 'fixed'
-    document.body.style.top = `-${scrollY}px`
-    document.body.style.width = '100%'
 
     // Handle Escape key
     const handleKeyDown = (e) => {
@@ -57,13 +55,6 @@ export default function Modal({ children, onClose, ariaLabel }) {
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
-      // Restore iOS scroll
-      const savedScrollY = document.body.style.top
-      document.body.style.overflow = ''
-      document.body.style.position = ''
-      document.body.style.top = ''
-      document.body.style.width = ''
-      window.scrollTo(0, parseInt(savedScrollY || '0') * -1)
       // Restore focus on close
       previousFocusRef.current?.focus()
     }
