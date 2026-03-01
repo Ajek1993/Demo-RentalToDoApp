@@ -251,6 +251,13 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
     return time.substring(0, 5)
   }
 
+  const formatCreatedAt = (createdAt) => {
+    const d = new Date(createdAt)
+    const time = d.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })
+    const date = d.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    return `${time} dnia ${date}`
+  }
+
   return (
     <>
       <article id={`order-card-${order.id}`} className={`order-card status-${order.status}`} onClick={handleCardClick}>
@@ -398,6 +405,11 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
           />
         </div>
       )}
+      {order.created_by_profile && (
+        <span className="order-creator-tooltip">
+          Dodane przez {order.created_by_profile.name} o {formatCreatedAt(order.created_at)}
+        </span>
+      )}
     </article>
 
     {showActionsModal && (
@@ -510,6 +522,11 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
             >
               Anuluj
             </button>
+            {order.created_by_profile && (
+              <p className="modal-creator-info">
+                Dodane przez {order.created_by_profile.name} o {formatCreatedAt(order.created_at)}
+              </p>
+            )}
           </div>
         </div>
       </div>
