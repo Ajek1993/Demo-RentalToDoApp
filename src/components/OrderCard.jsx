@@ -299,7 +299,7 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
                   🖨️
                 </button>
               )}
-              {order.notes && (
+              {(order.notes || order.created_by_profile) && (
                 <button
                   className="btn-notes-info"
                   onClick={(e) => {
@@ -375,16 +375,21 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
       </div>
 
       {order.notes && (
-        <>
-          <div className="order-notes order-notes-desktop">{order.notes}</div>
-          {showNotesPopup && (
-            <div className="notes-popup" onClick={(e) => e.stopPropagation()}>
-              <div className="notes-popup-content">
-                {order.notes}
-              </div>
+        <div className="order-notes order-notes-desktop">{order.notes}</div>
+      )}
+      {showNotesPopup && (
+        <div className="notes-popup" onClick={(e) => e.stopPropagation()}>
+          {order.notes && (
+            <div className="notes-popup-content">
+              {order.notes}
             </div>
           )}
-        </>
+          {order.created_by_profile && (
+            <div className={`notes-popup-creator${order.notes ? '' : ' no-border'}`}>
+              Dodane przez {order.created_by_profile.name} o {formatCreatedAt(order.created_at)}
+            </div>
+          )}
+        </div>
       )}
 
       {order.status === 'active' && (
@@ -404,11 +409,6 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
             isOnline={isOnline}
           />
         </div>
-      )}
-      {order.created_by_profile && (
-        <span className="order-creator-tooltip">
-          Dodane przez {order.created_by_profile.name} o {formatCreatedAt(order.created_at)}
-        </span>
       )}
     </article>
 
