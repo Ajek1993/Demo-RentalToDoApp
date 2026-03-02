@@ -4,9 +4,11 @@ import { useAuth } from './hooks/useAuth'
 import { useOnlineStatus } from './hooks/useOnlineStatus'
 import { usePushNotifications } from './hooks/usePushNotifications'
 import { useScrollLock } from './hooks/useScrollLock'
+import { isDemoMode } from './lib/demo-mode'
 import { LoginForm } from './components/LoginForm'
 import { OrderList } from './components/OrderList'
 import { OfflineBanner } from './components/OfflineBanner'
+import { DemoBanner } from './components/DemoBanner'
 import { AvailabilityManager } from './components/AvailabilityManager'
 import { AdminAvailabilityView } from './components/AdminAvailabilityView'
 import { FeedbackModal } from './components/FeedbackModal'
@@ -243,6 +245,7 @@ function App() {
         }}
       />
       <ErrorBoundary>
+        {isDemoMode() && <DemoBanner />}
         <OfflineBanner />
       <header className="app-header">
         <div className="header-left">

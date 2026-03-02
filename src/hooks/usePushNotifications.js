@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { isDemoMode } from '../lib/demo-mode'
 
 // Funkcja pomocnicza do konwersji VAPID key
 function urlBase64ToUint8Array(base64String) {
@@ -14,6 +15,17 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 export function usePushNotifications(userId) {
+  // Demo mode: push notifications disabled
+  if (isDemoMode()) {
+    return {
+      supported: false,
+      subscribed: false,
+      loading: false,
+      subscribe: async () => { throw new Error('Push notifications disabled in demo mode') },
+      unsubscribe: async () => { throw new Error('Push notifications disabled in demo mode') },
+    }
+  }
+
   const [subscribed, setSubscribed] = useState(false)
   const [loading, setLoading] = useState(true)
   const [supported, setSupported] = useState(false)

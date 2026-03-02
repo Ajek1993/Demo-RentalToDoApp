@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { isDemoMode } from '../lib/demo-mode'
+import { getDemoUser, initializeDemoDatabase } from '../lib/demo-data'
 
 const PRODUCTION_URL = 'https://example.com/'
 
@@ -21,6 +23,18 @@ export function useAuth() {
   })
 
   useEffect(() => {
+    // Demo mode: auto-login
+    if (isDemoMode()) {
+      initializeDemoDatabase()
+      const demoUser = getDemoUser()
+      setUser(demoUser)
+      // Fetch demo profile
+      fetchProfile(demoUser.id).then(() => {
+        setLoading(false)
+      })
+      return
+    }
+
     // Wykryj zaproszenie (type=invite w hash lub search URL dla PKCE)
     const hash = window.location.hash
     const search = window.location.search
