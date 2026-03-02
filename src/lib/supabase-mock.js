@@ -421,13 +421,8 @@ class QueryBuilder {
       // Emit realtime events
       this.emitRealtimeEvent('INSERT', inserted)
 
+      // Continue to select/join processing
       data = this.resolveJoins(inserted)
-
-      // Return inserted data if select was called
-      if (this.columns) {
-        return { data, error: null }
-      }
-      return { data: null, error: null }
     }
 
     // UPDATE
@@ -452,12 +447,8 @@ class QueryBuilder {
       // Emit realtime events
       this.emitRealtimeEvent('UPDATE', updated)
 
+      // Continue to select/join processing
       data = this.resolveJoins(updated)
-
-      if (this.columns) {
-        return { data, error: null }
-      }
-      return { data: null, error: null }
     }
 
     // DELETE
