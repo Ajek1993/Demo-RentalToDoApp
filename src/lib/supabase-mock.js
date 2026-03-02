@@ -400,11 +400,19 @@ class QueryBuilder {
     // INSERT
     if (this.insertData) {
       const now = new Date().toISOString()
-      const inserted = this.insertData.map(row => ({
-        id: row.id || generateId(),
-        created_at: row.created_at || now,
-        ...row,
-      }))
+      const inserted = this.insertData.map(row => {
+        const newRow = {
+          id: row.id || generateId(),
+          ...row,
+        }
+        // Add timestamp based on table
+        if (this.tableName === 'assignments') {
+          newRow.assigned_at = row.assigned_at || now
+        } else if (!row.created_at) {
+          newRow.created_at = now
+        }
+        return newRow
+      })
 
       const currentData = getTable(this.tableName)
       const newData = [...currentData, ...inserted]
