@@ -2,6 +2,18 @@ import { useScrollLock } from '../hooks/useScrollLock'
 
 const CHANGELOG = [
   {
+    version: '1.1.0',
+    date: '2026-03-02',
+    changes: [
+      'Content Security Policy (CSP) — ochrona przed XSS',
+      'Zablokowanie eskalacji uprawnień (zmiana roli) w bazie danych',
+      'Ograniczenia maxLength na wszystkich formularzach',
+      'Walidacja payloadu Edge Function send-push',
+      'ESLint plugin security — wykrywanie zagrożeń w kodzie',
+      'Wyłączenie sourcemaps w buildzie produkcyjnym',
+    ],
+  },
+  {
     version: '1.0.0',
     date: '2026-02-27',
     changes: [
