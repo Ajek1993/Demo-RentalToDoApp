@@ -14,8 +14,8 @@ wersjonowanie według [Semantic Versioning](https://semver.org/lang/pl/).
 - Ograniczenia `maxLength` na formularzach: `OrderForm` (plate 10, location 200, notes 2000), `LoginForm` (name 100, password 255), `FeedbackModal` (message 2000), `CompleteProfile` (name 100)
 
 ### Naprawione
-- **P0 Krytyczne:** Zablokowanie eskalacji uprawnień — użytkownik nie może zmienić swojej roli na admin (`schema-full.sql`, `WITH CHECK NEW.role = OLD.role`)
-- Polityka RLS `Feedback: admin read` — admin może odczytywać feedback użytkowników
+- **P0 Krytyczne:** Zablokowanie eskalacji uprawnień — użytkownik nie może zmienić swojej roli na admin (migracja `019_rls_role_escalation_fix`, `WITH CHECK role = (SELECT role FROM profiles WHERE id = auth.uid())`)
+- Polityka RLS `Feedback: admin read` — admin może odczytywać feedback użytkowników (migracja `019_rls_role_escalation_fix`)
 - Podatności npm (`npm audit fix` — 6 pakietów)
 - Puste bloki catch w `AdminUserManagement` i nieużywana zmienna w `useAuth`
 

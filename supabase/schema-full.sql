@@ -142,7 +142,12 @@ ALTER TABLE public.kursy ENABLE ROW LEVEL SECURITY;
 -- profiles
 CREATE POLICY "Profiles: select all" ON public.profiles FOR SELECT USING (true);
 CREATE POLICY "Profiles: insert own" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
-CREATE POLICY "Profiles: update own" ON public.profiles FOR UPDATE USING (auth.uid() = id) WITH CHECK (auth.uid() = id AND NEW.role = OLD.role);
+CREATE POLICY "Profiles: update own" ON public.profiles
+  FOR UPDATE USING (auth.uid() = id)
+  WITH CHECK (
+    auth.uid() = id
+    AND role = (SELECT p.role FROM public.profiles p WHERE p.id = auth.uid())
+  );
 
 -- orders
 CREATE POLICY "Orders: select all" ON public.orders FOR SELECT USING (true);
