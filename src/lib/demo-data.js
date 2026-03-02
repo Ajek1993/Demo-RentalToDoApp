@@ -252,8 +252,20 @@ export function initializeDemoDatabase() {
   const orderAssignments = []
   const activeOrders = orders.filter(o => o.status === 'active')
 
-  // Assign users to active orders
-  activeOrders.slice(0, 5).forEach((order, idx) => {
+  // Assign demo admin to first 2 orders (so user can see "Wypisz się" button)
+  activeOrders.slice(0, 2).forEach((order, idx) => {
+    orderAssignments.push({
+      id: generateId(),
+      order_id: order.id,
+      user_id: 'demo-admin-id',
+      assigned_at: getRelativeDateTime(0, 6 - idx),
+      unassigned_at: null,
+      unassigned_by: null,
+    })
+  })
+
+  // Assign other users to remaining active orders
+  activeOrders.slice(2, 6).forEach((order, idx) => {
     const userId = `demo-user-${(idx % 4) + 1}`
     orderAssignments.push({
       id: generateId(),
@@ -270,7 +282,7 @@ export function initializeDemoDatabase() {
     {
       id: generateId(),
       order_id: activeOrders[0].id,
-      user_id: 'demo-user-2',
+      user_id: 'demo-user-1',
       assigned_at: getRelativeDateTime(0, 7),
       unassigned_at: null,
       unassigned_by: null,
@@ -278,7 +290,7 @@ export function initializeDemoDatabase() {
     {
       id: generateId(),
       order_id: activeOrders[0].id,
-      user_id: 'demo-user-3',
+      user_id: 'demo-user-2',
       assigned_at: getRelativeDateTime(0, 5),
       unassigned_at: null,
       unassigned_by: null,
@@ -289,8 +301,8 @@ export function initializeDemoDatabase() {
   orderAssignments.push(
     {
       id: generateId(),
-      order_id: activeOrders[1]?.id || orders[0].id,
-      user_id: 'demo-user-4',
+      order_id: activeOrders[2]?.id || activeOrders[0]?.id || orders[0].id,
+      user_id: 'demo-user-3',
       assigned_at: getRelativeDateTime(-1, 10),
       unassigned_at: getRelativeDateTime(0, 9),
       unassigned_by: 'demo-admin-id',
