@@ -1,16 +1,10 @@
 import { isDemoMode } from './demo-mode.js'
+import { createClient } from '@supabase/supabase-js'
+import { createDemoClient } from './supabase-mock.js'
 
-let supabase
-
-if (isDemoMode()) {
-  const { createDemoClient } = await import('./supabase-mock.js')
-  supabase = createDemoClient()
-} else {
-  const { createClient } = await import('@supabase/supabase-js')
-  supabase = createClient(
-    import.meta.env.VITE_SUPABASE_URL,
-    import.meta.env.VITE_SUPABASE_ANON_KEY
-  )
-}
-
-export { supabase }
+export const supabase = isDemoMode()
+  ? createDemoClient()
+  : createClient(
+      import.meta.env.VITE_SUPABASE_URL,
+      import.meta.env.VITE_SUPABASE_ANON_KEY
+    )
