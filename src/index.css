@@ -3130,3 +3130,112 @@ textarea:focus-visible,
   font-weight: 600;
   text-decoration: none;
 }
+
+/* ============================================
+   DemoBanner styles
+   ============================================ */
+.demo-banner {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  position: relative;
+  z-index: 1001;
+}
+
+.demo-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.demo-banner-text {
+  font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.demo-banner-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.demo-role-label {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.demo-role-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.demo-role-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.demo-role-btn.active {
+  background: white;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.demo-banner-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.demo-banner-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 640px) {
+  .demo-banner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .demo-banner-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .demo-banner-controls {
+    align-self: flex-end;
+  }
+
+  .demo-banner-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+  }
+}
+
+[data-theme="dark"] .demo-banner {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
