@@ -30,7 +30,7 @@ export function getDemoUser() {
     id: 'demo-admin-id',
     email: 'admin@rentalapp.demo',
     user_metadata: {
-      name: 'Jan Kowalski',
+      name: 'Anna Nowak',
     },
     aud: 'authenticated',
     created_at: getRelativeDateTime(-30, 10),
@@ -53,7 +53,7 @@ export function initializeDemoDatabase() {
   const profiles = [
     {
       id: 'demo-admin-id',
-      name: 'Jan Kowalski',
+      name: 'Anna Nowak',
       role: 'admin',
       created_at: getRelativeDateTime(-30, 10),
     },
