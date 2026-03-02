@@ -1,10 +1,10 @@
-# Integracja abacus-kursy-app z rental-app
+# Integracja kursy-app z rental-app
 
 ## Kontekst
 
 Dwie istniejące aplikacje:
 - **rental-app** — główna aplikacja (React + Vite + Supabase Auth, projekt `xpjcopzdbovenbhykfsb`)
-- **abacus-kursy-app** (`C:\Users\ajek1\Desktop\abacus-kursy-app`) — aplikacja do śledzenia kursów kierowców (Next.js + PIN auth)
+- **kursy-app** (`C:\Users\ajek1\Desktop\kursy-app`) — aplikacja do śledzenia kursów kierowców (Next.js + PIN auth)
 
 Cel: wbudować funkcjonalność kursów bezpośrednio do rental-app jako nowa zakładka „Kursy" w tym samym pasku nawigacji. Zalogowany użytkownik jest automatycznie przypisany do swoich kursów — bez osobnego logowania.
 
@@ -47,7 +47,7 @@ npm install exceljs
 
 Skopiować plik szablonu:
 ```
-abacus-kursy-app/public/szablon.xlsx  →  rental-app/public/szablon.xlsx
+kursy-app/public/szablon.xlsx  →  rental-app/public/szablon.xlsx
 ```
 
 ---
@@ -55,13 +55,13 @@ abacus-kursy-app/public/szablon.xlsx  →  rental-app/public/szablon.xlsx
 ## Etap 3: Nowe pliki
 
 ### `src/lib/periods.js`
-Skopiować bezpośrednio z `abacus-kursy-app/lib/periods.js` bez zmian.
+Skopiować bezpośrednio z `kursy-app/lib/periods.js` bez zmian.
 Zawiera: `getPeriods(monthsBack)` i `filterByPeriod(kursy, start, end)`.
 
 ---
 
 ### `src/components/KursyList.jsx`
-Zaadaptowany z `abacus-kursy-app/components/KursyList.jsx`.
+Zaadaptowany z `kursy-app/components/KursyList.jsx`.
 
 **Kluczowe zmiany względem oryginału:**
 - `fetch('/api/kursy')` → bezpośrednie wywołania Supabase client (`import { supabase } from '../lib/supabase'`)
@@ -75,7 +75,7 @@ Zaadaptowany z `abacus-kursy-app/components/KursyList.jsx`.
 ---
 
 ### `src/components/KursForm.jsx`
-Zaadaptowany z `abacus-kursy-app/components/KursForm.jsx`.
+Zaadaptowany z `kursy-app/components/KursForm.jsx`.
 
 **Kluczowe zmiany:**
 - `fetch('/api/kursy', { method: 'POST' })` → `supabase.from('kursy').insert({ ...fields, user_id: currentUser.id })`
@@ -85,7 +85,7 @@ Zaadaptowany z `abacus-kursy-app/components/KursForm.jsx`.
 ---
 
 ### `src/components/KursItem.jsx`
-Zaadaptowany z `abacus-kursy-app/components/KursItem.jsx`.
+Zaadaptowany z `kursy-app/components/KursItem.jsx`.
 
 **Kluczowe zmiany:**
 - `fetch('/api/kursy', { method: 'DELETE' })` → `supabase.from('kursy').delete().eq('id', kurs.id)`
@@ -96,8 +96,8 @@ Zaadaptowany z `abacus-kursy-app/components/KursItem.jsx`.
 ## Etap 4: Style
 
 Dodać na końcu `src/index.css` zawartość:
-- `abacus-kursy-app/styles/KursyList.css`
-- `abacus-kursy-app/styles/KursForm.css`
+- `kursy-app/styles/KursyList.css`
+- `kursy-app/styles/KursForm.css`
 
 CSS używa tych samych zmiennych CSS (`--primary`, `--input-bg`, `--border`, itd.) co rental-app — działa bez zmian.
 

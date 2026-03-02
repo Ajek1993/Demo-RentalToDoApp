@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
-const PRODUCTION_URL = 'https://to-do-app-abacus.vercel.app/'
+const PRODUCTION_URL = 'https://example.com/'
 
 export function useAuth() {
   const [user, setUser] = useState(null)

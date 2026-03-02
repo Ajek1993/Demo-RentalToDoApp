@@ -2,7 +2,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const ALLOWED_ORIGINS = [
-  'https://to-do-app-abacus.vercel.app',
+  'https://example.com',
   'http://localhost:5173',
 ]
 
@@ -120,7 +120,7 @@ serve(async (req) => {
     }
 
     const { data, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-      redirectTo: 'https://to-do-app-abacus.vercel.app/',
+      redirectTo: 'https://example.com/',
     })
 
     if (inviteError) {

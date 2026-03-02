@@ -185,7 +185,7 @@ wersjonowanie według [Semantic Versioning](https://semver.org/lang/pl/).
 - Szybkie wklejanie daty i godziny na desktop
 
 ### Zmienione
-- Rebranding na Abacus
+- Rebranding na RentalApp
 
 ## [0.6.0]
 

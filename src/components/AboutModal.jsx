@@ -115,7 +115,7 @@ export function AboutModal({ onClose }) {
         <h2>O programie</h2>
 
         <div className="about-version">
-          <span className="about-app-name">Abacus</span>
+          <span className="about-app-name">RentalApp</span>
           <span className="about-version-badge">v{__APP_VERSION__}</span>
         </div>
 
