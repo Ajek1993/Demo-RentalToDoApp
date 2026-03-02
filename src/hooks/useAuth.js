@@ -11,7 +11,7 @@ export function useAuth() {
   const [needsProfileSetup, setNeedsProfileSetup] = useState(() =>
     sessionStorage.getItem('pendingProfileSetup') === 'true'
   )
-  const [inviteError, setInviteError] = useState(() => {
+  const [inviteError] = useState(() => {
     const hash = window.location.hash
     if (hash.includes('error=')) {
       const params = new URLSearchParams(hash.slice(1))

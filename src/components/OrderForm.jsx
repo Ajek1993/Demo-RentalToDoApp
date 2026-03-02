@@ -202,6 +202,7 @@ export function OrderForm({ onSubmit, initialData, onCancel }) {
           onChange={handlePlateChange}
           placeholder="np. WA12345"
           disabled={submitting}
+          maxLength="10"
         />
         {errors.plate && <span className="error">{errors.plate}</span>}
         {detectedMarka && (
@@ -299,6 +300,7 @@ export function OrderForm({ onSubmit, initialData, onCancel }) {
           onChange={handleChange}
           placeholder="np. Lotnisko Okęcie T1"
           disabled={submitting}
+          maxLength="200"
         />
         {errors.location && <span className="error">{errors.location}</span>}
         {detectedCity && detectedDistance && (
@@ -382,6 +384,7 @@ export function OrderForm({ onSubmit, initialData, onCancel }) {
           placeholder="Dodatkowe informacje..."
           rows="3"
           disabled={submitting}
+          maxLength="2000"
         />
       </div>
 

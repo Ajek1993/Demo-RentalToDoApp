@@ -55,6 +55,7 @@ export function CompleteProfile() {
               placeholder="np. Jan Kowalski"
               autoFocus
               required
+              maxLength="100"
             />
           </div>
           <div className="auth-field">

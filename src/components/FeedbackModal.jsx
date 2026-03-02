@@ -41,10 +41,11 @@ export function FeedbackModal({ userId, onClose }) {
             <textarea
               id="feedback-message"
               value={message}
-              onChange={e => setMessage(e.target.value)}
+              onChange={e => setMessage(e.target.value.slice(0, 2000))}
               placeholder="Opisz problem lub podziel się sugestią..."
               rows={5}
               autoFocus
+              maxLength="2000"
             />
           </div>
           <div className="form-actions">

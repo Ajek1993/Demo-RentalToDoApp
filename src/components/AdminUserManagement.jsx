@@ -45,7 +45,12 @@ export function AdminUserManagement({ onClose }) {
       if (error || data?.error) {
         let msg = data?.error || error.message
         if (!data?.error && error.context?.json) {
-          try { const body = await error.context.json(); if (body?.error) msg = body.error } catch {}
+          try {
+            const body = await error.context.json()
+            if (body?.error) msg = body.error
+          } catch {
+            // Ignorowanie błędu parsowania JSON
+          }
         }
         throw new Error(msg)
       }
@@ -71,7 +76,12 @@ export function AdminUserManagement({ onClose }) {
       if (error || data?.error) {
         let msg = data?.error || error.message
         if (!data?.error && error.context?.json) {
-          try { const body = await error.context.json(); if (body?.error) msg = body.error } catch {}
+          try {
+            const body = await error.context.json()
+            if (body?.error) msg = body.error
+          } catch {
+            // Ignorowanie błędu parsowania JSON
+          }
         }
         throw new Error(msg)
       }
