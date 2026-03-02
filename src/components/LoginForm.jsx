@@ -187,6 +187,7 @@ export function LoginForm({ inviteError }) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required={isSignUp}
+                maxLength="100"
               />
             </div>
           )}
@@ -210,6 +211,7 @@ export function LoginForm({ inviteError }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              maxLength="255"
             />
           </div>
 
