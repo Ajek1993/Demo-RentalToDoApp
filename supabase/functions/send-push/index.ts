@@ -49,7 +49,26 @@ serve(async (req) => {
     )
 
     // Parsuj dane z requestu
-    const { title, body, url, userId, targetRole } = await req.json()
+    const payload = await req.json()
+
+    // Walidacja typów pól
+    if (typeof payload.title !== 'string' && payload.title !== undefined) {
+      throw new Error('title must be a string')
+    }
+    if (typeof payload.body !== 'string' && payload.body !== undefined) {
+      throw new Error('body must be a string')
+    }
+    if (typeof payload.url !== 'string' && payload.url !== undefined) {
+      throw new Error('url must be a string')
+    }
+    if (typeof payload.userId !== 'string' && payload.userId !== undefined) {
+      throw new Error('userId must be a string')
+    }
+    if (typeof payload.targetRole !== 'string' && payload.targetRole !== undefined) {
+      throw new Error('targetRole must be a string')
+    }
+
+    const { title, body, url, userId, targetRole } = payload
 
     // Inicjalizacja Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
