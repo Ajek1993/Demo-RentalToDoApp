@@ -42,8 +42,13 @@ export function AdminUserManagement({ onClose }) {
       const { data, error } = await supabase.functions.invoke('admin-actions', {
         body: { action: 'invite', email },
       })
-      if (error) throw error
-      if (data?.error) throw new Error(data.error)
+      if (error || data?.error) {
+        let msg = data?.error || error.message
+        if (!data?.error && error.context?.json) {
+          try { const body = await error.context.json(); if (body?.error) msg = body.error } catch {}
+        }
+        throw new Error(msg)
+      }
 
       toast.success(`Link zaproszeniowy wysłany na ${email}`)
       setInviteEmail('')
@@ -63,8 +68,13 @@ export function AdminUserManagement({ onClose }) {
       const { data, error } = await supabase.functions.invoke('admin-actions', {
         body: { action: 'delete-user', userId: deleteConfirmId },
       })
-      if (error) throw error
-      if (data?.error) throw new Error(data.error)
+      if (error || data?.error) {
+        let msg = data?.error || error.message
+        if (!data?.error && error.context?.json) {
+          try { const body = await error.context.json(); if (body?.error) msg = body.error } catch {}
+        }
+        throw new Error(msg)
+      }
 
       toast.success('Użytkownik został usunięty')
       setDeleteConfirmId(null)

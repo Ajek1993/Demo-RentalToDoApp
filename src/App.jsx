@@ -32,7 +32,7 @@ function useDarkMode() {
 }
 
 function App() {
-  const { user, profile, loading, signOut, passwordRecovery, updatePassword, isAdmin, needsProfileSetup } = useAuth()
+  const { user, profile, loading, signOut, passwordRecovery, updatePassword, isAdmin, needsProfileSetup, inviteError } = useAuth()
   const isOnline = useOnlineStatus()
   const { subscribed, supported, subscribe, unsubscribe, loading: pushLoading } = usePushNotifications(user?.id)
   const [showPushSettings, setShowPushSettings] = useState(false)
@@ -156,7 +156,7 @@ function App() {
   }
 
   if (!user) {
-    return <LoginForm />
+    return <LoginForm inviteError={inviteError} />
   }
 
   if (needsProfileSetup) {

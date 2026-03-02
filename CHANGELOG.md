@@ -5,6 +5,14 @@ Wszystkie istotne zmiany w projekcie System Zleceń Wypożyczalni.
 Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.0.0/),
 wersjonowanie według [Semantic Versioning](https://semver.org/lang/pl/).
 
+## [1.0.1] - 2026-03-02
+
+### Naprawione
+- `AdminUserManagement`: odczyt rzeczywistego komunikatu błędu z ciała odpowiedzi Edge Function (zamiast generycznego "Edge Function returned a non-2xx status code")
+- `useAuth`: wykrywanie linku zaproszeniowego w `?search` (PKCE flow) obok dotychczasowego `#hash`
+- `useAuth`: eksponowanie `inviteError` gdy Supabase zwraca `#error=...` w URL (wygasły/unieważniony token)
+- `LoginForm`: wyświetlenie komunikatu o wygasłym linku zaproszeniowym zamiast cichego przekierowania na pusty formularz logowania
+
 ## [1.0.0] - 2026-02-27
 
 ### Dodane

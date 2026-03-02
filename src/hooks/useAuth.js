@@ -11,11 +11,20 @@ export function useAuth() {
   const [needsProfileSetup, setNeedsProfileSetup] = useState(() =>
     sessionStorage.getItem('pendingProfileSetup') === 'true'
   )
+  const [inviteError, setInviteError] = useState(() => {
+    const hash = window.location.hash
+    if (hash.includes('error=')) {
+      const params = new URLSearchParams(hash.slice(1))
+      return params.get('error_description') || 'Link wygasł'
+    }
+    return null
+  })
 
   useEffect(() => {
-    // Wykryj zaproszenie (type=invite w hash URL)
+    // Wykryj zaproszenie (type=invite w hash lub search URL dla PKCE)
     const hash = window.location.hash
-    if (hash.includes('type=invite')) {
+    const search = window.location.search
+    if (hash.includes('type=invite') || search.includes('type=invite')) {
       sessionStorage.setItem('pendingProfileSetup', 'true')
       setNeedsProfileSetup(true)
     }
@@ -163,6 +172,7 @@ export function useAuth() {
     passwordRecovery,
     needsProfileSetup,
     isAdmin,
+    inviteError,
     signUp,
     signIn,
     signOut,

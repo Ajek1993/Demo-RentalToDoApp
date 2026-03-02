@@ -3,7 +3,7 @@ import { useAuth } from '../hooks/useAuth'
 
 const REGISTRATION_ENABLED = false
 
-export function LoginForm() {
+export function LoginForm({ inviteError }) {
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -170,6 +170,12 @@ export function LoginForm() {
     <div className="auth-container">
       <div className="auth-card">
         <h1>{isSignUp ? 'Rejestracja' : 'Logowanie'}</h1>
+
+        {inviteError && (
+          <div className="auth-error">
+            Twój link zaproszeniowy wygasł lub jest nieprawidłowy. Poproś administratora o nowe zaproszenie.
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           {isSignUp && (
