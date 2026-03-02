@@ -413,7 +413,7 @@ export function initializeDemoDatabase() {
   const tables = {
     profiles,
     orders,
-    order_assignments: orderAssignments,
+    assignments: orderAssignments,
     dyspozycyjnosc,
     kursy,
     order_edits: orderEdits,

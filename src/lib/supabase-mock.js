@@ -597,9 +597,9 @@ async function invokeFunction(functionName, { body } = {}) {
         setTable('profiles', profiles)
 
         // Remove related data
-        let assignments = getTable('order_assignments')
+        let assignments = getTable('assignments')
         assignments = assignments.filter(a => a.user_id !== userId)
-        setTable('order_assignments', assignments)
+        setTable('assignments', assignments)
 
         let availability = getTable('dyspozycyjnosc')
         availability = availability.filter(a => a.user_id !== userId)
