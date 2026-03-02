@@ -308,20 +308,38 @@ class QueryBuilder {
     })
   }
 
-  // Resolve joins (e.g., profiles(*))
+  // Resolve joins (e.g., profiles(*), user_profile:profiles!fkey(id, name))
   resolveJoins(data) {
-    if (!this.columns || !this.columns.includes('*')) {
+    if (!this.columns) {
       return data
     }
 
-    // Parse joins like "*, profiles(*)" or "*, profiles(id, name)"
-    const joinRegex = /(\w+)\((\*|[^)]+)\)/g
+    // Parse Supabase join syntax:
+    // - profiles(*)
+    // - user_profile:profiles!assignments_user_id_fkey(id, name)
+    const joinRegex = /(\w+):(\w+)!(?:\w+\([^)]*\))?(\*|[^)]*)/g
+    const simpleJoinRegex = /(\w+)\((\*|[^)]+)\)/g
+
     const joins = []
     let match
 
-    while ((match = joinRegex.exec(this.columns)) !== null) {
+    // First try complex syntax with foreign key
+    const complexColumns = this.columns.replace(/,\s*/g, ', ')
+    while ((match = joinRegex.exec(complexColumns)) !== null) {
       joins.push({
-        table: match[1],
+        alias: match[1],      // e.g., user_profile
+        table: match[2],      // e.g., profiles
+        columns: match[3],    // e.g., id, name or *
+      })
+    }
+
+    // Then try simple syntax without foreign key
+    joinRegex.lastIndex = 0 // Reset regex
+    while ((match = simpleJoinRegex.exec(this.columns)) !== null) {
+      const alias = match[1]
+      joins.push({
+        alias: alias,
+        table: alias === 'profile' ? 'profiles' : alias + 's',
         columns: match[2],
       })
     }
@@ -335,16 +353,38 @@ class QueryBuilder {
       const result = { ...row }
 
       joins.forEach(join => {
-        const joinTable = join.table
-        // Try both naming conventions: table_id and tables (plural)
-        const foreignKey = row[`${join.table}_id`] ? `${join.table}_id` : `${join.table}s`
+        const targetTable = join.table
+        // Find foreign key - try common patterns
+        let foreignKey = null
+        const possibleKeys = [
+          `${targetTable.slice(0, -1)}_id`,  // profiles -> profile_id
+          `${targetTable}_id`,                // profiles -> profiles_id
+          `user_id`,                          // default for profiles
+        ]
 
-        if (row[foreignKey]) {
-          const relatedData = getTable(join.table === 'profile' ? 'profiles' : join.table + 's')
+        for (const key of possibleKeys) {
+          if (row[key] !== undefined) {
+            foreignKey = key
+            break
+          }
+        }
+
+        if (foreignKey && row[foreignKey]) {
+          const relatedData = getTable(targetTable)
           const related = relatedData.find(item => item.id === row[foreignKey])
 
           if (related) {
-            result[joinTable] = related
+            // Filter columns if specific ones requested
+            if (join.columns !== '*') {
+              const cols = join.columns.split(',').map(c => c.trim())
+              const filtered = {}
+              cols.forEach(col => {
+                filtered[col] = related[col]
+              })
+              result[join.alias] = filtered
+            } else {
+              result[join.alias] = related
+            }
           }
         }
       })
