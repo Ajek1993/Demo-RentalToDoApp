@@ -258,6 +258,7 @@ export function initializeDemoDatabase() {
       id: generateId(),
       order_id: order.id,
       user_id: 'demo-admin-id',
+      assigned_by: 'demo-admin-id',  // who made the assignment
       assigned_at: getRelativeDateTime(0, 6 - idx),
       unassigned_at: null,
       unassigned_by: null,
@@ -271,6 +272,7 @@ export function initializeDemoDatabase() {
       id: generateId(),
       order_id: order.id,
       user_id: userId,
+      assigned_by: userId,  // self-assigned
       assigned_at: getRelativeDateTime(0, 6 - idx),
       unassigned_at: null,
       unassigned_by: null,
