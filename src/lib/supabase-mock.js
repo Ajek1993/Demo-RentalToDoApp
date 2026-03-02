@@ -59,7 +59,7 @@ class AuthMock {
     return { data: { session }, error: null }
   }
 
-  async signInWithPassword({ email, password }) {
+  async signInWithPassword({ email }) {
     // Demo accepts any password, but email must match demo user
     const demoUser = this.getUser().data.user
     if (!demoUser) {
@@ -147,7 +147,7 @@ class AuthMock {
     return { data: { user }, error: null }
   }
 
-  async resetPasswordForEmail(email) {
+  async resetPasswordForEmail() {
     // No-op success
     return { data: {}, error: null }
   }
@@ -336,7 +336,8 @@ class QueryBuilder {
 
       joins.forEach(join => {
         const joinTable = join.table
-        const foreignKey = `${join.table}_id` || `${join.table}s`
+        // Try both naming conventions: table_id and tables (plural)
+        const foreignKey = row[`${join.table}_id`] ? `${join.table}_id` : `${join.table}s`
 
         if (row[foreignKey]) {
           const relatedData = getTable(join.table === 'profile' ? 'profiles' : join.table + 's')
@@ -473,7 +474,7 @@ class QueryBuilder {
   }
 
   // Realtime event emission
-  emitRealtimeEvent eventType, payload) {
+  emitRealtimeEvent(eventType, payload) {
     setTimeout(() => {
       globalDemoChannels.forEach(channel => {
         channel.listeners.forEach(listener => {
@@ -628,7 +629,6 @@ async function rpc(functionName, params) {
     case 'delete_kurs_by_order_id': {
       const { order_id } = params
       let kursy = getTable('kursy')
-      const before = kursy.length
       kursy = kursy.filter(k => k.order_id !== order_id)
       setTable('kursy', kursy)
 

@@ -15,6 +15,22 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 export function usePushNotifications(userId) {
+  const [subscribed, setSubscribed] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [supported, setSupported] = useState(false)
+
+  useEffect(() => {
+    // Demo mode: skip push logic
+    if (isDemoMode()) {
+      setLoading(false)
+      return
+    }
+
+    checkSupport()
+    checkSubscription()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId])
+
   // Demo mode: push notifications disabled
   if (isDemoMode()) {
     return {
@@ -25,16 +41,6 @@ export function usePushNotifications(userId) {
       unsubscribe: async () => { throw new Error('Push notifications disabled in demo mode') },
     }
   }
-
-  const [subscribed, setSubscribed] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [supported, setSupported] = useState(false)
-
-  useEffect(() => {
-    checkSupport()
-    checkSubscription()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId])
 
   const checkSupport = () => {
     const isSupported =

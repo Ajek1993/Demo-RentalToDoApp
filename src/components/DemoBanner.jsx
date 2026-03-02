@@ -4,14 +4,12 @@ import { supabase } from '../lib/supabase'
 const DEMO_BANNER_HIDDEN_KEY = 'demo_banner_hidden'
 
 export function DemoBanner() {
-  const [isHidden, setIsHidden] = useState(false)
+  const [isHidden, setIsHidden] = useState(() =>
+    sessionStorage.getItem(DEMO_BANNER_HIDDEN_KEY) === 'true'
+  )
   const [currentRole, setCurrentRole] = useState('admin')
 
   useEffect(() => {
-    // Check if banner was hidden
-    const hidden = sessionStorage.getItem(DEMO_BANNER_HIDDEN_KEY) === 'true'
-    setIsHidden(hidden)
-
     // Get current user role from profiles
     const getCurrentRole = async () => {
       const { data: { user } } = await supabase.auth.getUser()

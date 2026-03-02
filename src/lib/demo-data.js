@@ -43,7 +43,6 @@ export function initializeDemoDatabase() {
     return // Already initialized
   }
 
-  const now = new Date()
   const today = getRelativeDate(0)
   const yesterday = getRelativeDate(-1)
   const tomorrow = getRelativeDate(1)
