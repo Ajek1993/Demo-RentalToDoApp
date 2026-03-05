@@ -444,13 +444,17 @@ class QueryBuilder {
       // Emit realtime events
       this.emitRealtimeEvent('INSERT', inserted)
 
-      // Continue to select/join processing
+      // Return inserted data (with joins if .select() was chained)
       data = this.resolveJoins(inserted)
+      return this.applyTerminal(data)
     }
 
     // UPDATE
     if (this.updateData !== null) {
       data = this.applyFilters(data)
+
+      // Keep old rows before mutation for realtime events
+      const oldRows = data.map(row => ({ ...row }))
 
       const updated = data.map(row => ({
         ...row,
@@ -467,11 +471,12 @@ class QueryBuilder {
       )
       setTable(this.tableName, newData)
 
-      // Emit realtime events
-      this.emitRealtimeEvent('UPDATE', updated)
+      // Emit realtime events with old rows
+      this.emitRealtimeEvent('UPDATE', updated, oldRows)
 
-      // Continue to select/join processing
+      // Return updated data (with joins if .select() was chained)
       data = this.resolveJoins(updated)
+      return this.applyTerminal(data)
     }
 
     // DELETE
@@ -513,8 +518,11 @@ class QueryBuilder {
     }
 
     data = this.resolveJoins(data)
+    return this.applyTerminal(data)
+  }
 
-    // Handle single/maybeSingle
+  // Apply single/maybeSingle terminal
+  applyTerminal(data) {
     if (this.singleMode === 'single') {
       if (data.length === 0) {
         return { data: null, error: { message: 'No rows returned' } }
@@ -536,7 +544,7 @@ class QueryBuilder {
   }
 
   // Realtime event emission
-  emitRealtimeEvent(eventType, payload) {
+  emitRealtimeEvent(eventType, payload, oldRows = null) {
     setTimeout(() => {
       globalDemoChannels.forEach(channel => {
         channel.listeners.forEach(listener => {
@@ -544,10 +552,12 @@ class QueryBuilder {
             const { config, callback } = listener
             if (config.event === '*' || config.event === eventType) {
               if (!config.table || config.table === this.tableName) {
-                callback({
-                  eventType,
-                  new: eventType === 'INSERT' ? payload[0] : payload[0],
-                  old: eventType === 'DELETE' ? payload[0] : null,
+                payload.forEach((row, index) => {
+                  callback({
+                    eventType,
+                    new: eventType === 'DELETE' ? null : row,
+                    old: eventType === 'DELETE' ? row : (oldRows ? oldRows[index] : null),
+                  })
                 })
               }
             }
