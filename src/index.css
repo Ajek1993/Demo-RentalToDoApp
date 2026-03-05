@@ -1361,11 +1361,12 @@ button.btn-primary {
 }
 
 .assignment-history li {
+  position: relative;
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
   gap: 0.15rem 0.5rem;
-  padding: 0.35rem 0.5rem;
+  padding: 0.35rem 2rem 0.35rem 0.5rem;
   background: var(--gray-50);
   border-radius: 0;
   margin-bottom: 0.15rem;
@@ -1421,6 +1422,9 @@ button.btn-primary {
 }
 
 .btn-unassign-other {
+  position: absolute;
+  right: 0.35rem;
+  top: 0.35rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1434,8 +1438,6 @@ button.btn-primary {
   font-size: 0.7rem;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
-  flex-shrink: 0;
-  margin-left: 0.25rem;
 }
 
 .btn-unassign-other:hover {
