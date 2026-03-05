@@ -8,6 +8,7 @@ export function DemoBanner() {
     sessionStorage.getItem(DEMO_BANNER_HIDDEN_KEY) === 'true'
   )
   const [currentRole, setCurrentRole] = useState('admin')
+  const [currentName, setCurrentName] = useState('Anna Nowak')
 
   useEffect(() => {
     // Get current user role from profiles
@@ -16,11 +17,12 @@ export function DemoBanner() {
       if (user) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('role')
+          .select('role, name')
           .eq('id', user.id)
           .single()
         if (profile) {
           setCurrentRole(profile.role)
+          setCurrentName(profile.name || 'Anna Nowak')
         }
       }
     }
@@ -33,18 +35,25 @@ export function DemoBanner() {
   }
 
   const handleRoleSwitch = async (newRole) => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      // Update role in profiles (demo only - allows role switching)
-      await supabase
-        .from('profiles')
-        .update({ role: newRole })
-        .eq('id', user.id)
+    // Switch identity based on role
+    const targetUser = newRole === 'admin'
+      ? { id: 'demo-admin-id', name: 'Anna Nowak', email: 'admin@rentalapp.demo' }
+      : { id: 'demo-user-1', name: 'Jan Kowalski', email: 'user@rentalapp.demo' }
 
-      setCurrentRole(newRole)
-      // Reload the page to reflect role change
-      window.location.reload()
+    // Update sessionStorage auth user
+    const authUser = {
+      id: targetUser.id,
+      email: targetUser.email,
+      user_metadata: { name: targetUser.name },
+      aud: 'authenticated',
+      created_at: new Date().toISOString(),
     }
+    sessionStorage.setItem('demo_auth_user', JSON.stringify(authUser))
+
+    setCurrentRole(newRole)
+    setCurrentName(targetUser.name)
+    // Reload the page to reflect identity change
+    window.location.reload()
   }
 
   if (isHidden) {
@@ -64,14 +73,14 @@ export function DemoBanner() {
             onClick={() => handleRoleSwitch('admin')}
             aria-pressed={currentRole === 'admin'}
           >
-            Admin
+            Admin (Anna Nowak)
           </button>
           <button
             className={`demo-role-btn ${currentRole === 'user' ? 'active' : ''}`}
             onClick={() => handleRoleSwitch('user')}
             aria-pressed={currentRole === 'user'}
           >
-            User
+            User (Jan Kowalski)
           </button>
         </div>
       </div>

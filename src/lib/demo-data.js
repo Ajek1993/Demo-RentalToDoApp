@@ -24,8 +24,13 @@ function getRelativeDateTime(daysOffset = 0, hour = 12) {
   return date.toISOString()
 }
 
-// Demo admin user (compatible with Supabase auth user)
+// Demo user (compatible with Supabase auth user)
+// Returns current user from sessionStorage if available, otherwise default admin
 export function getDemoUser() {
+  const stored = sessionStorage.getItem('demo_auth_user')
+  if (stored) {
+    return JSON.parse(stored)
+  }
   return {
     id: 'demo-admin-id',
     email: 'admin@rentalapp.demo',
@@ -38,9 +43,12 @@ export function getDemoUser() {
 }
 
 // Initialize demo database in sessionStorage
+const DEMO_DATA_VERSION = 2
+
 export function initializeDemoDatabase() {
-  if (sessionStorage.getItem('demo_initialized')) {
-    return // Already initialized
+  const currentVersion = sessionStorage.getItem('demo_data_version')
+  if (sessionStorage.getItem('demo_initialized') && currentVersion === String(DEMO_DATA_VERSION)) {
+    return // Already initialized with current version
   }
 
   const today = getRelativeDate(0)
@@ -59,7 +67,7 @@ export function initializeDemoDatabase() {
     },
     {
       id: 'demo-user-1',
-      name: 'Anna Nowak',
+      name: 'Jan Kowalski',
       role: 'user',
       created_at: getRelativeDateTime(-25, 14),
     },
@@ -285,6 +293,7 @@ export function initializeDemoDatabase() {
       id: generateId(),
       order_id: activeOrders[0].id,
       user_id: 'demo-user-1',
+      assigned_by: 'demo-admin-id',
       assigned_at: getRelativeDateTime(0, 7),
       unassigned_at: null,
       unassigned_by: null,
@@ -293,6 +302,7 @@ export function initializeDemoDatabase() {
       id: generateId(),
       order_id: activeOrders[0].id,
       user_id: 'demo-user-2',
+      assigned_by: 'demo-admin-id',
       assigned_at: getRelativeDateTime(0, 5),
       unassigned_at: null,
       unassigned_by: null,
@@ -305,6 +315,7 @@ export function initializeDemoDatabase() {
       id: generateId(),
       order_id: activeOrders[2]?.id || activeOrders[0]?.id || orders[0].id,
       user_id: 'demo-user-3',
+      assigned_by: 'demo-user-3',
       assigned_at: getRelativeDateTime(-1, 10),
       unassigned_at: getRelativeDateTime(0, 9),
       unassigned_by: 'demo-admin-id',
@@ -428,5 +439,6 @@ export function initializeDemoDatabase() {
   })
 
   sessionStorage.setItem('demo_initialized', 'true')
+  sessionStorage.setItem('demo_data_version', String(DEMO_DATA_VERSION))
   sessionStorage.setItem('demo_auth_user', JSON.stringify(getDemoUser()))
 }
