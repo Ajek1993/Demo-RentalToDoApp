@@ -82,7 +82,7 @@ export const OrderCard = memo(function OrderCard({ order, currentUserId, isAdmin
   }, [showHistory, loadEdits])
 
   // Filtruj tylko aktywne przypisania (nie wypisane)
-  const activeAssignments = assignments.filter(a => a.unassigned_at === null)
+  const activeAssignments = assignments.filter(a => !a.unassigned_at)
 
   const isCurrentUserAssigned = activeAssignments.some(a => a.user_id === currentUserId)
 

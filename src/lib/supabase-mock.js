@@ -66,7 +66,7 @@ class AuthMock {
       const defaultUser = {
         id: 'demo-admin-id',
         email: 'admin@rentalapp.demo',
-        user_metadata: { name: 'Jan Kowalski' },
+        user_metadata: { name: 'Anna Nowak' },
         aud: 'authenticated',
         created_at: now(),
       }
@@ -295,7 +295,7 @@ class QueryBuilder {
         case 'neq':
           return value !== filter.value
         case 'is':
-          return filter.value === null ? value === null : value !== null
+          return filter.value === null ? (value === null || value === undefined) : (value !== null && value !== undefined)
         case 'in':
           return filter.values.includes(value)
         case 'gte':
@@ -317,7 +317,7 @@ class QueryBuilder {
     // Parse Supabase join syntax:
     // - profiles(*)
     // - user_profile:profiles!assignments_user_id_fkey(id, name)
-    const joinRegex = /(\w+):(\w+)!(?:\w+\([^)]*\))?(\*|[^)]*)/g
+    const joinRegex = /([\w]+):([\w]+)!([\w_]+)\((\*|[^)]+)\)/g
     const simpleJoinRegex = /(\w+)\((\*|[^)]+)\)/g
 
     const joins = []
@@ -329,14 +329,18 @@ class QueryBuilder {
       joins.push({
         alias: match[1],      // e.g., user_profile
         table: match[2],      // e.g., profiles
-        columns: match[3],    // e.g., id, name or *
+        fkey: match[3],       // e.g., assignments_user_id_fkey
+        columns: match[4],    // e.g., id, name or *
       })
     }
 
     // Then try simple syntax without foreign key
-    joinRegex.lastIndex = 0 // Reset regex
-    while ((match = simpleJoinRegex.exec(this.columns)) !== null) {
+    // Remove complex joins from string first to avoid double-matching
+    const simpleColumns = this.columns.replace(joinRegex, '')
+    while ((match = simpleJoinRegex.exec(simpleColumns)) !== null) {
       const alias = match[1]
+      // Skip if alias already captured by complex regex
+      if (joins.some(j => j.alias === alias)) continue
       joins.push({
         alias: alias,
         table: alias === 'profile' ? 'profiles' : alias + 's',
@@ -356,11 +360,21 @@ class QueryBuilder {
         const targetTable = join.table
         // Find foreign key - try common patterns
         let foreignKey = null
-        const possibleKeys = [
+        const possibleKeys = []
+
+        // Extract FK column name from fkey string (e.g., "assignments_assigned_by_fkey" -> "assigned_by")
+        if (join.fkey) {
+          const fkeyMatch = join.fkey.match(/^[\w]+?_(.+)_fkey$/)
+          if (fkeyMatch) {
+            possibleKeys.push(fkeyMatch[1])
+          }
+        }
+
+        possibleKeys.push(
           `${targetTable.slice(0, -1)}_id`,  // profiles -> profile_id
           `${targetTable}_id`,                // profiles -> profiles_id
           `user_id`,                          // default for profiles
-        ]
+        )
 
         for (const key of possibleKeys) {
           if (row[key] !== undefined) {
@@ -407,8 +421,17 @@ class QueryBuilder {
         }
         // Add timestamp based on table
         if (this.tableName === 'assignments') {
-          newRow.assigned_at = row.assigned_at || now
-        } else if (!row.created_at) {
+          if (!newRow.assigned_at) {
+            newRow.assigned_at = now
+          }
+          // Ensure null defaults for unassigned fields (not undefined)
+          if (newRow.unassigned_at === undefined) {
+            newRow.unassigned_at = null
+          }
+          if (newRow.unassigned_by === undefined) {
+            newRow.unassigned_by = null
+          }
+        } else if (!newRow.created_at) {
           newRow.created_at = now
         }
         return newRow

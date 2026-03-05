@@ -564,8 +564,8 @@ export function useOrders() {
 
       // Sortuj: najpierw aktywni (unassigned_at = null), potem wypisani
       const sorted = (data || []).sort((a, b) => {
-        if (a.unassigned_at === null && b.unassigned_at !== null) return -1
-        if (a.unassigned_at !== null && b.unassigned_at === null) return 1
+        if (!a.unassigned_at && b.unassigned_at) return -1
+        if (a.unassigned_at && !b.unassigned_at) return 1
         return new Date(a.assigned_at) - new Date(b.assigned_at)
       })
 

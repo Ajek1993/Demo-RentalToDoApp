@@ -33,8 +33,8 @@ export function AssignmentHistory({ assignments, currentUserId, edits, onUnassig
   }
 
   // Filtruj tylko aktywnych
-  const activeAssignments = (assignments || []).filter(a => a.unassigned_at === null)
-  const unassignedAssignments = (assignments || []).filter(a => a.unassigned_at !== null)
+  const activeAssignments = (assignments || []).filter(a => !a.unassigned_at)
+  const unassignedAssignments = (assignments || []).filter(a => a.unassigned_at)
 
   return (
     <div className="assignment-history">
