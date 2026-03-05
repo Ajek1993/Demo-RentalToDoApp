@@ -43,7 +43,7 @@ export function getDemoUser() {
 }
 
 // Initialize demo database in sessionStorage
-const DEMO_DATA_VERSION = 2
+const DEMO_DATA_VERSION = 3
 
 export function initializeDemoDatabase() {
   const currentVersion = sessionStorage.getItem('demo_data_version')
@@ -92,6 +92,7 @@ export function initializeDemoDatabase() {
   ]
 
   // === ORDERS (~15 orders with mixed statuses) ===
+  const creators = ['demo-admin-id', 'demo-user-1', 'demo-user-2', 'demo-user-3', 'demo-user-4']
   const orders = [
     // Active - Today
     {
@@ -103,6 +104,8 @@ export function initializeDemoDatabase() {
       notes: 'Klient czeka na hali odlotów',
       status: 'active',
       insurance_company: null,
+      is_one_way: false,
+      created_by: creators[0],
       created_at: getRelativeDateTime(0, 7),
     },
     {
@@ -114,6 +117,8 @@ export function initializeDemoDatabase() {
       notes: '',
       status: 'active',
       insurance_company: 'PZU',
+      is_one_way: false,
+      created_by: creators[1],
       created_at: getRelativeDateTime(0, 6),
     },
     {
@@ -125,6 +130,8 @@ export function initializeDemoDatabase() {
       notes: 'Dostawa kluczy w recepcji',
       status: 'active',
       insurance_company: null,
+      is_one_way: false,
+      created_by: creators[2],
       created_at: getRelativeDateTime(0, 5),
     },
     // Active - Tomorrow
@@ -137,6 +144,8 @@ export function initializeDemoDatabase() {
       notes: '',
       status: 'active',
       insurance_company: 'WARTA',
+      is_one_way: false,
+      created_by: creators[0],
       created_at: getRelativeDateTime(0, 4),
     },
     {
@@ -148,6 +157,8 @@ export function initializeDemoDatabase() {
       notes: 'Kontakt: 600-123-456',
       status: 'active',
       insurance_company: null,
+      is_one_way: true,
+      created_by: creators[3],
       created_at: getRelativeDateTime(0, 3),
     },
     // Active - Day after tomorrow
@@ -160,6 +171,8 @@ export function initializeDemoDatabase() {
       notes: '',
       status: 'active',
       insurance_company: 'ALLIANZ',
+      is_one_way: false,
+      created_by: creators[4],
       created_at: getRelativeDateTime(0, 2),
     },
     // Active - Next week
@@ -172,6 +185,8 @@ export function initializeDemoDatabase() {
       notes: 'Wczesny poranek',
       status: 'active',
       insurance_company: null,
+      is_one_way: false,
+      created_by: creators[1],
       created_at: getRelativeDateTime(-1, 20),
     },
     // Completed - Yesterday
@@ -184,6 +199,8 @@ export function initializeDemoDatabase() {
       notes: 'Zlecenie zrealizowane',
       status: 'completed',
       insurance_company: null,
+      is_one_way: false,
+      created_by: creators[0],
       created_at: getRelativeDateTime(-1, 6),
     },
     {
@@ -195,6 +212,8 @@ export function initializeDemoDatabase() {
       notes: '',
       status: 'completed',
       insurance_company: 'VIG',
+      is_one_way: false,
+      created_by: creators[2],
       created_at: getRelativeDateTime(-2, 14),
     },
     // Completed - Earlier
@@ -204,9 +223,11 @@ export function initializeDemoDatabase() {
       date: getRelativeDate(-3),
       time: '12:00',
       location: 'Wrocław, Sky Tower',
-      notes: 'Klient非常 satisfied',
+      notes: 'Klient bardzo zadowolony',
       status: 'completed',
       insurance_company: null,
+      is_one_way: false,
+      created_by: creators[3],
       created_at: getRelativeDateTime(-3, 10),
     },
     {
@@ -218,6 +239,8 @@ export function initializeDemoDatabase() {
       notes: '',
       status: 'completed',
       insurance_company: 'TUW',
+      is_one_way: false,
+      created_by: creators[4],
       created_at: getRelativeDateTime(-4, 8),
     },
     {
@@ -225,10 +248,12 @@ export function initializeDemoDatabase() {
       plate: 'ZR00112',
       date: getRelativeDate(-5),
       time: '13:00',
-      location: 'Zielona Góra,Focus Mall',
+      location: 'Zielona Góra, Focus Mall',
       notes: 'Dokumenty w bagażniku',
       status: 'completed',
       insurance_company: null,
+      is_one_way: false,
+      created_by: creators[0],
       created_at: getRelativeDateTime(-5, 11),
     },
     // Deleted (soft delete)
@@ -241,6 +266,8 @@ export function initializeDemoDatabase() {
       notes: 'Anulowane przez klienta',
       status: 'deleted',
       insurance_company: null,
+      is_one_way: false,
+      created_by: creators[0],
       created_at: getRelativeDateTime(-1, 7),
     },
     {
@@ -252,6 +279,8 @@ export function initializeDemoDatabase() {
       notes: 'Duplikat zlecenia',
       status: 'deleted',
       insurance_company: null,
+      is_one_way: false,
+      created_by: creators[1],
       created_at: getRelativeDateTime(-2, 13),
     },
   ]
